@@ -1,0 +1,77 @@
+import { useState } from 'react'
+import { useRouter } from 'expo-router'
+
+import { RecordListScreen, type FilterChip } from '@/components'
+import type { ComplianceCaseStatus } from '@/data/compliance-case/compliance-case-model'
+import { useDrawerToggle } from '@/core/navigation/use-drawer-toggle'
+import { useComplianceCases } from '@/hooks/use-compliance-cases'
+import { usePullRefresh } from '@/hooks/use-pull-refresh'
+import { messages } from '@/lib/messages'
+
+import { ComplianceCaseCard } from './compliance-case-card'
+
+type StatusFilter = ComplianceCaseStatus | 'ALL'
+
+const STATUS_CHIPS: FilterChip<StatusFilter>[] = [
+  { value: 'ALL', label: messages.common.all },
+  { value: 'OPEN', label: messages.complianceCases.statuses.OPEN },
+  {
+    value: 'UNDER_REVIEW',
+    label: messages.complianceCases.statuses.UNDER_REVIEW,
+  },
+  { value: 'REOPENED', label: messages.complianceCases.statuses.REOPENED },
+  { value: 'CLOSED', label: messages.complianceCases.statuses.CLOSED },
+]
+
+export function ComplianceCaseListScreen() {
+  const router = useRouter()
+  const openDrawer = useDrawerToggle()
+  const [status, setStatus] = useState<StatusFilter>('ALL')
+
+  const query = useComplianceCases({
+    status: status === 'ALL' ? undefined : status,
+  })
+  const items = query.data?.items ?? []
+  const refresh = usePullRefresh(() => query.refetch())
+
+  return (
+    <RecordListScreen
+      title={messages.complianceCases.title}
+      subtitle={messages.complianceCases.subtitle}
+      leading={
+        openDrawer
+          ? { icon: 'menu', label: messages.nav.openMenu, onPress: openDrawer }
+          : {
+              icon: 'back',
+              label: messages.nav.back,
+              onPress: () => router.back(),
+            }
+      }
+      headerActions={[
+        {
+          icon: 'refresh',
+          label: messages.common.refresh,
+          onPress: () => query.refetch(),
+        },
+      ]}
+      statusChips={{ chips: STATUS_CHIPS, value: status, onChange: setStatus }}
+      items={items}
+      keyExtractor={(item) => `${item.uid}-${item.caseId}`}
+      renderItem={({ item }) => (
+        <ComplianceCaseCard
+          item={item}
+          onPress={() =>
+            router.push(`/compliance/cases/${item.uid}/${item.caseId}`)
+          }
+        />
+      )}
+      loading={query.isPending}
+      error={query.error}
+      onRetry={() => query.refetch()}
+      refreshing={refresh.refreshing}
+      onRefresh={refresh.onRefresh}
+      emptyIcon="compliance"
+      emptyLabel={messages.complianceCases.empty}
+    />
+  )
+}

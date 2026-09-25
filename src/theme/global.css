@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Өнгөний токенууд. Эх нь **вэб админы** `src/styles/theme.css` (shadcn
+ * "slate") — тэнд oklch() бичигдсэнийг RN уншиж чаддаг hex рүү хөрвүүлсэн.
+ * Харанхуй горимын `border`/`input` нь вэб дээр цагаан 10%/15% тунгалаг —
+ * дэвсгэр дээр нь нийлүүлж хатуу hex болгосон.
+ *
+ * Өнгө зөвхөн **утга** илэрхийлнэ: дүрс бүгд цагаан/саарал, статус л өнгөтэй.
+ * Өнгө нэмэх бол эхлээд docs/design-tokens.md, дараа нь энд ба tokens.ts.
+ */
+@layer base {
+  :root {
+    --color-background: #ffffff;
+    --color-foreground: #020618;
+    --color-card: #ffffff;
+    --color-card-foreground: #020618;
+    --color-elevated: #ffffff;
+    --color-popover: #ffffff;
+    --color-popover-foreground: #020618;
+    --color-primary: #0f172b;
+    --color-primary-foreground: #f8fafc;
+    --color-secondary: #f1f5f9;
+    --color-secondary-foreground: #0f172b;
+    --color-muted: #f1f5f9;
+    --color-muted-foreground: #62748e;
+    --color-accent: #f1f5f9;
+    --color-accent-foreground: #0f172b;
+    --color-destructive: #e7000b;
+    --color-destructive-foreground: #ffffff;
+    --color-destructive-subtle: #fef3f2;
+    --color-success: #12b76a;
+    --color-success-foreground: #ffffff;
+    --color-success-subtle: #ecfdf3;
+    --color-warning: #f79009;
+    --color-warning-foreground: #ffffff;
+    --color-warning-subtle: #fffaeb;
+    --color-border: #e2e8f0;
+    --color-border-strong: #cbd5e1;
+    --color-input: #e2e8f0;
+    --color-ring: #90a1b9;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-background: #020618;
+      --color-foreground: #f8fafc;
+      --color-card: #020919;
+      --color-card-foreground: #f8fafc;
+      --color-elevated: #0f172b;
+      --color-popover: #0f172b;
+      --color-popover-foreground: #f8fafc;
+      --color-primary: #e2e8f0;
+      --color-primary-foreground: #0f172b;
+      --color-secondary: #1d293d;
+      --color-secondary-foreground: #f8fafc;
+      --color-muted: #1d293d;
+      --color-muted-foreground: #90a1b9;
+      --color-accent: #1d293d;
+      --color-accent-foreground: #f8fafc;
+      --color-destructive: #ff6467;
+      --color-destructive-foreground: #020618;
+      --color-destructive-subtle: #3b0a0f;
+      --color-success: #32d583;
+      --color-success-foreground: #020618;
+      --color-success-subtle: #05301e;
+      --color-warning: #fdb022;
+      --color-warning-foreground: #020618;
+      --color-warning-subtle: #35240a;
+      --color-border: #1b1f2f;
+      --color-border-strong: #334155;
+      --color-input: #282b3b;
+      --color-ring: #6a7282;
+    }
+  }
+}

@@ -36,7 +36,18 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-seemedia-ae6a702ed4e0.json
-# Local ebarimt backfill (sensitive — do not commit)
-scripts/pending-ebarimt.json
-scripts/backfill-ebarimt-failures.json
+example
+
+# generated native folders
+/ios
+/android
+
+# Орчны нууц утгууд — хэзээ ч commit хийхгүй
+.env
+.env.local
+.env.*.local
+env/
+
+# Native prebuild гаралт
+/android
+/ios

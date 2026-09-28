@@ -602,6 +602,60 @@ mobile-д байхгүй.
 - Вэб `x-idempotency-key` явуулдаггүй тул mobile ч явуулахгүй; давхар дарахаас
   `AppButton`-ы түгжээ хамгаална.
 
+### Хэл (англи / монгол)
+
+Анхдагч хэл **англи** (вэб админ англи, App Store reviewer англиар уншина).
+Профайл → "Language" хэсгээс монгол руу солино, сонголт AsyncStorage-д.
+
+| Юу | Файл |
+| --- | --- |
+| Текст | `lib/messages/mn.ts` (`Messages` төрлийн эх), `lib/messages/en.ts` |
+| Идэвхтэй хэл | `lib/messages/language-store.ts` — `useLanguageStore` (`restore`, `set`) |
+| `messages` | `lib/messages/index.ts` — зам барьдаг Proxy, уншигдах мөчид идэвхтэй хэлээр |
+| Апп асахад | `_layout.tsx` `boot()` — theme-тэй зэрэг `restoreLanguage()` |
+| Солиход | `_layout.tsx` `<Fragment key={language}>` — бүх дэлгэц дахин mount |
+
+- Дахин mount хийх шалтгаан: React Compiler текстийг memo хийдэг тул state
+  өөрчлөгдөөгүй компонент шинэ хэлийг харахгүй. Навигацийн төлөв expo-router-т
+  (Stack-ээс дээш) хадгалагддаг тул одоогийн дэлгэц хэвээр үлдэнэ.
+- 🔴 Модулийн түвшинд string барихгүй (`CLEAN_CODE_PROMPT.md` §15). Tab-ын
+  шошго (`TAB_ITEMS`), багийн тайлбар (`TEAMS`) нь getter.
+- Backend-ээс ирэх текст (цэсний нэр, серверийн алдааны `message`)
+  орчуулагдахгүй — сервер өгсөн хэлээрээ.
+- Тест: `lib/messages/__tests__/messages.test.ts` — хоёр толь бичиг ижил
+  түлхүүртэй, хэл солиход барьсан объект ч шинэчлэгдэнэ.
+
+### Демо горим (App Store review)
+
+Apple-ийн reviewer бодит өгөгдөл харахгүйгээр аппыг бүрэн туршина
+(Guideline 2.1(a) "built-in demo mode"). `EXPO_PUBLIC_DEMO_EMAIL` +
+`EXPO_PUBLIC_DEMO_PASSWORD`-оор нэвтрэхэд апп Cognito, backend руу **огт**
+хандахгүй. Хоёр env хоосон бол демо горим бүрмөсөн унтарна.
+
+| Алхам | Файл | Юу болно |
+| --- | --- | --- |
+| 1 | `hooks/use-sign-in.ts` | `demoMode.matches()` → Cognito-г алгасаж `demoMode.enter()` |
+| 2 | `core/network/clients.ts` request interceptor | демо идэвхтэй бол `config.adapter = demoAdapter`, token хавсрахгүй |
+| 3 | `core/demo/demo-adapter.ts` | `baseURL` → `api` түлхүүр, body-г задлаад backend руу |
+| 4 | `core/demo/demo-backend.ts` | route хүснэгт + санах ойн төлөв (батлах, төлөв солих нь жагсаалтад харагдана) |
+| 5 | `core/demo/demo-fixtures.ts` | зохиомол өгөгдөл (`example.com`) — бодит DTO төрлөөр бичигдсэн |
+| 6 | `session-store` `signOut` | `demoMode.exit()` + `queryClient.clear()` |
+
+- Демо өгөгдөлтэй хэсэг: Чөлөө, Даалгавар, Долоо хоногийн тайлан, Support
+  ticket (хариу бичих орно), Crypto зарлага, Банкны орлого/зарлага, Convert.
+  Цэс (`demo-fixtures.ts` `menus()`) зөвхөн эдгээрийг харуулна.
+- 🔴 **Бүртгэлгүй хүсэлт сүлжээ рүү унахгүй.** `POST …/list` → хоосон
+  жагсаалт, бусад нь `501` + `messages.demo.unsupported`. Тест:
+  `core/demo/__tests__/demo-mode.test.ts`.
+- Ticket чат: демо горимд WebSocket нээхгүй, `appendDemoTicketMessage`-ээр
+  дуурайна (`use-ticket-conversation.ts`).
+- Нүүр дээр `DemoNotice` (`screens/home/demo-notice.tsx`) — ажилтан андуурахгүй.
+- Төлөв санах ойд л — апп дахин асахад демо үргэлж унтраалттай.
+- ⚠️ Демо нууц үг bundle-д ил. Энэ нь зөвхөн зохиомол өгөгдөл нээдэг тул
+  зөвшөөрөгдсөн эрсдэл; бодит эрх, token олгохгүй.
+- Шинэ endpoint-ийг демод нэмэх: `demo-backend.ts`-д `route(...)`, өгөгдлийг
+  `demo-fixtures.ts`-д тухайн DTO төрлөөр.
+
 ## 6. Шинэ дэлгэц нэмэх алхам
 
 1. **Гэрээг унш** — `xmeta-admin/src/services/types/**` доторх TS type + түүнийг
@@ -622,7 +676,7 @@ mobile-д байхгүй.
 4. **Hook** — `useQuery` / `useInfiniteQuery` / `useMutation`.
 5. **Дэлгэц** — `<Screen>` + `<AppHeader>` + `<StateView>` + `@/components`.
    Таб доторх дэлгэц `edges={['top']}` — доод захыг таб bar эзэлнэ.
-6. **Текст** — `lib/messages/`-д нэм. Дэлгэцэнд монгол өгүүлбэр шууд бичихгүй.
+6. **Текст** — `lib/messages/mn.ts` ба `en.ts` хоёуланд нэм. Дэлгэцэнд өгүүлбэр шууд бичихгүй.
 7. **Мөнгө** — `parseMoney` / `formatMoney`. `number` хэзээ ч биш.
 8. **Буцаах боломжгүй үйлдэл** — картад `<RecordActions actions={[…]} />`
    (`confirm.reason` + idempotency key). Формд сонголт → `<SelectField>`,

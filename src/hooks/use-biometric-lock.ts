@@ -53,6 +53,7 @@ export function useBiometricLock(): BiometricLockState {
         next &&
         !(await biometricService.authenticate(
           messages.profile.biometricEnableReason,
+          messages.common.cancel,
         ))
       ) {
         toast.error(messages.profile.biometricFailed)

@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 
+import { demoMode } from '@/core/demo/demo-mode'
+import { queryClient } from '@/core/query/query-client'
 import type { AdminMenuTree } from '@/data/auth/admin-menu-dto'
 import { cognitoAuth } from '@/services/auth/cognito-auth-service'
 
@@ -50,6 +52,13 @@ export const useSessionStore = create<SessionState>((set) => ({
   lock: () => set((state) => (state.user ? { status: 'locked' } : state)),
   unlock: () => set((state) => (state.user ? { status: 'signedIn' } : state)),
   signOut: async () => {
+    if (demoMode.isActive()) {
+      // Демогийн cache бодит нэвтрэлтийн дэлгэц дээр харагдахгүй байх ёстой.
+      demoMode.exit()
+      queryClient.clear()
+      set({ user: null, status: 'signedOut' })
+      return
+    }
     // Cognito унасан ч локал төлөвийг заавал цэвэрлэнэ — эс бөгөөс апп
     // нэвтэрсэн мэт харагдсаар байна.
     try {

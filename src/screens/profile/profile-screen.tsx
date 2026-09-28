@@ -22,7 +22,7 @@ import { useDrawerToggle } from '@/core/navigation/use-drawer-toggle'
 import { useSessionStore } from '@/core/session/session-store'
 import { useAdminMenu } from '@/hooks/use-admin-menu'
 import { useBiometricLock } from '@/hooks/use-biometric-lock'
-import { messages } from '@/lib/messages'
+import { messages, useLanguageStore, type Language } from '@/lib/messages'
 import { iconSize } from '@/theme/tokens'
 import { useThemeStore, type ThemePreference } from '@/theme/theme-preference'
 
@@ -33,6 +33,8 @@ export function ProfileScreen() {
   const signOut = useSessionStore((store) => store.signOut)
   const preference = useThemeStore((store) => store.preference)
   const setPreference = useThemeStore((store) => store.set)
+  const language = useLanguageStore((store) => store.language)
+  const setLanguage = useLanguageStore((store) => store.set)
   const menu = useAdminMenu()
   const biometric = useBiometricLock()
 
@@ -109,6 +111,20 @@ export function ProfileScreen() {
                 label: messages.theme.system,
                 icon: 'themeAuto',
               },
+            ]}
+          />
+        </View>
+
+        <View className="gap-3">
+          <SectionHeader title={messages.language.title} />
+          <SegmentedControl<Language>
+            value={language}
+            onChange={(next) => {
+              void setLanguage(next)
+            }}
+            options={[
+              { value: 'en', label: messages.language.en, icon: 'globe' },
+              { value: 'mn', label: messages.language.mn, icon: 'globe' },
             ]}
           />
         </View>

@@ -142,7 +142,7 @@ export function NewPushNotificationScreen() {
       <ConfirmSheet
         visible={confirming}
         title={messages.pushNotifications.newButton}
-        description={`${title} · ${isBroadcast ? messages.pushNotifications.form.broadcast : `${emails.length} имэйл`}`}
+        description={`${title} · ${isBroadcast ? messages.pushNotifications.form.broadcast : `${emails.length} ${messages.pushNotifications.form.emailsCount}`}`}
         confirmLabel={messages.pushNotifications.form.submit}
         onCancel={() => setConfirming(false)}
         onConfirm={async () => {

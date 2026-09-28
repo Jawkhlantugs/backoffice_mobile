@@ -1,6 +1,8 @@
 import { create, isAxiosError, type AxiosInstance } from 'axios'
 
 import { api } from '@/core/config/api'
+import { demoAdapter } from '@/core/demo/demo-adapter'
+import { demoMode } from '@/core/demo/demo-mode'
 import { sessionActions } from '@/core/session/session-store'
 import { cognitoAuth } from '@/services/auth/cognito-auth-service'
 import { logger } from '@/lib/logger'
@@ -40,6 +42,12 @@ function fullUrl(config: { baseURL?: string; url?: string }): string {
 
 function attachInterceptors(instance: AxiosInstance): AxiosInstance {
   instance.interceptors.request.use(async (config) => {
+    // Демо горимд хүсэлт сүлжээ рүү гарахгүй, token ч хавсрахгүй.
+    if (demoMode.isActive()) {
+      config.adapter = demoAdapter
+      return config
+    }
+
     const token = await cognitoAuth.idToken()
     if (token) config.headers.Authorization = `Bearer ${token}`
 

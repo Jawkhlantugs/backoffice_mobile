@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { AppState, type AppStateStatus } from 'react-native'
 
+import { demoMode } from '@/core/demo/demo-mode'
 import { biometricService } from '@/services/biometric/biometric-service'
 import { cognitoAuth } from '@/services/auth/cognito-auth-service'
 import { logger } from '@/lib/logger'
+import { messages } from '@/lib/messages'
 
 import { useSessionStore } from './session-store'
 
@@ -23,6 +25,7 @@ async function lockOrRefresh(expired: boolean): Promise<void> {
     useSessionStore.getState().lock()
     return
   }
+  if (demoMode.isActive()) return
 
   try {
     await cognitoAuth.refresh()
@@ -88,7 +91,14 @@ export async function tryUnlock(): Promise<boolean> {
     return !isLocked()
   }
 
-  if (await biometricService.authenticate()) unlock()
+  if (
+    await biometricService.authenticate(
+      messages.auth.unlockReason,
+      messages.common.cancel,
+    )
+  ) {
+    unlock()
+  }
 
   return !isLocked()
 }

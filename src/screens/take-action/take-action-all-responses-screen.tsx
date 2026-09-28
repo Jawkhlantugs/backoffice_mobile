@@ -19,7 +19,7 @@ import { UserResponseCard } from './user-response-card'
 
 type StatusFilter = UserTakeActionStatus | 'ALL'
 
-const STATUS_CHIPS: FilterChip<StatusFilter>[] = [
+const statusChips = (): FilterChip<StatusFilter>[] => [
   { value: 'ALL', label: messages.common.all },
   { value: 'waiting', label: messages.takeAction.responseStatuses.waiting },
   { value: 'success', label: messages.takeAction.responseStatuses.success },
@@ -66,7 +66,11 @@ export function TakeActionAllResponsesScreen() {
       />
 
       <View className="pb-3">
-        <FilterChips chips={STATUS_CHIPS} value={status} onChange={setStatus} />
+        <FilterChips
+          chips={statusChips()}
+          value={status}
+          onChange={setStatus}
+        />
       </View>
 
       <StateView

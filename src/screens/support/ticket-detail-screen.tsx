@@ -36,19 +36,19 @@ import { TicketMacroSheet } from './ticket-macro-sheet'
 import { TicketMessageBubble } from './ticket-message-bubble'
 import { TicketStatusPill } from './ticket-status-pill'
 
-const STATUS_CHIPS: FilterChip<TicketStatus>[] = [
+const statusChips = (): FilterChip<TicketStatus>[] => [
   { value: 'new', label: messages.supportTickets.statuses.new },
   { value: 'open', label: messages.supportTickets.statuses.open },
   { value: 'pending', label: messages.supportTickets.statuses.pending },
   { value: 'solved', label: messages.supportTickets.statuses.solved },
 ]
 
-const CONNECTION_LABEL = {
+const connectionLabel = () => ({
   idle: '',
   connecting: messages.supportTickets.reply.connecting,
   connected: messages.supportTickets.reply.connected,
   error: messages.supportTickets.reply.error,
-} as const
+})
 
 export function TicketDetailScreen() {
   const router = useRouter()
@@ -154,7 +154,7 @@ export function TicketDetailScreen() {
                   </AppCard>
 
                   <FilterChips
-                    chips={STATUS_CHIPS}
+                    chips={statusChips()}
                     value={ticket.status}
                     onChange={(status) =>
                       updateStatus.mutate({ id: ticket.id, status })
@@ -178,10 +178,10 @@ export function TicketDetailScreen() {
             <AppText variant="tiny" className="text-destructive">
               {sendError}
             </AppText>
-          ) : CONNECTION_LABEL[conversation.status] ? (
+          ) : connectionLabel()[conversation.status] ? (
             <View className="flex-row items-center justify-between">
               <AppText variant="tiny">
-                {CONNECTION_LABEL[conversation.status]}
+                {connectionLabel()[conversation.status]}
               </AppText>
               {conversation.status === 'error' ? (
                 <TextButton

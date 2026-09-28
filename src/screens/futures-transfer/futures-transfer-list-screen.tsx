@@ -12,7 +12,7 @@ import { FuturesTransferCard } from './futures-transfer-card'
 
 type StatusFilter = FuturesTransferStatus | 'ALL'
 
-const STATUS_CHIPS: FilterChip<StatusFilter>[] = [
+const statusChips = (): FilterChip<StatusFilter>[] => [
   { value: 'ALL', label: messages.common.all },
   { value: 'PENDING', label: messages.futures.statuses.PENDING },
   { value: 'APPROVED', label: messages.futures.statuses.APPROVED },
@@ -49,7 +49,7 @@ export function FuturesTransferListScreen() {
           onPress: () => query.refetch(),
         },
       ]}
-      statusChips={{ chips: STATUS_CHIPS, value: status, onChange: setStatus }}
+      statusChips={{ chips: statusChips(), value: status, onChange: setStatus }}
       items={items}
       keyExtractor={(item) => item.txnId}
       renderItem={({ item }) => <FuturesTransferCard request={item} />}

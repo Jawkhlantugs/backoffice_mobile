@@ -16,6 +16,7 @@ import type {
   LeaveRequest,
   LeaveStatus,
 } from '@/data/leave-request/leave-request-model'
+import { useDemoStore } from '@/core/demo/demo-mode'
 import { LEAVE_MENU_PATH } from '@/core/navigation/menu-items'
 import { hasMenuPath } from '@/core/navigation/menu-view'
 import { useDrawerToggle } from '@/core/navigation/use-drawer-toggle'
@@ -28,6 +29,7 @@ import { useAppColors } from '@/theme/use-theme'
 
 import { LeaveRequestCard } from '@/screens/leave/leave-request-card'
 
+import { DemoNotice } from './demo-notice'
 import { QuickAction } from './quick-action'
 
 const RECENT_LIMIT = 3
@@ -50,6 +52,7 @@ export function HomeScreen() {
   const router = useRouter()
   const openDrawer = useDrawerToggle()
   const user = useSessionStore((store) => store.user)
+  const isDemo = useDemoStore((store) => store.active)
   const menu = useAdminMenu()
   const { colors } = useAppColors()
 
@@ -93,6 +96,8 @@ export function HomeScreen() {
           }
           right={<Avatar source={user?.email} />}
         />
+
+        {isDemo ? <DemoNotice /> : null}
 
         {canUseLeave ? (
           <View className="gap-3">

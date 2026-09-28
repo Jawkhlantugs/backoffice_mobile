@@ -12,7 +12,7 @@ import { ComplianceCaseCard } from './compliance-case-card'
 
 type StatusFilter = ComplianceCaseStatus | 'ALL'
 
-const STATUS_CHIPS: FilterChip<StatusFilter>[] = [
+const statusChips = (): FilterChip<StatusFilter>[] => [
   { value: 'ALL', label: messages.common.all },
   { value: 'OPEN', label: messages.complianceCases.statuses.OPEN },
   {
@@ -54,7 +54,7 @@ export function ComplianceCaseListScreen() {
           onPress: () => query.refetch(),
         },
       ]}
-      statusChips={{ chips: STATUS_CHIPS, value: status, onChange: setStatus }}
+      statusChips={{ chips: statusChips(), value: status, onChange: setStatus }}
       items={items}
       keyExtractor={(item) => `${item.uid}-${item.caseId}`}
       renderItem={({ item }) => (

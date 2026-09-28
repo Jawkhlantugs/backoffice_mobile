@@ -23,7 +23,9 @@ export function TaskItemRow({
   const meta = [
     item.assignee?.email.split('@')[0],
     item.dueDate ? formatDateOnly(item.dueDate) : undefined,
-    item.estimatedHours ? `${item.estimatedHours}ц` : undefined,
+    item.estimatedHours
+      ? `${item.estimatedHours}${messages.units.hours}`
+      : undefined,
   ].filter(Boolean)
 
   return (

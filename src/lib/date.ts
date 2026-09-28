@@ -1,5 +1,7 @@
 import dayjs from 'dayjs'
 
+import { messages } from '@/lib/messages'
+
 /**
  * Огнооны бичиг. Вэб админы `formatDate()`-тэй ижил дүрэм: 1e12-оос их тоо
  * миллисекунд, бага нь Unix секунд.
@@ -33,7 +35,8 @@ export function formatDuration(ms: number): string {
   const minutes = Math.floor(ms / MS_PER_MINUTE)
   const hours = Math.floor(minutes / MINUTES_PER_HOUR)
   const days = Math.floor(hours / HOURS_PER_DAY)
-  if (days > 0) return `${days}ө ${hours % HOURS_PER_DAY}ц`
-  if (hours > 0) return `${hours}ц ${minutes % MINUTES_PER_HOUR}м`
-  return `${minutes}м`
+  const { days: d, hours: h, minutes: m } = messages.units
+  if (days > 0) return `${days}${d} ${hours % HOURS_PER_DAY}${h}`
+  if (hours > 0) return `${hours}${h} ${minutes % MINUTES_PER_HOUR}${m}`
+  return `${minutes}${m}`
 }

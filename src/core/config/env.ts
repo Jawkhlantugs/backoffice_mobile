@@ -18,6 +18,16 @@ const raw = {
 }
 
 /**
+ * App Store review-ийн демо нэвтрэлт (FLOWS.md "Демо горим"). Заавал биш —
+ * хоёулаа байхгүй бол демо горим бүрмөсөн унтарна. Bundle-д ил байна: энэ
+ * нууц үг зөвхөн зохиомол өгөгдөл нээнэ, бодит API-д хүрэхгүй.
+ */
+const demoRaw = {
+  email: process.env.EXPO_PUBLIC_DEMO_EMAIL,
+  password: process.env.EXPO_PUBLIC_DEMO_PASSWORD,
+}
+
+/**
  * Дутуу тохиргоотой апп асахгүй байх нь дээр: 401 эсвэл "network error"
  * гэж будилахаас илүү, юу дутсаныг нэрээр нь хэлнэ.
  */
@@ -49,6 +59,10 @@ export const env = {
   },
   get supportWsUrl() {
     return required('supportWsUrl')
+  },
+  get demoLogin(): { email: string; password: string } | null {
+    const { email, password } = demoRaw
+    return email && password ? { email, password } : null
   },
 }
 

@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 
 import { adminRepository } from '@/data/auth/admin-repository'
+import { demoMode } from '@/core/demo/demo-mode'
 import { toAppException } from '@/core/network/failure'
 import { useSessionStore } from '@/core/session/session-store'
 import { toast } from '@/core/ui/toast-store'
@@ -35,12 +36,16 @@ export function useSignIn() {
   const [state, setState] = useState<State>(IDLE)
   const setUser = useSessionStore((store) => store.setUser)
 
+  const completeSignIn = useCallback(async () => {
+    const profile = await adminRepository.profile()
+    setUser(profile)
+    setState(IDLE)
+  }, [setUser])
+
   const finish = useCallback(
     async (step: SignInStep) => {
       if (step.step === 'done') {
-        const profile = await adminRepository.profile()
-        setUser(profile)
-        setState(IDLE)
+        await completeSignIn()
         return
       }
 
@@ -50,38 +55,51 @@ export function useSignIn() {
         pending: false,
       })
     },
-    [setUser],
+    [completeSignIn],
   )
 
-  const run = useCallback(
-    async (action: () => Promise<SignInStep>) => {
-      setState((previous) => ({ ...previous, pending: true, error: undefined }))
-      try {
-        await finish(await action())
-      } catch (error) {
-        // Cognito-ийн жинхэнэ нэр, мессежийг лог руу: доорх текст нь
-        // орчуулагдсан хувилбар тул шалтгаан нь алдагддаг.
-        logger.warn('Нэвтрэлт амжилтгүй', error)
+  /** Демо нэвтрэлт Cognito руу огт хандахгүй — профайл ч демо backend-ээс. */
+  const enterDemo = useCallback(async () => {
+    demoMode.enter()
+    try {
+      await completeSignIn()
+    } catch (error) {
+      demoMode.exit()
+      throw error
+    }
+  }, [completeSignIn])
 
-        const failure = toCognitoException(error) ?? toAppException(error)
-        const message = translateError(failure)
-        toast.error(message)
-        setState((previous) => ({
-          ...previous,
-          pending: false,
-          error: message,
-        }))
-      }
-    },
-    [finish],
-  )
+  const run = useCallback(async (task: () => Promise<void>) => {
+    setState((previous) => ({ ...previous, pending: true, error: undefined }))
+    try {
+      await task()
+    } catch (error) {
+      // Cognito-ийн жинхэнэ нэр, мессежийг лог руу: доорх текст нь
+      // орчуулагдсан хувилбар тул шалтгаан нь алдагддаг.
+      logger.warn('Нэвтрэлт амжилтгүй', error)
+
+      const failure = toCognitoException(error) ?? toAppException(error)
+      const message = translateError(failure)
+      toast.error(message)
+      setState((previous) => ({
+        ...previous,
+        pending: false,
+        error: message,
+      }))
+    }
+  }, [])
 
   return {
     ...state,
     signIn: (email: string, password: string) =>
-      run(() => cognitoAuth.signIn(email.trim(), password)),
+      demoMode.matches(email, password)
+        ? run(enterDemo)
+        : run(async () =>
+            finish(await cognitoAuth.signIn(email.trim(), password)),
+          ),
     /** TOTP код, шинэ нууц үг, setup код — Cognito-д бүгд нэг алхам. */
-    confirm: (answer: string) => run(() => cognitoAuth.confirm(answer.trim())),
+    confirm: (answer: string) =>
+      run(async () => finish(await cognitoAuth.confirm(answer.trim()))),
     reset: () => setState(IDLE),
   }
 }

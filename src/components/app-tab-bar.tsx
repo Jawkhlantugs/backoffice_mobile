@@ -12,13 +12,38 @@ import { GlassSurface } from './glass-surface'
 
 /**
  * Доод табын жагсаалт. Route-ийн нэр, дүрс, шошго нэг дор байснаар
- * `(tabs)/_layout.tsx` ба таб bar хоёр зөрөхгүй.
+ * `(tabs)/_layout.tsx` ба таб bar хоёр зөрөхгүй. Шошго нь getter — хэл
+ * солиход идэвхтэй хэлээр уншигдана.
  */
 export const TAB_ITEMS = [
-  { name: 'index', icon: 'home', title: messages.tabs.home },
-  { name: 'menu', icon: 'modules', title: messages.tabs.menu },
-  { name: 'leave', icon: 'work', title: messages.tabs.work },
-  { name: 'profile', icon: 'profile', title: messages.tabs.profile },
+  {
+    name: 'index',
+    icon: 'home',
+    get title() {
+      return messages.tabs.home
+    },
+  },
+  {
+    name: 'menu',
+    icon: 'modules',
+    get title() {
+      return messages.tabs.menu
+    },
+  },
+  {
+    name: 'leave',
+    icon: 'work',
+    get title() {
+      return messages.tabs.work
+    },
+  },
+  {
+    name: 'profile',
+    icon: 'profile',
+    get title() {
+      return messages.tabs.profile
+    },
+  },
 ] as const satisfies readonly {
   name: string
   icon: AppIconName

@@ -2,10 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { AppState, type AppStateStatus } from 'react-native'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
+import { appendDemoTicketMessage } from '@/core/demo/demo-backend'
+import { demoMode } from '@/core/demo/demo-mode'
 import { useSessionStore } from '@/core/session/session-store'
 import { ticketConversationRepository } from '@/data/support-ticket/ticket-conversation-repository'
 import { wrapAsHtmlParagraph } from '@/lib/html'
 import { logger } from '@/lib/logger'
+import { messages } from '@/lib/messages'
 import {
   TICKET_WS_PING_INTERVAL_MS,
   conversationSendMessage,
@@ -52,6 +55,11 @@ export function useTicketConversation(ticketId: string) {
 
   const connect = useCallback(async () => {
     if (socketRef.current) return
+    // Демо горимд WebSocket нээхгүй — илгээлтийг `sendMessage` дуурайна.
+    if (demoMode.isActive()) {
+      setStatus('connected')
+      return
+    }
 
     setStatus('connecting')
     try {
@@ -107,13 +115,21 @@ export function useTicketConversation(ticketId: string) {
   }, [ticketId, connect, disconnect, queryClient])
 
   async function sendMessage(text: string): Promise<void> {
-    if (!senderId) throw new Error('Session алга — дахин нэвтэрнэ үү')
+    if (!senderId) throw new Error(messages.supportTickets.reply.sessionMissing)
+
+    if (demoMode.isActive()) {
+      appendDemoTicketMessage(ticketId, wrapAsHtmlParagraph(text))
+      await queryClient.invalidateQueries({
+        queryKey: conversationKey(ticketId),
+      })
+      return
+    }
 
     if (socketRef.current?.readyState !== WebSocket.OPEN) {
       await connect()
     }
     if (socketRef.current?.readyState !== WebSocket.OPEN) {
-      throw new Error('WS холбогдоогүй байна. Дахин оролдоно уу')
+      throw new Error(messages.supportTickets.reply.notConnected)
     }
 
     socketRef.current.send(

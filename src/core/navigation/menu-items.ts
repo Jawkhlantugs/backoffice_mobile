@@ -1,5 +1,7 @@
 import type { Href } from 'expo-router'
 
+import { messages } from '@/lib/messages'
+
 /**
  * Вэб админы цэсний зам → mobile-ийн route.
  *
@@ -117,11 +119,22 @@ export type TeamInfo = { key: string; name: string; description: string }
 export const DEFAULT_TEAM_KEY = 'portal'
 
 /** Вэбийн баг сонгогчтой ижил нэр, тайлбар (`stores/team-store.ts`). */
+const team = (
+  key: keyof typeof messages.nav.teams,
+  name: string,
+): TeamInfo => ({
+  key,
+  name,
+  get description() {
+    return messages.nav.teams[key]
+  },
+})
+
 export const TEAMS: readonly TeamInfo[] = [
-  { key: 'portal', name: 'Portal', description: 'Үйл ажиллагаа' },
-  { key: 'office', name: 'Office', description: 'Дотоод удирдлага' },
-  { key: 'partner', name: 'Partner', description: 'Партнер менежмент' },
-  { key: 'futures', name: 'Futures', description: 'Фьючерс удирдлага' },
+  team('portal', 'Portal'),
+  team('office', 'Office'),
+  team('partner', 'Partner'),
+  team('futures', 'Futures'),
 ]
 
 export function teamInfo(key: string): TeamInfo {

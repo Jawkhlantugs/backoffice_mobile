@@ -20,7 +20,7 @@ import { TicketCard } from './ticket-card'
 
 type StatusFilter = TicketStatus | 'ALL'
 
-const STATUS_CHIPS: FilterChip<StatusFilter>[] = [
+const statusChips = (): FilterChip<StatusFilter>[] => [
   { value: 'ALL', label: messages.common.all },
   { value: 'new', label: messages.supportTickets.statuses.new },
   { value: 'open', label: messages.supportTickets.statuses.open },
@@ -75,7 +75,11 @@ export function TicketListScreen() {
           onChangeText={setSearch}
           placeholder={messages.supportTickets.searchPlaceholder}
         />
-        <FilterChips chips={STATUS_CHIPS} value={status} onChange={setStatus} />
+        <FilterChips
+          chips={statusChips()}
+          value={status}
+          onChange={setStatus}
+        />
       </View>
 
       <StateView

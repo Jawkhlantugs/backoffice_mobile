@@ -1,4 +1,5 @@
 import { AppErrors } from '@/core/errors/app-exception'
+import { messages } from '@/lib/messages'
 
 /** Сонгосон зураг — multipart upload-д хэрэгтэй гурван утга. */
 export type PickedImage = { uri: string; name: string; mimeType: string }
@@ -15,9 +16,13 @@ async function loadPicker() {
   try {
     return await import('expo-image-picker')
   } catch {
-    throw AppErrors.api(0, 'ExponentImagePicker native модуль алга — апп-ыг дахин build хий', {
-      message: 'Зураг сонгох модуль суугаагүй байна. Аппыг дахин build хийнэ үү.',
-    })
+    throw AppErrors.api(
+      0,
+      'ExponentImagePicker native модуль алга — апп-ыг дахин build хий',
+      {
+        message: messages.form.imagePickerMissing,
+      },
+    )
   }
 }
 

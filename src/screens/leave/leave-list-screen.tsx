@@ -24,7 +24,7 @@ import { LeaveRequestCard } from './leave-request-card'
 type Scope = 'mine' | 'review'
 type StatusFilter = LeaveStatus | 'ALL'
 
-const STATUS_CHIPS: FilterChip<StatusFilter>[] = [
+const statusChips = (): FilterChip<StatusFilter>[] => [
   { value: 'ALL', label: messages.common.all },
   { value: 'PENDING', label: messages.leave.statuses.PENDING },
   { value: 'APPROVED', label: messages.leave.statuses.APPROVED },
@@ -83,7 +83,11 @@ export function LeaveListScreen() {
           ]}
         />
 
-        <FilterChips chips={STATUS_CHIPS} value={status} onChange={setStatus} />
+        <FilterChips
+          chips={statusChips()}
+          value={status}
+          onChange={setStatus}
+        />
       </View>
 
       <StateView

@@ -32,12 +32,10 @@ export const biometricService = {
    * Түгжээг тайлуулна. `false` буцаах нь "оруулсангүй" гэсэн үг — дуудагч
    * дэлгэцийг түгжээтэй хэвээр үлдээнэ.
    */
-  async authenticate(
-    reason = 'Үргэлжлүүлэхийн тулд баталгаажуулна уу',
-  ): Promise<boolean> {
+  async authenticate(reason: string, cancelLabel: string): Promise<boolean> {
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage: reason,
-      cancelLabel: 'Болих',
+      cancelLabel,
       // Нууц үгээр орох замыг нээлттэй үлдээнэ: биометрик таарахгүй болсон
       // админ аппаасаа бүрмөсөн түгжигдэх учиргүй.
       disableDeviceFallback: false,

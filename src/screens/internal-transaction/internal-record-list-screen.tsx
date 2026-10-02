@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { InternalTransactionRecord } from '@/data/internal-transaction/internal-transaction-model'
 import { useInternalTransactionRecords } from '@/hooks/use-internal-transactions'
 import { formatDate } from '@/lib/date'
@@ -26,14 +26,12 @@ export function InternalRecordListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(
-  item: InternalTransactionRecord,
-): React.ComponentProps<typeof RecordCard> {
+function toCard(item: InternalTransactionRecord): RecordView {
   return {
     title: item.to ?? item.txnId,
     subtitle: formatDate(item.createdAt),

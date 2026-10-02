@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { SpotCommission } from '@/data/spot/spot-model'
 import { useSpotCommissions } from '@/hooks/use-spot'
 import { formatDate } from '@/lib/date'
@@ -26,12 +26,12 @@ export function SpotCommissionListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(item: SpotCommission): React.ComponentProps<typeof RecordCard> {
+function toCard(item: SpotCommission): RecordView {
   return {
     title: item.user ?? item.tradeId,
     subtitle: formatDate(item.fetchedAt),

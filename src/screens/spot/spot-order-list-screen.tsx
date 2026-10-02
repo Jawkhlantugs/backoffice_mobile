@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { SpotOrder } from '@/data/spot/spot-model'
 import { useSpotOrders } from '@/hooks/use-spot'
 import { formatDate } from '@/lib/date'
@@ -26,12 +26,12 @@ export function SpotOrderListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(item: SpotOrder): React.ComponentProps<typeof RecordCard> {
+function toCard(item: SpotOrder): RecordView {
   return {
     title: item.symbol,
     subtitle: [item.user, formatDate(item.transactTime)]

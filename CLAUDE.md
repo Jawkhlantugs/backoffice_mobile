@@ -67,7 +67,8 @@ envelope-ийн санаа түүнээс ирсэн. Мөн зөвхөн унш
    Face ID / хурууны хээ асууна (`use-app-lock.ts`).
 4. **Хувийн мэдээллийг диск дээр хадгалахгүй.** Хэрэглэгчийн мэдээлэл, ticket,
    захиалга зөвхөн санах ойд (Zustand + Query cache, persister байхгүй).
-   `AsyncStorage`-д зөвхөн хэл, биометрикийн туг, theme.
+   `AsyncStorage`-д зөвхөн хэл, биометрикийн туг, theme, жагсаалтын
+   харагдац (карт/хүснэгт).
 5. **Мөнгө хөдөлгөх, эрх өөрчлөх үйлдэл бүр:**
    - `ConfirmSheet` — юу хийх гэж байгаа, хэний, ямар дүн
    - Буцаах боломжгүй үйлдэлд шалтгааны талбар (`reason.required`)
@@ -76,7 +77,9 @@ envelope-ийн санаа түүнээс ирсэн. Мөн зөвхөн унш
 6. **401 ирэхэд** session цэвэрлээд login руу. Гэхдээ `/auth/login`,
    `/auth/mfa-challenge`, `/auth/action-mfa/verify`-д биш
    (`clients.ts`-ийн `AUTH_URL_SKIP_LOGOUT`).
-7. **Эрхгүй админд цэс харагдахгүй.** Deep link-ээр орж ирсэн ч "Эрх байхгүй".
+7. **Эрхгүй админд цэс харагдахгүй.** Deep link-ээр орж ирсэн ч "Эрх байхгүй"
+   (`screens/shell/route-guard.tsx`). Шинэ route-ийг `MOBILE_ROUTES`-д
+   бүртгээгүй бол хаалттай — FLOWS §5.4 "Route guard".
 
 ---
 
@@ -124,7 +127,9 @@ Design system gallery: `src/app/gallery.tsx` — компонент бүрийг
 Дүрс нь `lucide-react-native` (вэбтэй ижил) — **зөвхөн цагаан/саарал**, статусын
 өнгөгүй (`components/app-icon.tsx`). Өөр дүрсний сан нэмэхгүй.
 
-Жагсаалт → `PagedListScreen` + `usePagedList`/`useCursorList` + `RecordCard` (FLOWS §5.5).
+Жагсаалт → `PagedListScreen` (хуудасгүй бол `QueryListScreen`) + `usePagedList`/`useCursorList`
++ `record={(item) => RecordView}` — карт ба хүснэгт (`DataTable`) хоёулаа үүнээс (FLOWS §5.5 "Хүснэгт").
+Статистик/тохиргооны утга → `SummaryScreen`.
 Форм → `FormScreen` + `FormSection` + `AppInput`/`ChoiceField`/`SelectField`/`ImageField`.
 Мөнгө/эрхийн үйлдлийн товч → `RecordActions` (товч + ConfirmSheet + toast).
 Liquid Glass нь `GlassSurface`-ээр л (design-tokens §3.2). Raw `Pressable`/`Switch`

@@ -4,9 +4,10 @@ import { PagedListScreen } from '@/components'
 import { useConvertRecords } from '@/hooks/use-convert'
 import { messages } from '@/lib/messages'
 
-import { ConvertCard } from './convert-card'
+import { useConvertRecord } from './use-convert-record'
 
 export function ConvertListScreen() {
+  const record = useConvertRecord()
   const [search, setSearch] = useState('')
   const list = useConvertRecords({ search })
 
@@ -23,7 +24,7 @@ export function ConvertListScreen() {
         onChange: setSearch,
         placeholder: messages.finance.searchPlaceholder,
       }}
-      renderItem={({ item }) => <ConvertCard record={item} />}
+      record={record}
     />
   )
 }

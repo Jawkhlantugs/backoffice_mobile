@@ -2,17 +2,16 @@ import { useState } from 'react'
 import { View } from 'react-native'
 import { Image } from 'expo-image'
 
-import type { AmountField } from '@/core/money/format'
 import { radius } from '@/theme/tokens'
 
 import { AmountText } from './amount-text'
 import { AppCard } from './app-card'
 import { AppText } from './app-text'
-import type { RecordAction } from './record-actions'
 import { RecordDetailSheet } from './record-detail-sheet'
-import { visibleFields, type RecordField } from './record-field'
+import { visibleFields } from './record-field'
 import { RecordFieldValue } from './record-field-value'
-import { StatusPill, type StatusTone } from './status-pill'
+import type { RecordView } from './record-view'
+import { StatusPill } from './status-pill'
 
 /** Banner-ын 16:9 харьцаа. */
 const IMAGE_RATIO = 16 / 9
@@ -35,21 +34,7 @@ export function RecordCard({
   actions,
   image,
   onPress,
-}: {
-  title: string
-  subtitle?: string
-  status?: { label: string; tone: StatusTone }
-  amount?: AmountField
-  /** Картан дээр харагдах гол талбарууд (4 хүртэл). */
-  fields?: RecordField[]
-  /** Зөвхөн дэлгэрэнгүйд — txnId, огноо гэх мэт. */
-  details?: RecordField[]
-  actions?: RecordAction[]
-  /** Картын дээд хэсэгт харагдах зураг (banner гэх мэт). */
-  image?: string
-  /** Өгвөл дэлгэрэнгүй хавтангийн оронд үүнийг дуудна — засах дэлгэц рүү. */
-  onPress?: () => void
-}) {
+}: RecordView) {
   const [open, setOpen] = useState(false)
   const grid = visibleFields(fields).slice(0, GRID_LIMIT)
 

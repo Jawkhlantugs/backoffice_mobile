@@ -8,7 +8,7 @@ import { useFinanceOrders } from '@/hooks/use-finance-orders'
 import { usePullRefresh } from '@/hooks/use-pull-refresh'
 import { messages } from '@/lib/messages'
 
-import { OrderCard } from './order-card'
+import { financeOrderRecord } from './finance-order-record'
 
 const TITLES: Record<OrderMarket, { title: string; subtitle: string }> = {
   usdt: messages.finance.orderUsdt,
@@ -51,7 +51,7 @@ export function FinanceOrderListScreen({ market }: { market: OrderMarket }) {
       }}
       items={items}
       keyExtractor={(item) => item.orderId}
-      renderItem={({ item }) => <OrderCard order={item} />}
+      record={financeOrderRecord}
       loading={query.isPending}
       error={query.error}
       onRetry={() => query.refetch()}

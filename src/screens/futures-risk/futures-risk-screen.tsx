@@ -1,183 +1,165 @@
-import { useRouter } from 'expo-router'
-import { ScrollView, View } from 'react-native'
+import { View } from 'react-native'
 
 import {
   AppCard,
-  AppHeader,
   AppText,
-  Screen,
+  Badge,
+  InfoRow,
   SectionHeader,
-  StatCard,
+  SummaryScreen,
 } from '@/components'
-import { formatAmountSafe } from '@/core/money/format'
-import { useDrawerToggle } from '@/core/navigation/use-drawer-toggle'
+import { formatMoney, type AmountField } from '@/core/money/format'
+import { tryParseMoney } from '@/core/money/money'
 import {
   useFuturesMasterRisk,
   useFuturesOpenOrders,
 } from '@/hooks/use-futures-risk'
+import { groupDigits } from '@/lib/group-digits'
 import { messages, translateUnknownError } from '@/lib/messages'
 
-export function FuturesRiskScreen() {
-  const router = useRouter()
-  const openDrawer = useDrawerToggle()
+import { RiskMetricCard, type MetricTone } from './risk-metric-card'
 
+const text = messages.futures
+
+/** Вэбийн `formatRiskValue`-тай ижил — 2 орон, доош тайрна. */
+const RISK_DECIMALS = 2
+
+function riskAmount(amount: AmountField): string {
+  const money = tryParseMoney(amount.raw, amount.currency)
+  return money
+    ? formatMoney(money, { fractionDigits: RISK_DECIMALS })
+    : String(amount.raw)
+}
+
+function pnlTone(amount: AmountField): MetricTone {
+  const money = tryParseMoney(amount.raw, amount.currency)
+  if (!money || money.minorUnits === 0n) return 'default'
+  return money.minorUnits < 0n ? 'negative' : 'positive'
+}
+
+export function FuturesRiskScreen() {
   const riskQuery = useFuturesMasterRisk()
   const ordersQuery = useFuturesOpenOrders()
 
   const risk = riskQuery.data
   const orders = ordersQuery.data ?? []
+  const loading = riskQuery.isPending
 
   return (
-    <Screen edges={['top']}>
-      <AppHeader
-        title={messages.futures.riskTitle}
-        subtitle={messages.futures.riskSubtitle}
-        leading={
-          openDrawer
-            ? {
-                icon: 'menu',
-                label: messages.nav.openMenu,
-                onPress: openDrawer,
-              }
-            : {
-                icon: 'back',
-                label: messages.nav.back,
-                onPress: () => router.back(),
-              }
-        }
-        actions={[
-          {
-            icon: 'refresh',
-            label: messages.common.refresh,
-            onPress: () => {
-              void riskQuery.refetch()
-              void ordersQuery.refetch()
-            },
-          },
-        ]}
-      />
-
-      <ScrollView contentContainerClassName="gap-4 pb-8">
-        {riskQuery.error ? (
-          <AppText variant="body" className="text-destructive">
-            {translateUnknownError(riskQuery.error)}
-          </AppText>
-        ) : (
-          <View className="flex-row flex-wrap gap-3">
-            <StatCard
-              label={messages.futures.walletBalance}
-              value={
-                risk
-                  ? formatAmountSafe(
-                      risk.totalWalletBalance.raw,
-                      risk.totalWalletBalance.currency,
-                    )
-                  : ''
-              }
-              icon="wallet"
-              loading={riskQuery.isPending}
-            />
-            <StatCard
-              label={messages.futures.marginBalance}
-              value={
-                risk
-                  ? formatAmountSafe(
-                      risk.totalMarginBalance.raw,
-                      risk.totalMarginBalance.currency,
-                    )
-                  : ''
-              }
-              icon="trading"
-              loading={riskQuery.isPending}
-            />
-            <StatCard
-              label={messages.futures.unrealizedProfit}
-              value={
-                risk
-                  ? formatAmountSafe(
-                      risk.totalUnrealizedProfit.raw,
-                      risk.totalUnrealizedProfit.currency,
-                    )
-                  : ''
-              }
-              icon="transaction"
-              loading={riskQuery.isPending}
-            />
-            <StatCard
-              label={messages.futures.marginRatio}
-              value={risk?.marginRatioPercent ?? '—'}
-              icon="config"
-              loading={riskQuery.isPending}
-            />
-          </View>
-        )}
-
-        <View className="gap-2">
-          <SectionHeader title={messages.futures.positions} />
-          {risk && risk.positions.length === 0 ? (
-            <AppText variant="caption">
-              {messages.futures.positionsEmpty}
-            </AppText>
-          ) : null}
-          {risk?.positions.map((position) => (
-            <AppCard
-              key={`${position.symbol}-${position.positionSide ?? ''}`}
-              className="gap-1"
-            >
-              <View className="flex-row items-center justify-between">
-                <AppText variant="body" className="font-semibold">
-                  {position.symbol}
-                </AppText>
-                <AppText variant="body" numeric>
-                  {position.positionAmt}
-                </AppText>
-              </View>
-              <View className="flex-row items-center justify-between">
-                <AppText variant="tiny">
-                  {position.leverage ? `${position.leverage}x` : ''}{' '}
-                  {position.entryPrice ?? ''}
-                </AppText>
-                <AppText
-                  variant="caption"
-                  numeric
-                  className={
-                    Number(position.unrealizedProfit.raw) < 0
-                      ? 'text-destructive'
-                      : 'text-success'
-                  }
-                >
-                  {formatAmountSafe(
-                    position.unrealizedProfit.raw,
-                    position.unrealizedProfit.currency,
-                  )}
-                </AppText>
-              </View>
-            </AppCard>
-          ))}
+    <SummaryScreen
+      title={text.riskTitle}
+      subtitle={text.riskSubtitle}
+      onRefresh={() =>
+        Promise.all([riskQuery.refetch(), ordersQuery.refetch()])
+      }
+    >
+      {riskQuery.error ? (
+        <AppText variant="body" className="text-destructive">
+          {translateUnknownError(riskQuery.error)}
+        </AppText>
+      ) : (
+        <View className="gap-3">
+          <RiskMetricCard
+            label={text.walletBalance}
+            icon="wallet"
+            value={risk ? riskAmount(risk.totalWalletBalance) : ''}
+            unit={risk?.totalWalletBalance.currency}
+            loading={loading}
+          />
+          <RiskMetricCard
+            label={text.marginBalance}
+            icon="trading"
+            value={risk ? riskAmount(risk.totalMarginBalance) : ''}
+            unit={risk?.totalMarginBalance.currency}
+            loading={loading}
+          />
+          <RiskMetricCard
+            label={text.unrealizedProfit}
+            icon="transaction"
+            value={risk ? riskAmount(risk.totalUnrealizedProfit) : ''}
+            unit={risk?.totalUnrealizedProfit.currency}
+            tone={risk ? pnlTone(risk.totalUnrealizedProfit) : 'default'}
+            loading={loading}
+          />
+          <RiskMetricCard
+            label={text.marginRatio}
+            icon="config"
+            value={risk?.marginRatioPercent ?? '—'}
+            unit={risk?.marginRatioPercent ? '%' : undefined}
+            loading={loading}
+          />
         </View>
+      )}
 
-        <View className="gap-2">
-          <SectionHeader title={messages.futures.openOrders} />
-          {orders.length === 0 && !ordersQuery.isPending ? (
-            <AppText variant="caption">
-              {messages.futures.openOrdersEmpty}
-            </AppText>
-          ) : null}
-          {orders.map((order) => (
-            <AppCard key={order.orderId} className="gap-1">
-              <View className="flex-row items-center justify-between">
-                <AppText variant="body" className="font-semibold">
-                  {order.symbol}
-                </AppText>
-                <AppText variant="tiny">{order.status}</AppText>
-              </View>
-              <AppText variant="caption">
-                {order.side} · {order.type} · {order.price ?? ''}
+      <View className="gap-2">
+        <SectionHeader title={text.positions} />
+        {risk && risk.positions.length === 0 ? (
+          <AppText variant="caption">{text.positionsEmpty}</AppText>
+        ) : null}
+        {risk?.positions.map((position) => (
+          <AppCard
+            key={`${position.symbol}-${position.positionSide ?? ''}`}
+            className="gap-2"
+          >
+            <View className="flex-row items-center justify-between gap-3">
+              <AppText variant="bodyLarge" className="font-semibold">
+                {position.symbol}
               </AppText>
-            </AppCard>
-          ))}
-        </View>
-      </ScrollView>
-    </Screen>
+              {position.leverage ? (
+                <Badge value={`${position.leverage}x`} />
+              ) : null}
+            </View>
+
+            <InfoRow
+              label={text.positionSize}
+              value={groupDigits(position.positionAmt)}
+            />
+            <InfoRow
+              label={text.entryPrice}
+              value={groupDigits(position.entryPrice)}
+            />
+            <InfoRow
+              label={text.markPrice}
+              value={groupDigits(position.markPrice)}
+            />
+
+            <View className="flex-row items-center justify-between gap-3">
+              <AppText variant="label">{text.unrealizedProfit}</AppText>
+              <AppText
+                variant="body"
+                numeric
+                className={
+                  pnlTone(position.unrealizedProfit) === 'negative'
+                    ? 'font-semibold text-destructive'
+                    : 'font-semibold text-success'
+                }
+              >
+                {`${riskAmount(position.unrealizedProfit)} ${position.unrealizedProfit.currency}`}
+              </AppText>
+            </View>
+          </AppCard>
+        ))}
+      </View>
+
+      <View className="gap-2">
+        <SectionHeader title={text.openOrders} />
+        {orders.length === 0 && !ordersQuery.isPending ? (
+          <AppText variant="caption">{text.openOrdersEmpty}</AppText>
+        ) : null}
+        {orders.map((order) => (
+          <AppCard key={order.orderId} className="gap-1">
+            <View className="flex-row items-center justify-between">
+              <AppText variant="body" className="font-semibold">
+                {order.symbol}
+              </AppText>
+              <AppText variant="tiny">{order.status}</AppText>
+            </View>
+            <AppText variant="caption">
+              {order.side} · {order.type} · {order.price ?? ''}
+            </AppText>
+          </AppCard>
+        ))}
+      </View>
+    </SummaryScreen>
   )
 }

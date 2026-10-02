@@ -231,6 +231,38 @@ API (string эсвэл number)
 - 🔴 Цэс хоосон бол юу ч харагдахгүй — "Эрх байхгүй". Эрхийг клиент талд
   таамаглахгүй.
 
+### Route guard — deep link-ээр ч тойрохгүй
+
+Вэб route-ийн хамгаалалтгүй (зөвхөн sidebar шүүдэг). Mobile-д `xmetaadmin://`
+scheme байгаа тул route бүрийг navigator түвшинд хаана.
+
+| Алхам | Файл | Юу болно |
+| --- | --- | --- |
+| 1 | `app/_layout.tsx`, `(tabs)/_layout.tsx` | `screenLayout` → `RouteGuard` (дэлгэц бүрийг ороох) |
+| 2 | `screens/shell/route-guard.tsx` | эрхгүй бол дэлгэцийг **mount хийхгүй** (query ч явахгүй), "Эрх байхгүй" + Нүүр рүү |
+| 3 | `core/navigation/route-access.ts` | `canOpenRoute` — route нэр → зам → `MOBILE_ROUTES`-ийн урвуу → `hasMenuPath` |
+
+- Хамгийн урт таарсан route ялна: `/futures/users` нь `/futures`-ийн биш өөрийн
+  цэсийг шаардана. Дэд route (`/leave/[id]`, `/users/[id]`) эх route-ынхоо
+  эрхийг өвлөнө. `/transfer` ба `/admin/accounts` хоёр цэсийн аль нэгээр нээгдэнэ.
+- Нийтийн: Нүүр, Цэс, Профайл. `gallery`, `_sitemap` зөвхөн `__DEV__`-д.
+  Зураглалд байхгүй route **анхдагчаар хаалттай**.
+- 🔴 Шинэ route нэмбэл `MOBILE_ROUTES`-д цэсний замтай нь бүртгэ —
+  `route-access.test.ts` `src/app`-ийг бүхэлд нь уншиж, бүртгэлгүй route-д унана.
+- "Ажил" таб чөлөөний цэсгүй бол таб bar-аас нуугдана (`AppTabBar hidden`).
+- Цэс апп идэвхжих / түгжээ тайлагдах үед 5 минутаас хуучирсан бол дахин
+  татагдана (`hooks/use-menu-refresh.ts`, вэбийн `staleTime`-тай ижил). Эрх
+  хасагдвал нээлттэй дэлгэц шууд "Эрх байхгүй" болно.
+
+### Дэлгэц доторх эрх (groupId / цэсний зам)
+
+| Юу | Дүрэм | Вэбийн эх |
+| --- | --- | --- |
+| Чөлөө батлах, "Батлах" таб, нүүрний батлах хэсэг | `isOfficePrivileged` | leave `canViewAll` |
+| Task "Бүгд", weekly report хэлтсээр | `isOfficePrivileged` | `isTaskAdmin`, `isPrivilegedWeeklyReportViewer` |
+| Админы нууц үг сэргээх, хандалт хаах | `isSuperAdmin` | `admin-users` toolbar |
+| Transfer-ийн MNT сонголт | `mnt-transfer` цэс | SubAccount Transfer-т `showTransferType` байхгүй |
+
 ---
 
 ## 5.5 Хийгдсэн урсгалууд
@@ -266,6 +298,8 @@ API (string эсвэл number)
 | Зөвшөөрөх   | ↑ ConfirmSheet       | ↑                                     | `POST /admin/leave-requests/{id}/review` |
 
 - "Миний хүсэлт" таб нь `adminUserId`-аар шүүнэ, "Батлах" нь бүгдийг.
+- "Батлах" таб, Зөвшөөрөх/Татгалзах товч зөвхөн `isOfficePrivileged`-д (вэбийн
+  `canViewAll`). Бусад ажилтан зөвхөн өөрийн хүсэлтийг харна.
 - Татгалзах үед `ConfirmSheet`-ийн шалтгаан **заавал**, зөвшөөрөхөд заавал биш.
 - Шийдвэрлэгдсэн хүсэлтэд товч харагдахгүй — API дахин шийдвэрлэхгүй.
 
@@ -304,12 +338,18 @@ API (string эсвэл number)
 | --- | --- | --- |
 | Repository | `data/shared/fetch-list.ts` | POST → дугтуй → model, хоосон шүүлтүүр явуулахгүй |
 | Hook | `hooks/use-paged-list.ts` | `current/pageSize/query`, хайлт 400ms debounce, доош гүйлгэхэд дараагийн хуудас (`total` эсвэл дүүрэн хуудсаар) |
-| Дэлгэц | `components/paged-list-screen.tsx` | drawer/буцах, шинэчлэх, хайлт, "N бичлэг", хуудас ачаалах loader |
-| Мөр | `components/record-card.tsx` | гарчиг + статус + том дүн + 2 баганат 4 талбар; дарахад `RecordDetailSheet` — бүх талбар (удаан дарж хуулна) + `RecordActions` |
+| Дэлгэц | `components/paged-list-screen.tsx` | drawer/буцах, шинэчлэх, хайлт, "N бичлэг", карт ⇄ хүснэгт, хуудас ачаалах loader |
+| Хуудасгүй | `components/query-list-screen.tsx` | `useQuery`-ийн бүх мөр нэг дор (тохиргоо, эрх, ангилал); хайлт ачаалсан мөрөн дотор (`searchText`) |
+| Мөр | `components/record-view.ts` | `RecordView` — нэг бичлэгийн дэлгэцийн хэлбэр; карт ч, хүснэгтийн мөр ч үүнээс |
+| Карт | `components/record-card.tsx` | гарчиг + статус + том дүн + 2 баганат 4 талбар; дарахад `RecordDetailSheet` — бүх талбар (удаан дарж хуулна) + `RecordActions` |
+| Статистик | `components/summary-screen.tsx` | жагсаалт биш дэлгэц (dashboard, тохиргооны утга) — толгой + татаж шинэчлэх scroll |
 
 - Шинэ жагсаалт = model/dto/repository + `usePagedList` нэг мөр + дэлгэц
-  (`PagedListScreen` + `toCard(item)` функц). Дэлгэц файл дотроо карт
-  компонент бичихгүй — `RecordCard`-ын props-ыг буцаах функц л.
+  (`PagedListScreen` + `record={(item) => RecordView}`). Дэлгэц карт
+  компонент бичихгүй — `RecordView` буцаах функц л. Хүснэгт автоматаар
+  үүнээс гарна (доорх "Хүснэгт").
+- Mutation-тай карт (retry, батлах) → `screens/<домэйн>/use-<нэр>-record.ts`
+  hook: mutation-ыг нэг удаа үүсгээд `(item) => RecordView` буцаана.
 - Статусын өнгө `lib/status-tone.ts` — үгээр таана, утгыг өөрчлөхгүй.
 - `ExpandableRecordCard` устсан — бүгд `RecordCard` болсон.
 
@@ -341,10 +381,40 @@ render хийдэг.
 бичигт "шидэлтгүй хувилбар" гэж бичсэн ч зөрчиж байсан алдаа) — энэ ажлын
 явцад `core/money/currency.ts`-д `tryCurrencyOf()` нэмж засав.
 
-⚠️ Web menu path зарим нь тодорхойгүй хэвээр (`menu-items.ts` дэх коммент):
-order-mnt-ийн зам (`ihc-mnt` уу, `match-*` уу), `bank-exchange-bank-txn`-ийн
-зам (`/portal/bank/exchange-txn`, нэрээр таарсан цорын ганц сонголт ч
-баталгаажаагүй). Дэлгэц ажиллана, зөвхөн Цэсний холбоос батлагдаагүй.
+⚠️ `bank-exchange-bank-txn`-ийн цэсний зам (`/portal/bank/exchange-txn`)
+нэрээр таарсан цорын ганц сонголт, баталгаажаагүй. Order MNT нь
+`/portal/order-mnt/ihc-mnt` (вэбийн тэр хуудас `orderMntService.list`-ийг
+дууддаг — 2026-10-01-нд баталсан).
+
+### Хүснэгт (DataTable) — карт ⇄ хүснэгт (2026-10-01)
+
+Бүх жагсаалт (`PagedListScreen`, `QueryListScreen`, `RecordListScreen`)
+нэг `RecordView`-ээс карт эсвэл хүснэгт зурна. Сонголт нь бүх жагсаалтад
+нэг, AsyncStorage-д (`list-view-mode`, хувийн мэдээлэл биш).
+
+| Юу | Файл |
+| --- | --- |
+| Горим + нуусан багана | `core/ui/list-view-store.ts` — `mode` дискэнд, `hidden` санах ойд |
+| Карт/хүснэгт сонгогч, багана товч | `components/list-view-toolbar.tsx` |
+| Багана, мөр гаргах, эрэмбэ, өргөн | `components/record-table.ts` (цэвэр функц, тесттэй) |
+| Хүснэгт | `components/data-table.tsx` (+ `-header`, `-row`, `-cell`, `-sticky-cell`) |
+| Багана нуух хавтан | `components/column-picker-sheet.tsx` |
+| Дүн харьцуулах | `lib/compare-decimal.ts` — `number`-гүй (§10) |
+
+- Багана = гарчиг (sticky) → статус → дүн → `fields` → `details`; ачаалсан
+  мөрүүдийн талбарын нэгдэл. Өргөнийг эхний 60 мөрийн текстийн уртаар
+  тооцоод дэлгэцээс нарийн бол илүү зайг хуваана (`fitColumns`).
+- Хэвтээ гүйлгэлт нь `Animated.ScrollView` → дотор нь босоо `FlatList`.
+  Гарчгийн нүд scroll-ын зайгаар буцаж шилждэг (native driver) тул зүүн
+  талд наалдана; толгой нь `stickyHeaderIndices`.
+- Эрэмбэ нь ачаалсан мөрөн дээр (вэб ч одоогийн хуудсаа л эрэмбэлдэг):
+  эрэмбэгүй → өсөх → буурах. Хоосон нүд үргэлж сүүлд.
+- Мөр дарахад картынхтай ижил `RecordDetailSheet` (үйлдэлтэй); `onPress`
+  өгсөн бол түүнийг (засах дэлгэц). Сонгосон мөрийг түлхүүрээр санадаг тул
+  үйлдлийн дараа хавтан шинэ өгөгдлөө харуулна.
+- `tableLabels` — гарчиг/дүнгийн баганы нэр (анхдагч "Бичлэг", "Дүн").
+- `tableId` = дэлгэцийн гарчиг: хэл солиход баганын нэр ч солигддог тул
+  нуусан багана хамт шинэчлэгдэнэ.
 
 ### Зөвхөн харах жагсаалтууд (2026-09-25) — 19 дэлгэц
 
@@ -371,6 +441,51 @@ order-mnt-ийн зам (`ihc-mnt` уу, `match-*` уу), `bank-exchange-bank-tx
 - Stake: `*_manual` статустай мөрөнд "Хүсэлтийг батлах" →
   `POST {staking}/admin/stake/users/change-status` (вэбийн `customActions`).
 - KYC-ийн `initiateResponse`-ийг уншихгүй; бүх утга санах ойд л.
+
+### Вэбээс нэмэгдсэн дэлгэцүүд (2026-10-01) — 47 дэлгэц
+
+Вэбийн route бүрийг `MOBILE_ROUTES`-тэй тулгаж дутууг нэмэв. Ихэнх нь
+жагсаалт + хүснэгт; нэмэх/засах форм нь вэб дээр (тэмдэглэсэн).
+
+| Домэйн | Route | Data | Endpoint | Үйлдэл |
+| --- | --- | --- | --- | --- |
+| Partner (7) | `app/partner/{index,applications,commissions,payouts,referrals,config,analytics}` | `partner/` | `{partner}/partners`, `/applications`, `/commissions`, `/payouts`, `/referrals` `/list`; `GET /config/tiers`; `/analytics/{summary,referral-funnel,top-partners}` | partner идэвхжүүлэх/түдгэлзүүлэх; хүсэлт, төлбөр зөвшөөрөх/татгалзах (шалтгаан заавал) |
+| Support тохиргоо (5) | `app/support-admin/{macros,agents,roles,teams,categories}` | `support-admin/` | `{backoffice}/support/{marcos,agents,roles,teams}/list` (`page/search`), `/categories/data-list` (`parent: true`) | — |
+| Сайтын агуулга (9) | `app/site/{footer-categories,footer-items,contact,withdrawal-limit,pages,page-categories,web-files,head-config,news}` | `site-content/` | `{content}/footer-menu/*`, `/pages/list`, `/page-categories/list`, `/web-files/list`, `/head-config/items/list`, `/withdraw-limit`; `{news}/news/list` | — (холбоо барих, хязгаар зөвхөн харна) |
+| Админ (4) | `app/admin/{menu-groups,menus,roles,accounts}` | `admin-management/` | `GET /admin/admin-menu-groups/`, `/admin-menus/all`, `/admin-roles/{groups,permissions}`; `POST /users/admins/list` | нууц үг сэргээх, хандалт хаах/нээх — `isSuperAdmin` л, өөрийгөө хаахгүй |
+| FRC тайлан (6) | `app/reports/frc-*` | `frc-report/` | `{backoffice}/admin/reports/frc-*` (`sortDate`) | — (Excel вэб дээр) |
+| Reward hub (3) | `app/reward/{welcome-tasks,user-rewards,transactions}` | `reward-hub/` | `{rewardHub}/reward-hub/{rewards,user-rewards,transaction-tasks}/list` | — |
+| Match engine (2) | `app/finance/match-{ihc,usdt}-mnt` | `match-engine/` | `{finance}/match-engine/{market}/list` (cursor, `pair`) | — |
+| Convert limit | `app/finance/convert-limit` | `convert-limit/` | `GET {finance}/convert-limit/list` (`nextCursor`), `/{id}/{accept,reject,complete,reopen}` | вэбийн статусын дүрмээр; **x-idempotency-key** (вэб явуулдаг); эсрэг санал вэб дээр |
+| Хөрөнгө сэргээлт | `app/finance/asset-recovery` | `asset-recovery/` | `{finance}/asset-recovery/list`, `PUT /{id}/approve` | зөвшөөрөх — `user_claimed` үед л |
+| BuyNow хос | `app/finance/buynow-symbols` | `buy-now-symbol/` | `{finance}/buynow/symbol/list` | — |
+| Monitor users | `app/compliance/monitor-users` | `compliance-monitor/` | `{compliance}/compliance-monitoring/user/list` | — |
+| Crystal monitor | `app/compliance/crystal` | `crystal/` | `{backoffice}/crystal/monitor/{batch/txs,list}` (offset, USD цент ÷100 мөрөөр) | — |
+| Stake статистик | `app/stake/statistics` | `stake/` | `GET {staking}/admin/stake/users/total-stakes-info` | — |
+| Careers | `app/office/careers` | `career/` | `{content}/careers/{postings,applications}/list`, `/applications/update` | анкетын төлөв солих |
+| Jumio нөөц | `app/users/jumio-backup` | `jumio-backup/` | `{backoffice}/users/jumio-backup/list` | — (зураг огт уншихгүй) |
+| Operation данс | `app/admin/operation-accounts/[subAccountId]` | `operation-account/` | `GET /users/operation-accounts/detail/{id}`, `{finance}/operation-account/balance` | — (master данс вэб дээр) |
+| Dashboard | `app/dashboard` | `dashboard/` | `{backoffice}/dashboard/overview/{summary,revenue-sources}` | — (бусад 6 таб вэб дээр) |
+
+- Partner API тусдаа host: `EXPO_PUBLIC_PARTNER_API_URL` (заавал биш).
+  Хоосон бол `menu-items.ts`-ийн `PARTNER_ROUTES` идэвхгүй ("Вэб дээр"),
+  шууд холбоосоор орвол `clients.partner` validation алдаа өгнө.
+- Шинэ client: `rewardHub`, `news`, `crystal`, `partner` (`core/config/api.ts`).
+- Хуудасгүй жагсаалтын туслах: `QueryListScreen`; статистик: `SummaryScreen`;
+  товч хугацаа (7 хоног / 1 сар / 3 сар): `lib/period-chips.ts` +
+  `lib/date-range.ts`; хувь: `lib/format-ratio.ts` (`shift-decimal.ts`).
+- Mutation-ын нийтлэг hook: `hooks/use-invalidating-mutation.ts`.
+
+**Нэмээгүй (шалтгаантай):**
+
+| Вэбийн хуудас | Шалтгаан |
+| --- | --- |
+| `portal/crypto/coins-rate` | Coin бүрт Binance-ийн нийтийн API-г шууд дууддаг (X-Meta backend биш) — утсанд олон хүсэлт |
+| `portal/support/ai/*` | Тусдаа локал service + статик token (`VITE_AI_ADMIN_TOKEN`) — bundle-д нууц оруулахгүй |
+| `portal/chats`, `portal/apps` | Вэб дээр ч зохиомол өгөгдөлтэй template |
+| `portal/help-center` | Вэб дээр "Coming soon" |
+| Partner commission import, tier/зар/мэдээ/хуудас/footer/macro засах | Excel, rich text, JSON config форм — вэб дээр |
+| Convert limit "Counter" | Ханш, дүнгийн тусгай форм — вэб дээр |
 
 ### Mobile цэс — Banner, App version (нэмэх + засах)
 
@@ -579,7 +694,8 @@ order-mnt-ийн зам (`ihc-mnt` уу, `match-*` уу), `bank-exchange-bank-tx
 ### Balance transfer (4-р шат)
 
 Цэс: `/portal/exchange-management/mnt-transfer` ба `/sub-transfer` → хоёулаа
-`/transfer` (MNT/Crypto сонголттой нэг дэлгэц). Bulk/Promotion таб — CSV тул
+`/transfer`. MNT/Crypto сонголт зөвхөн `mnt-transfer` цэстэй админд — вэбийн
+SubAccount Transfer нь crypto-г л шилжүүлдэг. Bulk/Promotion таб — CSV тул
 mobile-д байхгүй.
 
 | Юу | Файл | Endpoint |
@@ -674,12 +790,15 @@ Apple-ийн reviewer бодит өгөгдөл харахгүйгээр апп�
    компонентууд `app/` дотор route болж хувирахгүй.
 3. **Repository** — endpoint дуудаж, `unwrap*` хийж, model буцаана.
 4. **Hook** — `useQuery` / `useInfiniteQuery` / `useMutation`.
-5. **Дэлгэц** — `<Screen>` + `<AppHeader>` + `<StateView>` + `@/components`.
+5. **Дэлгэц** — жагсаалт бол `PagedListScreen` / `QueryListScreen` +
+   `record={(item) => RecordView}` (карт ⇄ хүснэгт автоматаар), бусад нь
+   `<Screen>` + `<AppHeader>` + `<StateView>` эсвэл `SummaryScreen`.
    Таб доторх дэлгэц `edges={['top']}` — доод захыг таб bar эзэлнэ.
 6. **Текст** — `lib/messages/mn.ts` ба `en.ts` хоёуланд нэм. Дэлгэцэнд өгүүлбэр шууд бичихгүй.
 7. **Мөнгө** — `parseMoney` / `formatMoney`. `number` хэзээ ч биш.
-8. **Буцаах боломжгүй үйлдэл** — картад `<RecordActions actions={[…]} />`
-   (`confirm.reason` + idempotency key). Формд сонголт → `<SelectField>`,
-   жагсаалтаас сонгох хавтан → `<SelectSheet>`, бусад хавтан → `<BottomSheet>`.
+8. **Буцаах боломжгүй үйлдэл** — `RecordView.actions` (`confirm.reason` +
+   idempotency key) — карт ба хүснэгтийн дэлгэрэнгүйд хоёуланд гарна.
+   Формд сонголт → `<SelectField>`, жагсаалтаас сонгох хавтан →
+   `<SelectSheet>`, бусад хавтан → `<BottomSheet>`.
 9. **Энэ файлд урсгалаа нэм.**
 10. `npm run typecheck && npm run lint && npm test`

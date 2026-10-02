@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { SpotTrade } from '@/data/spot/spot-model'
 import { useSpotTrades } from '@/hooks/use-spot'
 import { formatDate } from '@/lib/date'
@@ -26,12 +26,12 @@ export function SpotTradeListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(item: SpotTrade): React.ComponentProps<typeof RecordCard> {
+function toCard(item: SpotTrade): RecordView {
   return {
     title: item.symbol || item.asset,
     subtitle: [item.user, formatDate(item.postDate)]

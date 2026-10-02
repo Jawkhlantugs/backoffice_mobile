@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { FuturesAccount } from '@/data/futures-account/futures-account-model'
 import { useFuturesAccounts } from '@/hooks/use-futures-accounts'
 import { formatDate } from '@/lib/date'
@@ -25,12 +25,12 @@ export function FuturesAccountListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(item: FuturesAccount): React.ComponentProps<typeof RecordCard> {
+function toCard(item: FuturesAccount): RecordView {
   return {
     title: item.email,
     subtitle: formatDate(item.createdAt),

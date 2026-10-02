@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { SpotFill } from '@/data/spot/spot-model'
 import { useSpotFills } from '@/hooks/use-spot'
 import { formatDate } from '@/lib/date'
@@ -26,12 +26,12 @@ export function SpotFillListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(item: SpotFill): React.ComponentProps<typeof RecordCard> {
+function toCard(item: SpotFill): RecordView {
   return {
     title: item.symbol,
     subtitle: [item.user, formatDate(item.createdAt)]

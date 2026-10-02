@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { InternalBalance } from '@/data/internal-transaction/internal-transaction-model'
 import { useInternalBalances } from '@/hooks/use-internal-transactions'
 import { formatDate } from '@/lib/date'
@@ -25,14 +25,12 @@ export function InternalBalanceListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(
-  item: InternalBalance,
-): React.ComponentProps<typeof RecordCard> {
+function toCard(item: InternalBalance): RecordView {
   return {
     title: item.owner ?? item.subAccountId,
     subtitle: item.subAccountId,

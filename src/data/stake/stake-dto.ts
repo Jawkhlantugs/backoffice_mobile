@@ -1,4 +1,9 @@
-import type { StakeAsset, StakeContract, UserStake } from './stake-model'
+import type {
+  StakeAsset,
+  StakeContract,
+  StakeStatistics,
+  UserStake,
+} from './stake-model'
 
 export type UserStakeDto = {
   id: string
@@ -92,5 +97,36 @@ export function toStakeContract(dto: StakeContractDto): StakeContract {
     status: dto.status,
     isEnabled: dto.isEnabled === 1,
     cancelPolicies: dto.cancelPolicies ?? [],
+  }
+}
+
+export type StakeStatisticsDto = {
+  total?: number
+  general?: { active?: number; failed?: number }
+  status?: Record<string, number | undefined>
+}
+
+/** Вэбийн графикийн дараалал — тоо 0 байсан ч бүх статус харагдана. */
+const STATISTIC_STATUSES = [
+  'redeemable',
+  'ongoing',
+  'cancelled',
+  'redeeming',
+  'canceling',
+  'cancel_requested',
+  'cancel_requested_manual',
+  'redeem_requested',
+  'redeem_requested_manual',
+] as const
+
+export function toStakeStatistics(dto: StakeStatisticsDto): StakeStatistics {
+  return {
+    total: dto.total ?? 0,
+    active: dto.general?.active ?? 0,
+    failed: dto.general?.failed ?? 0,
+    byStatus: STATISTIC_STATUSES.map((status) => ({
+      status,
+      count: dto.status?.[status] ?? 0,
+    })),
   }
 }

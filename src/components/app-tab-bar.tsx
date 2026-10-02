@@ -68,7 +68,19 @@ export function useTabBarInset(): number {
  * зөвхөн өнгө + тод шошгоор ялгана (зураасгүй); дүрсний ард дугуй/капсул
  * тодруулга **байхгүй** (хэрэглэгчийн шийдвэр).
  */
-export function AppTabBar({ state, navigation, insets }: BottomTabBarProps) {
+export type TabName = (typeof TAB_ITEMS)[number]['name']
+
+export type AppTabBarProps = BottomTabBarProps & {
+  /** Эрхгүй таб — route guard хаасан дэлгэц рүү товч харуулахгүй. */
+  hidden?: readonly TabName[]
+}
+
+export function AppTabBar({
+  state,
+  navigation,
+  insets,
+  hidden = [],
+}: AppTabBarProps) {
   return (
     <GlassSurface
       interactive
@@ -78,7 +90,7 @@ export function AppTabBar({ state, navigation, insets }: BottomTabBarProps) {
     >
       {state.routes.map((route, index) => {
         const item = TAB_ITEMS.find((tab) => tab.name === route.name)
-        if (!item) return null
+        if (!item || hidden.includes(item.name)) return null
 
         const focused = state.index === index
 

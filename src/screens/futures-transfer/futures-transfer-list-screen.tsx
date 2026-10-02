@@ -8,7 +8,7 @@ import { useFuturesTransferRequests } from '@/hooks/use-futures-transfers'
 import { usePullRefresh } from '@/hooks/use-pull-refresh'
 import { messages } from '@/lib/messages'
 
-import { FuturesTransferCard } from './futures-transfer-card'
+import { useFuturesTransferRecord } from './use-futures-transfer-record'
 
 type StatusFilter = FuturesTransferStatus | 'ALL'
 
@@ -20,6 +20,7 @@ const statusChips = (): FilterChip<StatusFilter>[] => [
 ]
 
 export function FuturesTransferListScreen() {
+  const record = useFuturesTransferRecord()
   const router = useRouter()
   const openDrawer = useDrawerToggle()
   const [status, setStatus] = useState<StatusFilter>('ALL')
@@ -52,7 +53,7 @@ export function FuturesTransferListScreen() {
       statusChips={{ chips: statusChips(), value: status, onChange: setStatus }}
       items={items}
       keyExtractor={(item) => item.txnId}
-      renderItem={({ item }) => <FuturesTransferCard request={item} />}
+      record={record}
       loading={query.isPending}
       error={query.error}
       onRetry={() => query.refetch()}

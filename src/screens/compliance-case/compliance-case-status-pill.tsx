@@ -2,7 +2,10 @@ import { StatusPill, type StatusTone } from '@/components'
 import type { ComplianceCaseStatus } from '@/data/compliance-case/compliance-case-model'
 import { messages } from '@/lib/messages'
 
-const TONES: Record<ComplianceCaseStatus, StatusTone> = {
+export const COMPLIANCE_CASE_STATUS_TONES: Record<
+  ComplianceCaseStatus,
+  StatusTone
+> = {
   OPEN: 'warning',
   UNDER_REVIEW: 'info',
   CLOSED: 'success',
@@ -17,7 +20,7 @@ export function ComplianceCaseStatusPill({
   return (
     <StatusPill
       label={messages.complianceCases.statuses[status]}
-      tone={TONES[status]}
+      tone={COMPLIANCE_CASE_STATUS_TONES[status]}
     />
   )
 }

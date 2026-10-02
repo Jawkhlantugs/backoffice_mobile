@@ -32,7 +32,11 @@ export type SessionStatus =
 type SessionState = {
   status: SessionStatus
   user: AdminUser | null
+  /** Цэс хамгийн сүүлд татагдсан мөч — `useMenuRefresh` хуучирсныг нь шийднэ. */
+  menuLoadedAt: number
   setUser: (user: AdminUser) => void
+  /** Хүсэлт явж байхад өөр админ нэвтэрсэн бол хуучин цэсийг тавихгүй. */
+  setMenu: (userId: string, menu: AdminMenuTree) => void
   /** Апп асахад: профайл ба түгжээний төлөвийг нэг дор тавина. */
   restore: (user: AdminUser, locked: boolean) => void
   setStatus: (status: SessionStatus) => void
@@ -45,9 +49,21 @@ type SessionState = {
 export const useSessionStore = create<SessionState>((set) => ({
   status: 'loading',
   user: null,
-  setUser: (user) => set({ user, status: 'signedIn' }),
+  menuLoadedAt: 0,
+  setUser: (user) =>
+    set({ user, status: 'signedIn', menuLoadedAt: Date.now() }),
+  setMenu: (userId, menu) =>
+    set((state) =>
+      state.user?.id === userId
+        ? { user: { ...state.user, menu }, menuLoadedAt: Date.now() }
+        : state,
+    ),
   restore: (user, locked) =>
-    set({ user, status: locked ? 'locked' : 'signedIn' }),
+    set({
+      user,
+      status: locked ? 'locked' : 'signedIn',
+      menuLoadedAt: Date.now(),
+    }),
   setStatus: (status) => set({ status }),
   lock: () => set((state) => (state.user ? { status: 'locked' } : state)),
   unlock: () => set((state) => (state.user ? { status: 'signedIn' } : state)),

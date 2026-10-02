@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { SpotSymbol } from '@/data/spot/spot-model'
 import { useSpotSymbols } from '@/hooks/use-spot'
 import { messages } from '@/lib/messages'
@@ -25,12 +25,12 @@ export function SpotSymbolListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(item: SpotSymbol): React.ComponentProps<typeof RecordCard> {
+function toCard(item: SpotSymbol): RecordView {
   return {
     title: item.symbol,
     subtitle: `${item.baseAsset} / ${item.quoteAsset}`,

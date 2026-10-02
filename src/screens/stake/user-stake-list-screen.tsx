@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import {
   nextManualStatus,
   USER_STAKE_STATUSES,
@@ -26,7 +26,7 @@ export function UserStakeListScreen() {
   const list = useUserStakes(search, status === ALL ? undefined : status)
   const change = useChangeUserStakeStatus()
 
-  function toCard(item: UserStake): React.ComponentProps<typeof RecordCard> {
+  function toCard(item: UserStake): RecordView {
     const next = nextManualStatus(item.stakeStatus)
     return {
       title: item.uid ?? item.id,
@@ -92,7 +92,7 @@ export function UserStakeListScreen() {
         value: status,
         onChange: setStatus,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }

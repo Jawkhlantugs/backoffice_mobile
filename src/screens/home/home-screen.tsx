@@ -20,6 +20,7 @@ import { useDemoStore } from '@/core/demo/demo-mode'
 import { LEAVE_MENU_PATH } from '@/core/navigation/menu-items'
 import { hasMenuPath } from '@/core/navigation/menu-view'
 import { useDrawerToggle } from '@/core/navigation/use-drawer-toggle'
+import { isOfficePrivileged } from '@/core/session/privileges'
 import { useSessionStore } from '@/core/session/session-store'
 import { useAdminMenu } from '@/hooks/use-admin-menu'
 import { useLeaveRequests } from '@/hooks/use-leave-requests'
@@ -57,16 +58,24 @@ export function HomeScreen() {
   const { colors } = useAppColors()
 
   const canUseLeave = user ? hasMenuPath(user.menu, LEAVE_MENU_PATH) : false
+  const canReview = canUseLeave && isOfficePrivileged(user)
 
-  const review = useLeaveRequests({ status: 'PENDING', enabled: canUseLeave })
+  const review = useLeaveRequests({ status: 'PENDING', enabled: canReview })
   const mine = useLeaveRequests({ adminUserId: user?.id, enabled: canUseLeave })
 
   const reviewItems = review.data?.items ?? []
   const myItems = mine.data?.items ?? []
+  // Батлах эрхгүй ажилтанд бусдын хүсэлт биш, өөрийнх нь сүүлийн хүсэлтүүд.
+  const recent = canReview ? review : mine
+  const recentItems = canReview ? reviewItems : myItems
 
   const tabBarInset = useTabBarInset()
+  // `refetch` нь `enabled: false`-г үл тоодог — эрхгүй query-г татахгүй.
   const refresh = usePullRefresh(() =>
-    Promise.all([review.refetch(), mine.refetch()]),
+    Promise.all([
+      canReview ? review.refetch() : null,
+      canUseLeave ? mine.refetch() : null,
+    ]),
   )
 
   return (
@@ -104,13 +113,15 @@ export function HomeScreen() {
             <SectionHeader title={messages.home.myWork} />
 
             <View className="flex-row gap-3">
-              <StatCard
-                label={messages.home.pendingLeave}
-                value={reviewItems.length}
-                icon="leave"
-                loading={review.isPending}
-                onPress={() => router.push('/leave')}
-              />
+              {canReview ? (
+                <StatCard
+                  label={messages.home.pendingLeave}
+                  value={reviewItems.length}
+                  icon="leave"
+                  loading={review.isPending}
+                  onPress={() => router.push('/leave')}
+                />
+              ) : null}
               <StatCard
                 label={messages.home.myLeave}
                 value={myItems.length}
@@ -172,16 +183,20 @@ export function HomeScreen() {
             />
 
             <StateView
-              loading={review.isPending}
-              error={review.error}
-              isEmpty={reviewItems.length === 0}
+              loading={recent.isPending}
+              error={recent.error}
+              isEmpty={recentItems.length === 0}
               emptyIcon="checkCircle"
-              emptyLabel={messages.home.noPending}
-              emptyHint={messages.home.noPendingHint}
-              onRetry={() => review.refetch()}
+              emptyLabel={
+                canReview ? messages.home.noPending : messages.home.noMine
+              }
+              emptyHint={
+                canReview ? messages.home.noPendingHint : messages.home.noMineHint
+              }
+              onRetry={() => recent.refetch()}
             >
               <View className="gap-3">
-                {reviewItems.slice(0, RECENT_LIMIT).map((item) => (
+                {recentItems.slice(0, RECENT_LIMIT).map((item) => (
                   <LeaveRequestCard
                     key={item.id}
                     request={item}

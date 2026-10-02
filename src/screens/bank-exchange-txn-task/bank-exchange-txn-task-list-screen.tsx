@@ -4,7 +4,7 @@ import { PagedListScreen } from '@/components'
 import { useBankExchangeTxnTasks } from '@/hooks/use-bank-exchange-txn-task'
 import { messages } from '@/lib/messages'
 
-import { BankExchangeTxnTaskCard } from './bank-exchange-txn-task-card'
+import { bankExchangeTxnTaskRecord } from './bank-exchange-txn-task-record'
 
 export function BankExchangeTxnTaskListScreen() {
   const [search, setSearch] = useState('')
@@ -23,7 +23,7 @@ export function BankExchangeTxnTaskListScreen() {
         onChange: setSearch,
         placeholder: messages.finance.searchPlaceholder,
       }}
-      renderItem={({ item }) => <BankExchangeTxnTaskCard task={item} />}
+      record={bankExchangeTxnTaskRecord}
     />
   )
 }

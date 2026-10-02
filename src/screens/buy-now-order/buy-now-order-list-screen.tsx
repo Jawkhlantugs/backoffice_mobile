@@ -4,9 +4,10 @@ import { PagedListScreen } from '@/components'
 import { useBuyNowOrders } from '@/hooks/use-buy-now-orders'
 import { messages } from '@/lib/messages'
 
-import { BuyNowOrderCard } from './buy-now-order-card'
+import { useBuyNowOrderRecord } from './use-buy-now-order-record'
 
 export function BuyNowOrderListScreen() {
+  const record = useBuyNowOrderRecord()
   const [search, setSearch] = useState('')
   const list = useBuyNowOrders({ search })
 
@@ -23,7 +24,7 @@ export function BuyNowOrderListScreen() {
         onChange: setSearch,
         placeholder: messages.finance.searchPlaceholder,
       }}
-      renderItem={({ item }) => <BuyNowOrderCard order={item} />}
+      record={record}
     />
   )
 }

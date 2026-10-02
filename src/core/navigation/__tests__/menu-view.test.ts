@@ -56,15 +56,17 @@ describe('buildMenu', () => {
     const portal = buildMenu(toMenuTree(payload), 'portal', options)
 
     expect(office.groups[0]?.entries[0]?.route).toBe('/leave')
-    expect(portal.groups[1]?.entries[0]?.route).toBeNull()
+    expect(portal.groups[1]?.entries[0]?.route).toBe('/dashboard')
+    // `/portal`-гүй хуучин зам — mobile-д бүртгэлгүй.
+    expect(portal.groups[0]?.entries[0]?.children[0]?.route).toBeNull()
   })
 
   it('дэд мөрийг тоолж, бэлэн байгааг нь тусад нь хэлнэ', () => {
     const portal = buildMenu(toMenuTree(payload), 'portal', options)
 
-    // Tickets, Macros, Dashboard — гурвуулаа mobile дээр хараахан байхгүй.
+    // Tickets, Macros (`/portal`-гүй зам) бэлэн биш, Dashboard бэлэн.
     expect(portal.total).toBe(3)
-    expect(portal.ready).toBe(0)
+    expect(portal.ready).toBe(1)
 
     const office = buildMenu(toMenuTree(payload), 'office', options)
     expect(office).toMatchObject({ total: 1, ready: 1 })

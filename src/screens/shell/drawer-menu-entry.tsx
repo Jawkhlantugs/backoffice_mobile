@@ -7,6 +7,9 @@ import { cn } from '@/lib/cn'
 import { messages } from '@/lib/messages'
 import { iconSize } from '@/theme/tokens'
 
+import { Collapsible } from './collapsible'
+import { ExpandChevron } from './expand-chevron'
+
 /**
  * Drawer-ийн нэг мөр. Дэд цэстэй бол вэбийн sidebar шиг задарна — эцэг мөр
  * өөрөө хуудас биш, зөвхөн бүлэг.
@@ -45,15 +48,11 @@ export function DrawerMenuEntry({
         <AppText variant="body" numberOfLines={1} className="flex-1">
           {entry.label}
         </AppText>
-        <AppIcon
-          name={open ? 'collapse' : 'expand'}
-          size={iconSize.sm}
-          tone="muted"
-        />
+        <ExpandChevron open={open} />
       </Pressable>
 
       {/* Дэд мөрүүд зүүн талын нарийн шугамаар эцэгтэйгээ холбогдоно. */}
-      {open ? (
+      <Collapsible open={open}>
         <View className="ml-6 border-l border-border pl-1">
           {entry.children.map((child) => (
             <DrawerRow
@@ -65,7 +64,7 @@ export function DrawerMenuEntry({
             />
           ))}
         </View>
-      ) : null}
+      </Collapsible>
     </View>
   )
 }

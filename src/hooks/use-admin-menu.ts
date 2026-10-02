@@ -9,8 +9,10 @@ import { useTeamStore } from '@/core/navigation/team-store'
 import {
   buildMenu,
   countByTeam,
+  hasMenuPath,
   type MenuView,
 } from '@/core/navigation/menu-view'
+import { canOpenRoute } from '@/core/navigation/route-access'
 import type { AdminMenuTree } from '@/data/auth/admin-menu-dto'
 import { messages } from '@/lib/messages'
 
@@ -61,4 +63,17 @@ export function useAdminMenu(query = ''): AdminMenuState {
   })
 
   return { ...view, teams, activeTeam, activeTeamInfo, selectTeam }
+}
+
+/** Route guard ба таб bar хоёр нэг дүрмээр шийднэ (`core/navigation/route-access.ts`). */
+export function useRouteAccess(): (routeName: string) => boolean {
+  const tree = useSessionStore((store) => store.user?.menu) ?? EMPTY_TREE
+
+  return (routeName) =>
+    canOpenRoute(tree, routeName, { allowDevRoutes: __DEV__ })
+}
+
+export function useHasMenuPath(path: string): boolean {
+  const tree = useSessionStore((store) => store.user?.menu) ?? EMPTY_TREE
+  return hasMenuPath(tree, path)
 }

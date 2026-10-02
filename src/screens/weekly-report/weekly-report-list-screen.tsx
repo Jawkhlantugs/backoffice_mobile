@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router'
 import {
   FilterChips,
   PagedListScreen,
-  RecordCard,
+  type RecordView,
   SegmentedControl,
   SelectField,
 } from '@/components'
@@ -127,22 +127,19 @@ export function WeeklyReportListScreen() {
       ]}
       search={inDepartment ? undefined : { value: search, onChange: setSearch }}
       filters={filters}
-      renderItem={({ item }) => (
-        <RecordCard
-          {...toCard(item)}
-          onPress={() =>
-            router.push({
-              pathname: '/office/weekly-reports/[id]',
-              params: { id: item.id },
-            })
-          }
-        />
-      )}
+      record={(item) => ({
+        ...toCard(item),
+        onPress: () =>
+          router.push({
+            pathname: '/office/weekly-reports/[id]',
+            params: { id: item.id },
+          }),
+      })}
     />
   )
 }
 
-function toCard(item: WeeklyReport): React.ComponentProps<typeof RecordCard> {
+function toCard(item: WeeklyReport): RecordView {
   const f = text.fields
   return {
     title: item.title,

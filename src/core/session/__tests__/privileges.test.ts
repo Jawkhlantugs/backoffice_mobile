@@ -1,4 +1,4 @@
-import { isOfficePrivileged } from '../privileges'
+import { isOfficePrivileged, isSuperAdmin } from '../privileges'
 
 const base = { id: '1', email: 'a@x.mn', menu: { teams: [] } as never }
 
@@ -12,5 +12,14 @@ describe('isOfficePrivileged', () => {
       false,
     )
     expect(isOfficePrivileged(null)).toBe(false)
+  })
+})
+
+describe('isSuperAdmin', () => {
+  it('группын id 4 эсвэл Super Admin — Directors биш', () => {
+    expect(isSuperAdmin({ ...base, adminGroupId: '4' })).toBe(true)
+    expect(isSuperAdmin({ ...base, adminGroupName: 'Super Admin' })).toBe(true)
+    expect(isSuperAdmin({ ...base, adminGroupName: 'Directors' })).toBe(false)
+    expect(isSuperAdmin(undefined)).toBe(false)
   })
 })

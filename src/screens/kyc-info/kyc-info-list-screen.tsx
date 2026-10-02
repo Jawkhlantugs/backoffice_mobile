@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { KycInfo } from '@/data/kyc-info/kyc-info-model'
 import { useKycInfos } from '@/hooks/use-kyc-info'
 import { formatDate } from '@/lib/date'
@@ -26,12 +26,12 @@ export function KycInfoListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(item: KycInfo): React.ComponentProps<typeof RecordCard> {
+function toCard(item: KycInfo): RecordView {
   const status = item.kycStatus ?? item.verificationStatus
   const flag = (value: boolean) => (value ? text.yes : text.no)
   return {

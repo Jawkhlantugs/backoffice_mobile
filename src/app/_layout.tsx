@@ -8,12 +8,14 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { adminRepository } from '@/data/auth/admin-repository'
+import { useMenuRefresh } from '@/hooks/use-menu-refresh'
 import { configureAmplify } from '@/core/config/amplify'
 import { assertEnvReady } from '@/core/config/env'
 import { queryClient } from '@/core/query/query-client'
 import { useAppLock } from '@/core/session/use-app-lock'
 import { useSessionStore } from '@/core/session/session-store'
 import { useThemeStore } from '@/theme/theme-preference'
+import { useListViewStore } from '@/core/ui/list-view-store'
 import { AppLoader, AppText, Screen, ToastHost } from '@/components'
 import { biometricService } from '@/services/biometric/biometric-service'
 import { cognitoAuth } from '@/services/auth/cognito-auth-service'
@@ -22,6 +24,7 @@ import { messages, useLanguageStore } from '@/lib/messages'
 import { useAppColors } from '@/theme/use-theme'
 
 import { LockScreen } from '@/screens/lock-screen'
+import { RouteGuard } from '@/screens/shell/route-guard'
 import { SignInScreen } from '@/screens/sign-in-screen'
 
 /**
@@ -39,14 +42,16 @@ export default function RootLayout() {
   const restoreTheme = useThemeStore((store) => store.restore)
   const language = useLanguageStore((store) => store.language)
   const restoreLanguage = useLanguageStore((store) => store.restore)
+  const restoreListView = useListViewStore((store) => store.restore)
 
   useAppLock()
+  useMenuRefresh()
 
   useEffect(() => {
     async function boot() {
       // Theme, хэлийг хамгийн түрүүнд — эс бөгөөс анхны кадр өөр өнгө, хэлээр
       // анивчина.
-      await Promise.all([restoreTheme(), restoreLanguage()])
+      await Promise.all([restoreTheme(), restoreLanguage(), restoreListView()])
 
       try {
         assertEnvReady()
@@ -76,7 +81,14 @@ export default function RootLayout() {
     }
 
     void boot()
-  }, [restore, restoreLanguage, restoreTheme, setStatus, signOut])
+  }, [
+    restore,
+    restoreLanguage,
+    restoreListView,
+    restoreTheme,
+    setStatus,
+    signOut,
+  ])
 
   if (fatal) {
     return (
@@ -110,7 +122,12 @@ export default function RootLayout() {
             ) : status === 'signedOut' ? (
               <SignInScreen />
             ) : (
-              <Stack screenOptions={{ headerShown: false }} />
+              <Stack
+                screenOptions={{ headerShown: false }}
+                screenLayout={({ route, children }) => (
+                  <RouteGuard routeName={route.name}>{children}</RouteGuard>
+                )}
+              />
             )}
           </Fragment>
           <ToastHost />

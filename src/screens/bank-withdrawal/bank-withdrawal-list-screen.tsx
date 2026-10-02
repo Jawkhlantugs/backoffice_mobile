@@ -4,9 +4,10 @@ import { PagedListScreen } from '@/components'
 import { useBankWithdrawals } from '@/hooks/use-bank-withdrawals'
 import { messages } from '@/lib/messages'
 
-import { BankWithdrawalCard } from './bank-withdrawal-card'
+import { useBankWithdrawalRecord } from './use-bank-withdrawal-record'
 
 export function BankWithdrawalListScreen() {
+  const record = useBankWithdrawalRecord()
   const [search, setSearch] = useState('')
   const list = useBankWithdrawals({ search })
 
@@ -23,7 +24,7 @@ export function BankWithdrawalListScreen() {
         onChange: setSearch,
         placeholder: messages.finance.searchPlaceholder,
       }}
-      renderItem={({ item }) => <BankWithdrawalCard withdrawal={item} />}
+      record={record}
     />
   )
 }

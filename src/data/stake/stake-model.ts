@@ -68,3 +68,11 @@ export type StakeContract = {
   isEnabled: boolean
   cancelPolicies: { fromDay: number; toDay: number; apr: number }[]
 }
+
+/** `stake.types.ts`-ийн `TotalUsersStakesInfo` — статус бүрийн тоо. */
+export type StakeStatistics = {
+  total: number
+  active: number
+  failed: number
+  byStatus: readonly { status: string; count: number }[]
+}

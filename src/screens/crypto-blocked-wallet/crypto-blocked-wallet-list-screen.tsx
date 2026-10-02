@@ -5,7 +5,7 @@ import { PagedListScreen } from '@/components'
 import { useCryptoBlockedWallets } from '@/hooks/use-crypto-blocked-wallets'
 import { messages } from '@/lib/messages'
 
-import { CryptoBlockedWalletCard } from './crypto-blocked-wallet-card'
+import { cryptoBlockedWalletRecord } from './crypto-blocked-wallet-record'
 
 export function CryptoBlockedWalletListScreen() {
   const router = useRouter()
@@ -32,7 +32,7 @@ export function CryptoBlockedWalletListScreen() {
         onChange: setSearch,
         placeholder: messages.finance.searchPlaceholder,
       }}
-      renderItem={({ item }) => <CryptoBlockedWalletCard wallet={item} />}
+      record={cryptoBlockedWalletRecord}
     />
   )
 }

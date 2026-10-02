@@ -1,6 +1,10 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard, type RecordField } from '@/components'
+import {
+  PagedListScreen,
+  type RecordField,
+  type RecordView,
+} from '@/components'
 import type {
   BalanceSnapshot,
   SnapshotBalance,
@@ -27,7 +31,7 @@ export function BalanceSnapshotListScreen() {
         onChange: setSearch,
         placeholder: text.subAccountPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
@@ -43,9 +47,7 @@ function balanceRows(
   }))
 }
 
-function toCard(
-  item: BalanceSnapshot,
-): React.ComponentProps<typeof RecordCard> {
+function toCard(item: BalanceSnapshot): RecordView {
   return {
     title: item.user ?? item.subAccountId,
     subtitle: `${item.date} · ${item.subAccountId}`,

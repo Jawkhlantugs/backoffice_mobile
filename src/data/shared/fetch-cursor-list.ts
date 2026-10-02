@@ -10,6 +10,8 @@ import { decodeCursor, encodeCursor } from './cursor'
 
 type CursorListData<Dto> = {
   list?: Dto[]
+  /** Content service (footer menu, page) `items` гэж буцаадаг. */
+  items?: Dto[]
   total?: number
   lastEvaluatedKey?: unknown
 } | null
@@ -34,7 +36,7 @@ export async function fetchCursorList<Dto, Model>(
   })
   const data = unwrap<CursorListData<Dto>>(response.data)
   return {
-    items: (data?.list ?? []).map(toModel),
+    items: (data?.list ?? data?.items ?? []).map(toModel),
     total: data?.total,
     lastEvaluatedKey: encodeCursor(data?.lastEvaluatedKey),
   }

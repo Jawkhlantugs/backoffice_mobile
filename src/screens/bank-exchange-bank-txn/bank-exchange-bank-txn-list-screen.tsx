@@ -4,9 +4,10 @@ import { PagedListScreen } from '@/components'
 import { useBankExchangeBankTxns } from '@/hooks/use-bank-exchange-bank-txn'
 import { messages } from '@/lib/messages'
 
-import { BankExchangeBankTxnCard } from './bank-exchange-bank-txn-card'
+import { useBankExchangeBankTxnRecord } from './use-bank-exchange-bank-txn-record'
 
 export function BankExchangeBankTxnListScreen() {
+  const record = useBankExchangeBankTxnRecord()
   const [search, setSearch] = useState('')
   const list = useBankExchangeBankTxns({ search })
 
@@ -23,7 +24,7 @@ export function BankExchangeBankTxnListScreen() {
         onChange: setSearch,
         placeholder: messages.finance.searchPlaceholder,
       }}
-      renderItem={({ item }) => <BankExchangeBankTxnCard txn={item} />}
+      record={record}
     />
   )
 }

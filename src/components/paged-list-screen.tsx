@@ -1,7 +1,6 @@
-import { View, type ListRenderItemInfo } from 'react-native'
-import { useRouter } from 'expo-router'
+import { View } from 'react-native'
 
-import { useDrawerToggle } from '@/core/navigation/use-drawer-toggle'
+import { useScreenLeading } from '@/core/navigation/use-screen-leading'
 import type { PagedList } from '@/hooks/use-paged-list'
 import { usePullRefresh } from '@/hooks/use-pull-refresh'
 import { messages } from '@/lib/messages'
@@ -11,18 +10,20 @@ import type { HeaderAction } from './app-header'
 import type { AppIconName } from './app-icon'
 import type { FilterChip } from './filter-chips'
 import { RecordListScreen } from './record-list-screen'
+import type { RecordView } from './record-view'
 
 /**
  * Хуудасласан жагсаалтын бүтэн дэлгэц — drawer/буцах, шинэчлэх, хайлт,
- * статус чип, доош гүйлгэхэд дараагийн хуудас бүгд дотроо. Дэлгэц нь зөвхөн
- * гарчиг, hook, картаа өгнө.
+ * статус чип, карт ⇄ хүснэгт, доош гүйлгэхэд дараагийн хуудас бүгд дотроо.
+ * Дэлгэц нь зөвхөн гарчиг, hook, `item → RecordView` функцээ өгнө.
  */
 export function PagedListScreen<T, S extends string = string>({
   title,
   subtitle,
   list,
   keyExtractor,
-  renderItem,
+  record,
+  tableLabels,
   emptyIcon,
   emptyLabel = messages.common.empty,
   search,
@@ -34,7 +35,8 @@ export function PagedListScreen<T, S extends string = string>({
   subtitle?: string
   list: PagedList<T>
   keyExtractor: (item: T) => string
-  renderItem: (info: ListRenderItemInfo<T>) => React.ReactElement
+  record: (item: T) => RecordView
+  tableLabels?: { title?: string; amount?: string }
   emptyIcon: AppIconName
   emptyLabel?: string
   search?: {
@@ -51,8 +53,7 @@ export function PagedListScreen<T, S extends string = string>({
   /** Хайлтын доор харагдах нэмэлт шүүлтүүр (segment, сонголт). */
   filters?: React.ReactNode
 }) {
-  const router = useRouter()
-  const openDrawer = useDrawerToggle()
+  const leading = useScreenLeading()
   const refresh = usePullRefresh(() => list.refetch())
 
   const count =
@@ -64,15 +65,7 @@ export function PagedListScreen<T, S extends string = string>({
     <RecordListScreen
       title={title}
       subtitle={[subtitle, count].filter(Boolean).join(' · ') || undefined}
-      leading={
-        openDrawer
-          ? { icon: 'menu', label: messages.nav.openMenu, onPress: openDrawer }
-          : {
-              icon: 'back',
-              label: messages.nav.back,
-              onPress: () => router.back(),
-            }
-      }
+      leading={leading}
       headerActions={[
         ...headerActions,
         {
@@ -86,7 +79,8 @@ export function PagedListScreen<T, S extends string = string>({
       filters={filters}
       items={list.items}
       keyExtractor={keyExtractor}
-      renderItem={renderItem}
+      record={record}
+      tableLabels={tableLabels}
       loading={list.isPending}
       error={list.error}
       onRetry={() => list.refetch()}

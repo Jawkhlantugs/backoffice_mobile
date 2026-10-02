@@ -1,4 +1,4 @@
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { StakeAsset } from '@/data/stake/stake-model'
 import { useStakeAssets } from '@/hooks/use-stake'
 import { formatDate } from '@/lib/date'
@@ -17,12 +17,12 @@ export function StakeAssetListScreen() {
       list={list}
       keyExtractor={(item) => item.asset}
       emptyIcon="stake"
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(item: StakeAsset): React.ComponentProps<typeof RecordCard> {
+function toCard(item: StakeAsset): RecordView {
   return {
     title: item.asset,
     subtitle: item.title,

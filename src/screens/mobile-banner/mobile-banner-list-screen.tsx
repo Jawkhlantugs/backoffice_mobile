@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useRouter } from 'expo-router'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import {
   BANNER_TYPES,
   type BannerType,
@@ -41,22 +41,19 @@ export function MobileBannerListScreen() {
         value: type,
         onChange: setType,
       }}
-      renderItem={({ item }) => (
-        <RecordCard
-          {...toCard(item)}
-          onPress={() =>
-            router.push({
-              pathname: '/mobile/banners/[id]',
-              params: { id: item.id },
-            })
-          }
-        />
-      )}
+      record={(item) => ({
+        ...toCard(item),
+        onPress: () =>
+          router.push({
+            pathname: '/mobile/banners/[id]',
+            params: { id: item.id },
+          }),
+      })}
     />
   )
 }
 
-function toCard(item: MobileBanner): React.ComponentProps<typeof RecordCard> {
+function toCard(item: MobileBanner): RecordView {
   const f = text.fields
   return {
     title: item.titleMn || item.titleEn,

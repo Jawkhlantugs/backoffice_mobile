@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { DelistedTransfer } from '@/data/crypto-registry/crypto-registry-model'
 import { useDelistedTransfers } from '@/hooks/use-crypto-registry'
 import { formatDate } from '@/lib/date'
@@ -26,14 +26,12 @@ export function CryptoDelistedTransferListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(
-  item: DelistedTransfer,
-): React.ComponentProps<typeof RecordCard> {
+function toCard(item: DelistedTransfer): RecordView {
   return {
     title: item.owner ?? item.id,
     subtitle: formatDate(item.createdAt),

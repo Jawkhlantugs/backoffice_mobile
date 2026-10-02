@@ -1,6 +1,7 @@
 import { create, isAxiosError, type AxiosInstance } from 'axios'
 
 import { api } from '@/core/config/api'
+import { AppErrors } from '@/core/errors/app-exception'
 import { demoAdapter } from '@/core/demo/demo-adapter'
 import { demoMode } from '@/core/demo/demo-mode'
 import { sessionActions } from '@/core/session/session-store'
@@ -115,6 +116,9 @@ const cache = new Map<string, AxiosInstance>()
 
 function client(name: keyof typeof api): AxiosInstance {
   const baseURL = api[name] as string
+  if (!baseURL) {
+    throw AppErrors.validation(`${name} API тохируулаагүй (.env.local)`)
+  }
   let instance = cache.get(baseURL)
   if (!instance) {
     instance = createClient(baseURL)
@@ -167,5 +171,21 @@ export const clients = {
   /** Bank withdraw v2 — өөр origin дээр (`{origin}/v2/withdraw`). */
   get bankV2() {
     return client('bankV2')
+  },
+  /** Reward hub — welcome task, хэрэглэгчийн явц, шагналын гүйлгээ. */
+  get rewardHub() {
+    return client('rewardHub')
+  },
+  /** News — мэдээ (зөвхөн унших). */
+  get news() {
+    return client('news')
+  },
+  /** Crystal intelligence — backoffice host дээр. */
+  get crystal() {
+    return client('crystal')
+  },
+  /** Partner affiliate API — тусдаа host, `EXPO_PUBLIC_PARTNER_API_URL`. */
+  get partner() {
+    return client('partner')
   },
 }

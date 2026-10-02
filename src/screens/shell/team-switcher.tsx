@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 
-import { AppIcon, AppText, Badge } from '@/components'
+import { AppText, Badge } from '@/components'
 import type { TeamOption } from '@/hooks/use-admin-menu'
 import { cn } from '@/lib/cn'
 import { messages } from '@/lib/messages'
-import { iconSize } from '@/theme/tokens'
+
+import { Collapsible } from './collapsible'
+import { ExpandChevron } from './expand-chevron'
 
 /**
  * Вэб админы sidebar-ийн дээд талын баг сонгогч (`team-switcher.tsx`).
@@ -26,7 +28,7 @@ export function TeamSwitcher({
   const active = teams.find((team) => team.key === activeTeam)
 
   return (
-    <View className="gap-1">
+    <View>
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
@@ -52,15 +54,12 @@ export function TeamSwitcher({
           </AppText>
         </View>
 
-        <AppIcon
-          name={open ? 'collapse' : 'expand'}
-          size={iconSize.sm}
-          tone="muted"
-        />
+        <ExpandChevron open={open} />
       </Pressable>
 
-      {open
-        ? teams.map((team) => (
+      <Collapsible open={open}>
+        <View className="gap-1 pt-1">
+          {teams.map((team) => (
             <TeamRow
               key={team.key}
               team={team}
@@ -70,8 +69,9 @@ export function TeamSwitcher({
                 setOpen(false)
               }}
             />
-          ))
-        : null}
+          ))}
+        </View>
+      </Collapsible>
     </View>
   )
 }
@@ -120,10 +120,6 @@ function TeamRow({
       ) : (
         <AppText variant="tiny">{messages.nav.teamNoAccess}</AppText>
       )}
-
-      {active ? (
-        <AppIcon name="check" size={iconSize.sm} tone="default" />
-      ) : null}
     </Pressable>
   )
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { BalanceTransaction } from '@/data/bank-account/bank-account-model'
 import { useBalanceTransactions } from '@/hooks/use-bank-accounts'
 import { formatDate } from '@/lib/date'
@@ -25,14 +25,12 @@ export function BankBalanceTransactionListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(
-  item: BalanceTransaction,
-): React.ComponentProps<typeof RecordCard> {
+function toCard(item: BalanceTransaction): RecordView {
   return {
     title: item.owner ?? item.subAccountId,
     subtitle: [item.type, formatDate(item.createdAt)]

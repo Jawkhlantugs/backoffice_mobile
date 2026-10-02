@@ -12,6 +12,8 @@ import {
   Screen,
   StateView,
 } from '@/components'
+import { isOfficePrivileged } from '@/core/session/privileges'
+import { useSessionStore } from '@/core/session/session-store'
 import type { LeaveRequest } from '@/data/leave-request/leave-request-model'
 import {
   useLeaveRequest,
@@ -40,6 +42,7 @@ export function LeaveDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const query = useLeaveRequest(id ?? '')
   const review = useReviewLeaveRequest()
+  const canReview = isOfficePrivileged(useSessionStore((store) => store.user))
   const [decision, setDecision] = useState<Decision | null>(null)
 
   const request = query.data
@@ -120,7 +123,7 @@ export function LeaveDetailScreen() {
 
               {/* Шийдвэрлэсэн хүсэлтэд товч харуулахгүй — API дахин
                   шийдвэрлэхийг зөвшөөрдөггүй. */}
-              {request.status === 'PENDING' ? (
+              {canReview && request.status === 'PENDING' ? (
                 <View className="gap-2">
                   <AppButton
                     label={messages.leave.approve}

@@ -14,6 +14,7 @@ import {
 } from '@/components'
 import type { LeaveStatus } from '@/data/leave-request/leave-request-model'
 import { useDrawerToggle } from '@/core/navigation/use-drawer-toggle'
+import { isOfficePrivileged } from '@/core/session/privileges'
 import { useSessionStore } from '@/core/session/session-store'
 import { useLeaveRequests } from '@/hooks/use-leave-requests'
 import { usePullRefresh } from '@/hooks/use-pull-refresh'
@@ -38,13 +39,15 @@ export function LeaveListScreen() {
   const tabBarInset = useTabBarInset()
   const router = useRouter()
   const openDrawer = useDrawerToggle()
-  const userId = useSessionStore((store) => store.user?.id)
+  const user = useSessionStore((store) => store.user)
+  const canReview = isOfficePrivileged(user)
   const [scope, setScope] = useState<Scope>('review')
   const [status, setStatus] = useState<StatusFilter>('PENDING')
+  const activeScope: Scope = canReview ? scope : 'mine'
 
   const query = useLeaveRequests({
     status: status === 'ALL' ? undefined : status,
-    adminUserId: scope === 'mine' ? userId : undefined,
+    adminUserId: activeScope === 'mine' ? user?.id : undefined,
   })
 
   const items = query.data?.items ?? []
@@ -74,14 +77,20 @@ export function LeaveListScreen() {
       />
 
       <View className="gap-3 pb-3">
-        <SegmentedControl<Scope>
-          value={scope}
-          onChange={setScope}
-          options={[
-            { value: 'review', label: messages.leave.toReview, icon: 'check' },
-            { value: 'mine', label: messages.leave.mine, icon: 'profile' },
-          ]}
-        />
+        {canReview ? (
+          <SegmentedControl<Scope>
+            value={scope}
+            onChange={setScope}
+            options={[
+              {
+                value: 'review',
+                label: messages.leave.toReview,
+                icon: 'check',
+              },
+              { value: 'mine', label: messages.leave.mine, icon: 'profile' },
+            ]}
+          />
+        ) : null}
 
         <FilterChips
           chips={statusChips()}

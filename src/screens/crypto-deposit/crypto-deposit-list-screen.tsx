@@ -4,7 +4,7 @@ import { PagedListScreen } from '@/components'
 import { useCryptoDeposits } from '@/hooks/use-crypto-deposits'
 import { messages } from '@/lib/messages'
 
-import { CryptoDepositCard } from './crypto-deposit-card'
+import { cryptoDepositRecord } from './crypto-deposit-record'
 
 export function CryptoDepositListScreen({
   isOperation,
@@ -30,7 +30,7 @@ export function CryptoDepositListScreen({
         onChange: setSearch,
         placeholder: messages.finance.searchPlaceholder,
       }}
-      renderItem={({ item }) => <CryptoDepositCard deposit={item} />}
+      record={cryptoDepositRecord}
     />
   )
 }

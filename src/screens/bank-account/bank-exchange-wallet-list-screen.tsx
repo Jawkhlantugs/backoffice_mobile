@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { ExchangeBankWallet } from '@/data/bank-account/bank-account-model'
 import { useExchangeBankWallets } from '@/hooks/use-bank-accounts'
 import { messages } from '@/lib/messages'
@@ -25,14 +25,12 @@ export function BankExchangeWalletListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(
-  item: ExchangeBankWallet,
-): React.ComponentProps<typeof RecordCard> {
+function toCard(item: ExchangeBankWallet): RecordView {
   return {
     title: item.accountName ?? item.accountNumber ?? item.id,
     subtitle: [item.bankCode, item.accountNumber].filter(Boolean).join(' · '),

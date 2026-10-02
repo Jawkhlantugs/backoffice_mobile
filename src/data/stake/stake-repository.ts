@@ -1,11 +1,22 @@
 import { clients } from '@/core/network/clients'
-import type { CursorParams, ListPage } from '@/core/network/envelope'
+import {
+  unwrap,
+  type CursorParams,
+  type ListPage,
+} from '@/core/network/envelope'
 import { fetchCursorList } from '@/data/shared/fetch-cursor-list'
 
-import { toStakeAsset, toStakeContract, toUserStake } from './stake-dto'
+import {
+  toStakeAsset,
+  toStakeContract,
+  toStakeStatistics,
+  toUserStake,
+  type StakeStatisticsDto,
+} from './stake-dto'
 import type {
   StakeAsset,
   StakeContract,
+  StakeStatistics,
   UserStake,
   UserStakeStatus,
 } from './stake-model'
@@ -54,5 +65,14 @@ export const stakeRepository = {
       usersStakeId,
       status,
     })
+  },
+
+  /** Вэбийн "Stake Statistics" — `{code,msg,data}`. */
+  async statistics(): Promise<StakeStatistics | null> {
+    const response = await clients.staking.get(
+      '/admin/stake/users/total-stakes-info',
+    )
+    const data = unwrap<StakeStatisticsDto | null>(response.data)
+    return data ? toStakeStatistics(data) : null
   },
 }

@@ -15,6 +15,7 @@ import {
 import { formatMoney } from '@/core/money/format'
 import type { Money } from '@/core/money/money'
 import { toast } from '@/core/ui/toast-store'
+import { USER_TRANSFER_MENU_PATH } from '@/core/navigation/menu-items'
 import { useDrawerToggle } from '@/core/navigation/use-drawer-toggle'
 import {
   destIsUser,
@@ -28,6 +29,7 @@ import {
   type TransferField,
   type TransferFormError,
 } from '@/data/transfer/transfer-validation'
+import { useHasMenuPath } from '@/hooks/use-admin-menu'
 import {
   useOperationAccounts,
   useSendTransfer,
@@ -61,8 +63,12 @@ export function TransferScreen() {
   const router = useRouter()
   const openDrawer = useDrawerToggle()
 
+  // Вэбийн SubAccount Transfer-т MNT сонголт байхгүй (`showTransferType`) —
+  // зөвхөн тэр цэсний эрхтэй админ crypto-г л шилжүүлнэ.
+  const canTransferMnt = useHasMenuPath(USER_TRANSFER_MENU_PATH)
   const [direction, setDirection] = useState<TransferDirection>('op-to-user')
-  const [type, setType] = useState<TransferType>('mnt')
+  const [selectedType, setType] = useState<TransferType>('mnt')
+  const type: TransferType = canTransferMnt ? selectedType : 'crypto'
   const [fromAccount, setFromAccount] = useState('')
   const [toAccount, setToAccount] = useState('')
   const [assetCode, setAssetCode] = useState<string>()
@@ -173,20 +179,22 @@ export function TransferScreen() {
           />
         </View>
 
-        <View className="gap-1.5">
-          <AppText variant="label">{text.type}</AppText>
-          <SegmentedControl
-            options={(['mnt', 'crypto'] as const).map((value) => ({
-              value,
-              label: text.types[value],
-            }))}
-            value={type}
-            onChange={(next) => {
-              setType(next)
-              resetAmount()
-            }}
-          />
-        </View>
+        {canTransferMnt ? (
+          <View className="gap-1.5">
+            <AppText variant="label">{text.type}</AppText>
+            <SegmentedControl
+              options={(['mnt', 'crypto'] as const).map((value) => ({
+                value,
+                label: text.types[value],
+              }))}
+              value={type}
+              onChange={(next) => {
+                setType(next)
+                resetAmount()
+              }}
+            />
+          </View>
+        ) : null}
 
         <TransferAccountField
           label={text.from}

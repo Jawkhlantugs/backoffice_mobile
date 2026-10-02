@@ -4,9 +4,10 @@ import { PagedListScreen } from '@/components'
 import { useCryptoFailedWithdrawals } from '@/hooks/use-crypto-failed-withdrawals'
 import { messages } from '@/lib/messages'
 
-import { CryptoFailedWithdrawalCard } from './crypto-failed-withdrawal-card'
+import { useCryptoFailedWithdrawalRecord } from './use-crypto-failed-withdrawal-record'
 
 export function CryptoFailedWithdrawalListScreen() {
+  const record = useCryptoFailedWithdrawalRecord()
   const [search, setSearch] = useState('')
   const list = useCryptoFailedWithdrawals({ search })
 
@@ -23,7 +24,7 @@ export function CryptoFailedWithdrawalListScreen() {
         onChange: setSearch,
         placeholder: messages.finance.searchPlaceholder,
       }}
-      renderItem={({ item }) => <CryptoFailedWithdrawalCard item={item} />}
+      record={record}
     />
   )
 }

@@ -1,17 +1,24 @@
-import { FlatList, View, type ListRenderItemInfo } from 'react-native'
+import { FlatList, View } from 'react-native'
+
+import { useListViewStore } from '@/core/ui/list-view-store'
+import { messages } from '@/lib/messages'
 
 import { AppHeader, type HeaderAction } from './app-header'
 import type { AppIconName } from './app-icon'
+import { DataTable } from './data-table'
 import { FilterChips, type FilterChip } from './filter-chips'
+import { ListViewToolbar } from './list-view-toolbar'
+import { RecordCard } from './record-card'
+import { buildRecordTable } from './record-table'
+import type { RecordView } from './record-view'
 import { Screen } from './screen'
 import { SearchInput } from './search-input'
 import { StateView } from './state-view'
 
 /**
- * Finance домэйнуудын (order, convert, crypto, bank, buynow) жагсаалтын
- * нийтлэг бүрхүүл. Домэйн бүр endpoint, model өөр өөр тул зөвхөн UI-г
- * нийтэлж, дэлгэц бүрийг өөрийн repository/hook-той үлдээнэ (гурвын дүрэм —
- * 10+ дэлгэц ижил хэв маягтай тул shell-ийг component болгосон).
+ * Бүх жагсаалтын нийтлэг бүрхүүл. Дэлгэц зөвхөн `item → RecordView`
+ * (`record`) өгнө; түүнээс карт эсвэл хүснэгт (сонголтоор) зурагдана.
+ * Домэйн бүр endpoint, model өөр тул UI-г л нийтэлсэн.
  */
 export function RecordListScreen<T, S extends string = string>({
   title,
@@ -22,7 +29,8 @@ export function RecordListScreen<T, S extends string = string>({
   statusChips,
   items,
   keyExtractor,
-  renderItem,
+  record,
+  tableLabels,
   loading,
   error,
   onRetry,
@@ -50,8 +58,10 @@ export function RecordListScreen<T, S extends string = string>({
     onChange: (value: S) => void
   }
   items: T[]
-  keyExtractor: (item: T, index: number) => string
-  renderItem: (info: ListRenderItemInfo<T>) => React.ReactElement
+  keyExtractor: (item: T) => string
+  record: (item: T) => RecordView
+  /** Хүснэгтийн гарчиг, дүнгийн баганы нэр — анхдагч нь "Бичлэг", "Дүн". */
+  tableLabels?: { title?: string; amount?: string }
   loading: boolean
   error?: unknown
   onRetry: () => void
@@ -59,7 +69,7 @@ export function RecordListScreen<T, S extends string = string>({
   onRefresh: () => void
   emptyIcon: AppIconName
   emptyLabel: string
-  /** Хуудаслалт — жагсаалтын төгсгөлд "Дараагийн хуудас" товч гэх мэт. */
+  /** Жагсаалтын төгсгөлд — дараагийн хуудас ачаалж буй loader гэх мэт. */
   footer?: React.ReactNode
   /** Доош гүйлгэж дуусахад дараагийн хуудас. */
   onEndReached?: () => void
@@ -67,6 +77,22 @@ export function RecordListScreen<T, S extends string = string>({
   bottomInset?: number
   filters?: React.ReactNode
 }) {
+  const mode = useListViewStore((state) => state.mode)
+  const table =
+    mode === 'table'
+      ? buildRecordTable(
+          items.map((item) => ({
+            key: keyExtractor(item),
+            view: record(item),
+          })),
+          {
+            title: tableLabels?.title ?? messages.table.record,
+            status: messages.table.status,
+            amount: tableLabels?.amount ?? messages.table.amount,
+          },
+        )
+      : null
+
   return (
     <Screen edges={['top']}>
       <AppHeader
@@ -76,25 +102,24 @@ export function RecordListScreen<T, S extends string = string>({
         actions={headerActions}
       />
 
-      {search || statusChips || filters ? (
-        <View className="gap-3 pb-3">
-          {search ? (
-            <SearchInput
-              value={search.value}
-              onChangeText={search.onChange}
-              placeholder={search.placeholder}
-            />
-          ) : null}
-          {statusChips ? (
-            <FilterChips
-              chips={statusChips.chips}
-              value={statusChips.value}
-              onChange={statusChips.onChange}
-            />
-          ) : null}
-          {filters}
-        </View>
-      ) : null}
+      <View className="gap-3 pb-3">
+        {search ? (
+          <SearchInput
+            value={search.value}
+            onChangeText={search.onChange}
+            placeholder={search.placeholder}
+          />
+        ) : null}
+        {statusChips ? (
+          <FilterChips
+            chips={statusChips.chips}
+            value={statusChips.value}
+            onChange={statusChips.onChange}
+          />
+        ) : null}
+        {filters}
+        <ListViewToolbar tableId={title} columns={table?.columns} />
+      </View>
 
       <StateView
         loading={loading}
@@ -104,21 +129,33 @@ export function RecordListScreen<T, S extends string = string>({
         emptyLabel={emptyLabel}
         onRetry={onRetry}
       >
-        <FlatList
-          data={items}
-          keyExtractor={keyExtractor}
-          contentContainerClassName="gap-3 pb-8"
-          showsVerticalScrollIndicator={false}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          renderItem={renderItem}
-          ListFooterComponent={footer ? <>{footer}</> : undefined}
-          onEndReached={onEndReached}
-          onEndReachedThreshold={0.5}
-          contentContainerStyle={
-            bottomInset ? { paddingBottom: bottomInset } : undefined
-          }
-        />
+        {table ? (
+          <DataTable
+            tableId={title}
+            columns={table.columns}
+            rows={table.rows}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            onEndReached={onEndReached}
+            footer={footer}
+          />
+        ) : (
+          <FlatList
+            data={items}
+            keyExtractor={keyExtractor}
+            contentContainerClassName="gap-3 pb-8"
+            showsVerticalScrollIndicator={false}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            renderItem={({ item }) => <RecordCard {...record(item)} />}
+            ListFooterComponent={footer ? <>{footer}</> : undefined}
+            onEndReached={onEndReached}
+            onEndReachedThreshold={0.5}
+            contentContainerStyle={
+              bottomInset ? { paddingBottom: bottomInset } : undefined
+            }
+          />
+        )}
       </StateView>
     </Screen>
   )

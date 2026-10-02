@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { AdminActivity } from '@/data/admin-activity/admin-activity-model'
 import { useAdminActivities } from '@/hooks/use-admin-activity'
 import { formatDate } from '@/lib/date'
@@ -25,12 +25,12 @@ export function AdminActivityListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(item: AdminActivity): React.ComponentProps<typeof RecordCard> {
+function toCard(item: AdminActivity): RecordView {
   return {
     title: `${item.method} ${item.path}`,
     subtitle: [item.admin, formatDate(item.createdAt)]

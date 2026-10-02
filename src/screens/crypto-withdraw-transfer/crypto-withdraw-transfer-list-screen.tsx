@@ -4,7 +4,7 @@ import { PagedListScreen } from '@/components'
 import { useCryptoWithdrawTransfers } from '@/hooks/use-crypto-withdraw-transfers'
 import { messages } from '@/lib/messages'
 
-import { CryptoWithdrawTransferCard } from './crypto-withdraw-transfer-card'
+import { cryptoWithdrawTransferRecord } from './crypto-withdraw-transfer-record'
 
 export function CryptoWithdrawTransferListScreen() {
   const [search, setSearch] = useState('')
@@ -23,7 +23,7 @@ export function CryptoWithdrawTransferListScreen() {
         onChange: setSearch,
         placeholder: messages.finance.searchPlaceholder,
       }}
-      renderItem={({ item }) => <CryptoWithdrawTransferCard transfer={item} />}
+      record={cryptoWithdrawTransferRecord}
     />
   )
 }

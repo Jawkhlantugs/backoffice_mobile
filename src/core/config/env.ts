@@ -18,6 +18,14 @@ const raw = {
 }
 
 /**
+ * Заавал биш service-ууд. Байхгүй бол тухайн цэс "Вэб дээр" хэвээр үлдэнэ —
+ * апп асахад саад болохгүй (`assertEnvReady` эдгээрийг шалгахгүй).
+ */
+const optionalRaw = {
+  partnerApiUrl: process.env.EXPO_PUBLIC_PARTNER_API_URL,
+}
+
+/**
  * App Store review-ийн демо нэвтрэлт (FLOWS.md "Демо горим"). Заавал биш —
  * хоёулаа байхгүй бол демо горим бүрмөсөн унтарна. Bundle-д ил байна: энэ
  * нууц үг зөвхөн зохиомол өгөгдөл нээнэ, бодит API-д хүрэхгүй.
@@ -59,6 +67,10 @@ export const env = {
   },
   get supportWsUrl() {
     return required('supportWsUrl')
+  },
+  /** Partner affiliate API (тусдаа host). */
+  get partnerApiUrl(): string | undefined {
+    return optionalRaw.partnerApiUrl || undefined
   },
   get demoLogin(): { email: string; password: string } | null {
     const { email, password } = demoRaw

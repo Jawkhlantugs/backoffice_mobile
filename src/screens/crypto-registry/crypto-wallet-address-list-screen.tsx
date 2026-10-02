@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { UserWalletAddress } from '@/data/crypto-registry/crypto-registry-model'
 import { useUserWalletAddresses } from '@/hooks/use-crypto-registry'
 import { formatDate } from '@/lib/date'
@@ -25,14 +25,12 @@ export function CryptoWalletAddressListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(
-  item: UserWalletAddress,
-): React.ComponentProps<typeof RecordCard> {
+function toCard(item: UserWalletAddress): RecordView {
   return {
     title: item.owner ?? item.address ?? item.id,
     subtitle: [item.coin, item.network].filter(Boolean).join(' · '),

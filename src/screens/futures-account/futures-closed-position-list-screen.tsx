@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import type { FuturesClosedPosition } from '@/data/futures-account/futures-account-model'
 import { useFuturesClosedPositions } from '@/hooks/use-futures-accounts'
 import { formatDate, formatDuration } from '@/lib/date'
@@ -25,14 +25,12 @@ export function FuturesClosedPositionListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      renderItem={({ item }) => <RecordCard {...toCard(item)} />}
+      record={toCard}
     />
   )
 }
 
-function toCard(
-  item: FuturesClosedPosition,
-): React.ComponentProps<typeof RecordCard> {
+function toCard(item: FuturesClosedPosition): RecordView {
   return {
     title: item.symbol,
     subtitle: [item.user, formatDate(item.closedAt)]

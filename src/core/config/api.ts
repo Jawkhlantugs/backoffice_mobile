@@ -33,6 +33,7 @@ function buildApi() {
 
     // Хуучин backoffice (өөр host)
     backoffice: BACKOFFICE,
+    crystal: `${BACKOFFICE}/crystal`,
 
     // Monorepo gateway дээрх service бүрийн path prefix
     admin: `${BASE}/admin/v3/admin`,
@@ -40,6 +41,8 @@ function buildApi() {
     compliance: `${BASE}/backoffice/compliance/v3/admin`,
     finance: `${BASE}/backoffice/finance/v3/admin`,
     security: `${BASE}/backoffice/security/v3/admin`,
+    rewardHub: `${BASE}/backoffice/reward/v3/admin`,
+    news: `${BASE}/news/v3/admin`,
     userSecurity: `${BASE}/security/v3/admin/user/security`,
     staking: `${BASE}/staking/v3`,
     takeAction: `${BASE}/account/v3/admin/accounts`,
@@ -47,6 +50,9 @@ function buildApi() {
     socket: `${BASE}/socket/v3/admin`,
     wallet: `${BASE}/wallet/v3/admin/wallets`,
     bankV2: `${ORIGIN}/v2/withdraw`,
+
+    // Тусдаа host, заавал биш — хоосон бол `clients.partner` татгалзана.
+    partner: env.partnerApiUrl ?? '',
 
     ws: env.supportWsUrl,
   } as const

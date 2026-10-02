@@ -2,7 +2,7 @@ import { clients } from '@/core/network/clients'
 import { unwrap } from '@/core/network/envelope'
 import type { AdminUser } from '@/core/session/session-store'
 
-import { toMenuTree } from './admin-menu-dto'
+import { toMenuTree, type AdminMenuTree } from './admin-menu-dto'
 
 /**
  * Нэвтэрсэн админы хувийн мэдээлэл ба эрх.
@@ -21,9 +21,9 @@ type AdminProfileDto = {
 
 export const adminRepository = {
   async profile(): Promise<AdminUser> {
-    const [infoRes, menuRes] = await Promise.all([
+    const [infoRes, menu] = await Promise.all([
       clients.backoffice.get('/auth/info'),
-      clients.backoffice.get('/admin/admin-menus/my'),
+      adminRepository.menu(),
     ])
 
     const dto = unwrap<AdminProfileDto>(infoRes.data)
@@ -35,7 +35,12 @@ export const adminRepository = {
       adminGroupId: dto.adminGroupId ?? undefined,
       adminGroupName: dto.adminGroup?.name?.trim() || undefined,
       department: dto.department ?? undefined,
-      menu: toMenuTree(unwrap(menuRes.data)),
+      menu,
     }
+  },
+
+  async menu(): Promise<AdminMenuTree> {
+    const response = await clients.backoffice.get('/admin/admin-menus/my')
+    return toMenuTree(unwrap(response.data))
   },
 }

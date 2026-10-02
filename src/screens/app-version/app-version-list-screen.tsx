@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useRouter } from 'expo-router'
 
-import { PagedListScreen, RecordCard } from '@/components'
+import { PagedListScreen, type RecordView } from '@/components'
 import {
   APP_OS,
   type AppOs,
@@ -41,22 +41,19 @@ export function AppVersionListScreen() {
         value: os,
         onChange: setOs,
       }}
-      renderItem={({ item }) => (
-        <RecordCard
-          {...toCard(item)}
-          onPress={() =>
-            router.push({
-              pathname: '/mobile/versions/[id]',
-              params: { id: item.id },
-            })
-          }
-        />
-      )}
+      record={(item) => ({
+        ...toCard(item),
+        onPress: () =>
+          router.push({
+            pathname: '/mobile/versions/[id]',
+            params: { id: item.id },
+          }),
+      })}
     />
   )
 }
 
-function toCard(item: AppVersion): React.ComponentProps<typeof RecordCard> {
+function toCard(item: AppVersion): RecordView {
   const f = text.fields
   return {
     title: `${text.os[item.os]} ${item.version}`,

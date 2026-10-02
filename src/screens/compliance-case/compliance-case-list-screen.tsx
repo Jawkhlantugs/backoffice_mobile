@@ -8,7 +8,7 @@ import { useComplianceCases } from '@/hooks/use-compliance-cases'
 import { usePullRefresh } from '@/hooks/use-pull-refresh'
 import { messages } from '@/lib/messages'
 
-import { ComplianceCaseCard } from './compliance-case-card'
+import { complianceCaseRecord } from './compliance-case-record'
 
 type StatusFilter = ComplianceCaseStatus | 'ALL'
 
@@ -57,14 +57,11 @@ export function ComplianceCaseListScreen() {
       statusChips={{ chips: statusChips(), value: status, onChange: setStatus }}
       items={items}
       keyExtractor={(item) => `${item.uid}-${item.caseId}`}
-      renderItem={({ item }) => (
-        <ComplianceCaseCard
-          item={item}
-          onPress={() =>
-            router.push(`/compliance/cases/${item.uid}/${item.caseId}`)
-          }
-        />
-      )}
+      record={(item) =>
+        complianceCaseRecord(item, () =>
+          router.push(`/compliance/cases/${item.uid}/${item.caseId}`),
+        )
+      }
       loading={query.isPending}
       error={query.error}
       onRetry={() => query.refetch()}

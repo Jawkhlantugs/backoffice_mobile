@@ -11,6 +11,7 @@ export type SnapshotBalance = {
 export type BalanceSnapshot = {
   id: string
   user?: string
+  userId?: string
   subAccountId: string
   date: string
   usdtValuation: AmountField

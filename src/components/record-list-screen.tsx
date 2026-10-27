@@ -60,8 +60,8 @@ export function RecordListScreen<T, S extends string = string>({
   items: T[]
   keyExtractor: (item: T) => string
   record: (item: T) => RecordView
-  /** Хүснэгтийн гарчиг, дүнгийн баганы нэр — анхдагч нь "Бичлэг", "Дүн". */
-  tableLabels?: { title?: string; amount?: string }
+  /** Хүснэгтийн гарчиг, дүн, статусын баганы нэр — анхдагч "Бичлэг", "Дүн", "Статус". */
+  tableLabels?: { title?: string; amount?: string; status?: string }
   loading: boolean
   error?: unknown
   onRetry: () => void
@@ -87,7 +87,7 @@ export function RecordListScreen<T, S extends string = string>({
           })),
           {
             title: tableLabels?.title ?? messages.table.record,
-            status: messages.table.status,
+            status: tableLabels?.status ?? messages.table.status,
             amount: tableLabels?.amount ?? messages.table.amount,
           },
         )

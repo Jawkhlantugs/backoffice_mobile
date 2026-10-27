@@ -50,6 +50,8 @@ module.exports = {
         tiny: ['11px', '14px'],
         caption: ['12px', '16px'],
         body: ['14px', '20px'],
+        // Нэг мөрт TextInput: iOS lineHeight-тэй үед текстийг доош түлхдэг.
+        field: '14px',
         'body-lg': ['16px', '24px'],
         title: ['18px', '24px'],
         heading: ['22px', '28px'],

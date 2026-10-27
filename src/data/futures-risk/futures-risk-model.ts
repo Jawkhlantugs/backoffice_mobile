@@ -24,6 +24,8 @@ export type FuturesPosition = {
   positionAmt: string
   entryPrice?: string
   markPrice?: string
+  /** Үнийг харуулах орон — Binance-ийн `pricePrecision`, хамгийн багадаа 2. */
+  priceDecimals: number
   unrealizedProfit: AmountField
   leverage?: string
   positionSide?: string

@@ -1,35 +1,47 @@
 import { clients } from '@/core/network/clients'
-import { unwrapList, type ListPage } from '@/core/network/envelope'
+import type { ListPage, PageParams } from '@/core/network/envelope'
+import { amountFilterToApi } from '@/data/shared/amount-filter'
+import { fetchList } from '@/data/shared/fetch-list'
 
 import { toBankWithdrawal, type BankWithdrawalDto } from './bank-withdrawal-dto'
 import type { BankWithdrawal } from './bank-withdrawal-model'
 
-/** Endpoint: `bank.service.ts` — `POST {backoffice}/banks/withdrawals/list`. */
-export type BankWithdrawalListParams = {
-  current: number
-  pageSize: number
-  query?: string
+/**
+ * Endpoint: `bank.service.ts` — `POST {backoffice}/banks/withdrawals/list`.
+ * Шүүлтүүрийн түлхүүр вэбийн `withdrawal/constants.ts`-ийн `FILTER_KEYS`;
+ * `query` нь User ID, Sub Account ID, имэйлээр хайна.
+ */
+export type BankWithdrawalListParams = PageParams & {
+  id?: string
   status?: string
-  currency?: string
+  txnId?: string
+  accountNumber?: string
+  totalAmount?: string
+  condition?: string
+  start_day?: string
+  end_day?: string
 }
 
 export const bankWithdrawalRepository = {
-  async list(
-    params: BankWithdrawalListParams,
-  ): Promise<ListPage<BankWithdrawal>> {
-    const response = await clients.backoffice.post('/banks/withdrawals/list', {
-      current: params.current,
-      pageSize: params.pageSize,
-      ...(params.query ? { query: params.query } : {}),
-      ...(params.status ? { status: params.status } : {}),
-      ...(params.currency ? { currency: params.currency } : {}),
-    })
-
-    const page = unwrapList<BankWithdrawalDto>(
-      response.data,
-      'bank-withdrawals',
+  list({
+    totalAmount,
+    condition,
+    start_day,
+    end_day,
+    ...rest
+  }: BankWithdrawalListParams): Promise<ListPage<BankWithdrawal>> {
+    const amountValue = amountFilterToApi(totalAmount)
+    return fetchList(
+      clients.backoffice,
+      '/banks/withdrawals/list',
+      {
+        ...rest,
+        totalAmount: amountValue,
+        condition: amountValue === undefined ? undefined : condition,
+        sortDate: start_day && end_day ? { start_day, end_day } : undefined,
+      },
+      (dto: BankWithdrawalDto) => toBankWithdrawal(dto),
     )
-    return { ...page, items: page.items.map(toBankWithdrawal) }
   },
 
   /** Мөнгө хөдөлгөнө — дуудагч тал ConfirmSheet-ээр хамгаална (§1.5). */

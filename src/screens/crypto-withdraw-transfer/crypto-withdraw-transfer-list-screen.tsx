@@ -24,6 +24,7 @@ export function CryptoWithdrawTransferListScreen() {
         placeholder: messages.finance.searchPlaceholder,
       }}
       record={cryptoWithdrawTransferRecord}
+      tableLabels={{ title: messages.finance.fields.id }}
     />
   )
 }

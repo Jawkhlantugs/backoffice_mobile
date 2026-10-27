@@ -54,6 +54,47 @@ describe('buildRecordTable', () => {
     expect(rows[1]?.cells['field:Note']).toEqual({ kind: 'text', text: 'hi' })
   })
 
+  it('`columns` өгвөл зөвхөн тэдгээрийг, тэр дарааллаар гаргана', () => {
+    const { columns } = buildRecordTable(
+      [
+        row('a', {
+          status: { label: 'DONE', tone: 'success' },
+          amount: { raw: '10', currency: 'MNT' },
+          fields: [
+            { label: 'Type', value: 'DEPOSIT' },
+            { label: 'Note', value: 'hi' },
+          ],
+          details: [{ label: 'Txn', value: 'x1' }],
+          columns: ['amount', 'Type', 'status', 'Txn'],
+        }),
+      ],
+      LABELS,
+    )
+    expect(columns.map((column) => column.label)).toEqual([
+      'Record',
+      'Amount',
+      'Type',
+      'Status',
+      'Txn',
+    ])
+  })
+
+  it('`tone`-той талбар статус pill-ийн нүд болно', () => {
+    const { rows } = buildRecordTable(
+      [
+        row('a', {
+          fields: [{ label: 'Type', value: 'WITHDRAWAL', tone: 'danger' }],
+        }),
+      ],
+      LABELS,
+    )
+    expect(rows[0]?.cells['field:Type']).toEqual({
+      kind: 'status',
+      label: 'WITHDRAWAL',
+      tone: 'danger',
+    })
+  })
+
   it('статус, дүнгүй жагсаалтад тэр баганууд гарахгүй', () => {
     const { columns } = buildRecordTable([row('a', {})], LABELS)
     expect(columns.map((column) => column.key)).toEqual(['title'])

@@ -7,7 +7,7 @@ import {
   AppHeader,
   AppInput,
   AppText,
-  BottomSheet,
+  BackofficeBottomSheet,
   FormSection,
   RecordActions,
   Screen,
@@ -154,7 +154,7 @@ export function WeeklyReportDetailScreen() {
         ) : null}
       </StateView>
 
-      <BottomSheet
+      <BackofficeBottomSheet
         visible={planDraft !== null}
         title={text.editNextPlan}
         onClose={() => setPlanDraft(null)}
@@ -174,7 +174,7 @@ export function WeeklyReportDetailScreen() {
             setPlanDraft(null)
           }}
         />
-      </BottomSheet>
+      </BackofficeBottomSheet>
     </Screen>
   )
 }

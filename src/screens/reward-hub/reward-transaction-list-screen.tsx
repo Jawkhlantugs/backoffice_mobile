@@ -14,12 +14,24 @@ import { ALL, rewardStatus, rewardStatusChips } from './reward-status'
 const text = messages.rewardHub
 const f = text.fields
 
+/** Вэбийн `reward-transaction/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.userId,
+  f.rewardId,
+  'status',
+  'amount',
+  f.task,
+  f.createdAt,
+  f.transferredAt,
+] as const
+
 function toRecord(item: RewardTransaction): RecordView {
   return {
     title: item.userId,
+    tableTitle: item.taskId,
     subtitle: [item.taskCode, formatDate(item.createdAt)].join(' · '),
     status: rewardStatus(item.status),
-    amount: item.amount,
+    amount: { ...item.amount, showCode: true },
     fields: [
       { label: f.task, value: item.taskCode },
       { label: f.rewardId, value: item.rewardId },
@@ -30,12 +42,18 @@ function toRecord(item: RewardTransaction): RecordView {
       { label: f.subAccountId, value: item.subAccountId },
     ],
     details: [
+      { label: f.userId, value: item.userId },
+      {
+        label: f.createdAt,
+        value: item.createdAt ? formatDate(item.createdAt) : undefined,
+      },
       { label: f.taskId, value: item.taskId },
       {
         label: f.requestedAt,
         value: item.requestedAt ? formatDate(item.requestedAt) : undefined,
       },
     ],
+    columns: COLUMNS,
   }
 }
 
@@ -64,7 +82,7 @@ export function RewardTransactionListScreen() {
         value: status,
         onChange: setStatus,
       }}
-      tableLabels={{ title: f.userId }}
+      tableLabels={{ title: f.taskId }}
       record={toRecord}
     />
   )

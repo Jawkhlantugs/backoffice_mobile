@@ -5,6 +5,7 @@ export type FuturesAccount = {
   role: string
   userId: string
   traderUserId: string
+  subAccountId?: string
   createdAt: string
 }
 
@@ -24,6 +25,10 @@ export type FuturesClosedPosition = {
   isLoss: boolean
   holdingMs: number
   user?: string
+  userId?: string
+  email?: string
+  subAccountId?: string
+  closeNotional?: string
   accountId: string
   openedAt: string
   closedAt: string

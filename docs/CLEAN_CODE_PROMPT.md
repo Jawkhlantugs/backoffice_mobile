@@ -194,6 +194,11 @@ Mutation амжилттай болоход холбогдох key-г `invalidate
 7. `moneyToApiNumber()` нь мөнгө `number` болдог **цорын ганц газар**, зөвхөн
    request body руу. Үр дүнгээр нь юу ч тооцохгүй.
 8. 🔴 **Мөнгөний логик тестгүй бол merge хийхгүй.**
+9. Дэлгэцэнд **USDT, MNT, USD яг 2 орон** (`25,004.14`, `100.00`) — вэбийн
+   `formatMoney`/`minimumFractionDigits: 2`. `Currency.fixedDecimals` +
+   `displayDecimals: 2`. Crypto (BTC, LTC…) илүү тэгээ хасаад бүтнээрээ.
+   Дүнг гараар `String(raw)` болгож харуулахгүй — `formatAmountSafe` /
+   `AmountText`-оор.
 
 ---
 

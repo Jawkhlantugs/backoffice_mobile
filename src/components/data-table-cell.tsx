@@ -5,7 +5,7 @@ import { cn } from '@/lib/cn'
 import { AmountText } from './amount-text'
 import { AppText } from './app-text'
 import type { TableCell, TableColumn } from './record-table'
-import { StatusPill } from './status-pill'
+import { StatusPill, TONE_TEXT } from './status-pill'
 
 const EMPTY = '—'
 
@@ -43,7 +43,7 @@ function CellContent({ cell }: { cell: TableCell | undefined }) {
           amount={cell.amount}
           variant="caption"
           numberOfLines={1}
-          className="text-foreground"
+          className={cell.tone ? TONE_TEXT[cell.tone] : 'text-foreground'}
         />
       )
     case 'text':

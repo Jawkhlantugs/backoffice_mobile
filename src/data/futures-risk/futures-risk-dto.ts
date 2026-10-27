@@ -1,3 +1,5 @@
+import { stepDecimals } from '@/lib/fixed-decimals'
+
 import type {
   FuturesMasterRisk,
   FuturesOpenOrder,
@@ -8,6 +10,8 @@ const USDT = 'USDT'
 
 export type FuturesPositionDto = {
   symbol?: string
+  pricePrecision?: number
+  priceTickSize?: string
   positionAmt?: string
   entryPrice?: string
   markPrice?: string
@@ -40,12 +44,26 @@ export type FuturesOpenOrderDto = {
   status?: string
 }
 
+const MIN_PRICE_DECIMALS = 2
+const MAX_PRICE_DECIMALS = 20
+
+/** Вэбийн `getPriceDecimals`: max(pricePrecision, tick size, 2). */
+function priceDecimals(dto: FuturesPositionDto): number {
+  const decimals = Math.max(
+    dto.pricePrecision ?? 0,
+    stepDecimals(dto.priceTickSize) ?? 0,
+    MIN_PRICE_DECIMALS,
+  )
+  return Math.min(Math.trunc(decimals), MAX_PRICE_DECIMALS)
+}
+
 function toPosition(dto: FuturesPositionDto): FuturesPosition {
   return {
     symbol: dto.symbol ?? '',
     positionAmt: dto.positionAmt ?? '0',
     entryPrice: dto.entryPrice,
     markPrice: dto.markPrice,
+    priceDecimals: priceDecimals(dto),
     unrealizedProfit: { raw: dto.unrealizedProfit ?? '0', currency: USDT },
     leverage: dto.leverage,
     positionSide: dto.positionSide,

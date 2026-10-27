@@ -127,6 +127,7 @@ export function WeeklyReportListScreen() {
       ]}
       search={inDepartment ? undefined : { value: search, onChange: setSearch }}
       filters={filters}
+      tableLabels={{ title: text.fields.week, status: text.fields.status }}
       record={(item) => ({
         ...toCard(item),
         onPress: () =>
@@ -139,14 +140,26 @@ export function WeeklyReportListScreen() {
   )
 }
 
+/** Вэбийн `office/weekly-task/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  text.fields.title,
+  text.fields.author,
+  text.fields.department,
+  'status',
+  text.fields.submittedAt,
+  text.fields.updatedAt,
+] as const
+
 function toCard(item: WeeklyReport): RecordView {
   const f = text.fields
   return {
     title: item.title,
+    tableTitle: formatDateOnly(item.weekStart),
     subtitle: `${formatDateOnly(item.weekStart)} – ${formatDateOnly(item.weekEnd)}`,
     status: {
       label: text.statuses[item.status],
-      tone: item.status === 'SUBMITTED' ? 'success' : 'warning',
+      // Вэб статусыг өнгөгүй (default/secondary) Badge-аар харуулдаг.
+      tone: 'neutral',
     },
     fields: [
       { label: f.author, value: item.author?.email },
@@ -158,5 +171,18 @@ function toCard(item: WeeklyReport): RecordView {
           : undefined,
       },
     ],
+    details: [
+      { label: f.title, value: item.title },
+      { label: f.department, value: item.author?.department },
+      {
+        label: f.submittedAt,
+        value: item.submittedAt ? formatDate(item.submittedAt) : undefined,
+      },
+      {
+        label: f.updatedAt,
+        value: item.updatedAt ? formatDate(item.updatedAt) : undefined,
+      },
+    ],
+    columns: COLUMNS,
   }
 }

@@ -19,7 +19,8 @@ const TONE: Record<StatusTone, string> = {
   info: 'bg-accent',
 }
 
-const TONE_TEXT: Record<StatusTone, string> = {
+/** Pill-гүй өнгөт текст (дүнгийн +/−) — вэбийн `text-green-600` гэх мэт. */
+export const TONE_TEXT: Record<StatusTone, string> = {
   neutral: 'text-muted-foreground',
   success: 'text-success',
   warning: 'text-warning',

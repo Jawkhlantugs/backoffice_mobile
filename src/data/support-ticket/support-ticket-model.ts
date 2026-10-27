@@ -6,19 +6,24 @@
 export const TICKET_STATUSES = ['new', 'open', 'pending', 'solved'] as const
 export type TicketStatus = (typeof TICKET_STATUSES)[number]
 
-export const TICKET_PRIORITIES = ['high', 'medium', 'low'] as const
-export type TicketPriority = (typeof TICKET_PRIORITIES)[number]
-
 export type SupportTicket = {
   id: string
   title: string
   requesterLabel: string
   requesterId?: string
+  /** `conversation.send`-ийн `uid`. */
+  customerUid?: string
   status: TicketStatus
-  priority?: TicketPriority
+  /** Вэбийн адил түүхий утга (`normal`, `high`…) — танихгүйг ч хаяхгүй. */
+  priority?: string
   assignee?: string
   categoryLabel?: string
-  message?: string
+  /** Харилцагчийн анхны мессеж (HTML) — ярианы эхний мөр болж харагдана. */
+  ticketMessage?: string
+  /** Хавсралтын URL. */
+  file?: string
+  /** Ажилтны дотоод тэмдэглэл — харилцагчид харагдахгүй. */
+  note?: string
   createdAt?: string
   updatedAt?: string
 }

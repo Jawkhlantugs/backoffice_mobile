@@ -5,19 +5,8 @@ import type { LeaveRequest } from '@/data/leave-request/leave-request-model'
 import { messages } from '@/lib/messages'
 import { iconSize } from '@/theme/tokens'
 
+import { leavePeriodLabel } from './leave-period-label'
 import { LeaveStatusPill } from './leave-status-pill'
-
-/** Хугацааг нэг мөрөнд: хоногоор бол огноо, цагаар бол огноо + цагийн зай. */
-function periodLabel(request: LeaveRequest): string {
-  if (request.unit === 'hour') {
-    const from = request.startTime ?? ''
-    const to = request.endTime ?? ''
-    return `${request.startDate} ${from} → ${to}`.trim()
-  }
-  return request.startDate === request.endDate
-    ? request.startDate
-    : `${request.startDate} → ${request.endDate}`
-}
 
 export function LeaveRequestCard({
   request,
@@ -46,7 +35,7 @@ export function LeaveRequestCard({
       <View className="flex-row items-center gap-2 rounded-lg bg-muted px-3 py-2">
         <AppIcon name="leave" size={iconSize.sm} tone="muted" />
         <AppText variant="caption" numeric className="flex-1">
-          {periodLabel(request)}
+          {leavePeriodLabel(request)}
         </AppText>
         <AppText variant="tiny">{messages.leave.types[request.type]}</AppText>
       </View>

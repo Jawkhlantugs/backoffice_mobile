@@ -22,6 +22,7 @@ export type OperationAccountRowDto = {
   description?: string
   canTrade?: boolean
   canWithdraw?: boolean
+  created_at?: string
 }
 
 /** 4xx/5xx — жагсаалтад улаанаар ялгана. */
@@ -55,5 +56,6 @@ export function toOperationAccountRow(
     description: dto.description,
     canTrade: dto.canTrade === true,
     canWithdraw: dto.canWithdraw === true,
+    createdAt: dto.created_at,
   }
 }

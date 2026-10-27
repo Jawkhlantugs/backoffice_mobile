@@ -49,7 +49,11 @@ export function AppVersionForm({
   ) => setInput((current) => ({ ...current, [key]: value }))
   const err = (field: AppVersionField) =>
     missing.includes(field) ? messages.form.required : undefined
-  const textInput = (field: AppVersionField, label: string, multiline = false) => (
+  const textInput = (
+    field: AppVersionField,
+    label: string,
+    multiline = false,
+  ) => (
     <AppInput
       label={`${label} *`}
       value={input[field]}

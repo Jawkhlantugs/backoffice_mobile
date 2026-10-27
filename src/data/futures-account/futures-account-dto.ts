@@ -24,7 +24,9 @@ export type FuturesClosedPositionDto = {
   openPrice?: number
   closePrice?: number
   realizedPnl?: number
+  closeNotional?: number
   holdingMs?: number
+  userId?: string
   accountId?: string
   openedAt?: string
   closedAt?: string
@@ -38,6 +40,7 @@ export function toFuturesAccount(dto: FuturesAccountDto): FuturesAccount {
     role: dto.role ?? '',
     userId: dto.userId ?? '',
     traderUserId: dto.traderUserId ?? '',
+    subAccountId: dto.User?.subAccountId ?? undefined,
     createdAt: dto.createdAt ?? '',
   }
 }
@@ -62,6 +65,10 @@ export function toFuturesClosedPosition(
     isLoss: pnl.startsWith('-'),
     holdingMs: dto.holdingMs ?? 0,
     user: partyLabel(dto.User),
+    userId: dto.userId,
+    email: dto.User?.email ?? undefined,
+    subAccountId: dto.User?.subAccountId ?? undefined,
+    closeNotional: text(dto.closeNotional) || undefined,
     accountId: dto.accountId ?? '',
     openedAt: dto.openedAt ?? '',
     closedAt: dto.closedAt ?? '',

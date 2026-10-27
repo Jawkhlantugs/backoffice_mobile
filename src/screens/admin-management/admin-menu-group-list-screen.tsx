@@ -7,14 +7,20 @@ import { messages } from '@/lib/messages'
 const text = messages.adminManagement
 const f = text.fields
 
+/** Вэбийн `admin-management/menu-group/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [f.name, f.createdAt] as const
+
 function toRecord(item: AdminMenuGroup): RecordView {
   return {
     title: item.name,
+    tableTitle: item.id,
     subtitle: `${f.id} ${item.id}`,
     fields: [
       { label: f.id, value: item.id },
       { label: f.createdAt, value: formatDate(item.createdAt) },
+      { label: f.name, value: item.name },
     ],
+    columns: COLUMNS,
   }
 }
 
@@ -31,7 +37,7 @@ export function AdminMenuGroupListScreen() {
       emptyIcon="folder"
       searchText={(item) => `${item.name} ${item.id}`}
       searchPlaceholder={text.searchPlaceholder}
-      tableLabels={{ title: f.name }}
+      tableLabels={{ title: f.id }}
       record={toRecord}
     />
   )

@@ -41,6 +41,7 @@ export function AppVersionListScreen() {
         value: os,
         onChange: setOs,
       }}
+      tableLabels={{ title: text.fields.os }}
       record={(item) => ({
         ...toCard(item),
         onPress: () =>
@@ -53,23 +54,45 @@ export function AppVersionListScreen() {
   )
 }
 
+/** Вэбийн `mobile/app-versions/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  text.fields.version,
+  text.fields.requiredVersion,
+  text.fields.updateMode,
+  text.fields.titleEn,
+  'status',
+  text.fields.createdAt,
+] as const
+
 function toCard(item: AppVersion): RecordView {
   const f = text.fields
   return {
     title: `${text.os[item.os]} ${item.version}`,
+    tableTitle: text.os[item.os],
     subtitle: item.titleMn || item.titleEn,
     status: {
       label: text.statuses[item.status],
-      tone: item.status === 'active' ? 'success' : 'neutral',
+      // Вэб статусыг өнгөгүй, `required` горимыг улаан Badge-аар.
+      tone: 'neutral',
     },
     fields: [
       { label: f.requiredVersion, value: item.requiredVersion },
-      { label: f.updateMode, value: text.updateModes[item.updateMode] },
+      {
+        label: f.updateMode,
+        value: text.updateModes[item.updateMode],
+        tone: item.updateMode === 'required' ? 'danger' : 'neutral',
+      },
       { label: f.createdBy, value: item.createdBy },
       {
         label: f.updatedAt,
         value: formatDate(item.updateTime ?? item.createTime),
       },
     ],
+    details: [
+      { label: f.version, value: item.version },
+      { label: f.titleEn, value: item.titleEn },
+      { label: f.createdAt, value: formatDate(item.createTime) },
+    ],
+    columns: COLUMNS,
   }
 }

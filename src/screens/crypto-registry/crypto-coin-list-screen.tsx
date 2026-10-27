@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { PagedListScreen, type RecordView } from '@/components'
 import type { CoinListing } from '@/data/crypto-registry/crypto-registry-model'
 import { useCoinListings } from '@/hooks/use-crypto-registry'
+import { formatDate } from '@/lib/date'
 import { messages } from '@/lib/messages'
 
 const text = messages.lists
@@ -25,25 +26,59 @@ export function CryptoCoinListScreen() {
         placeholder: text.searchPlaceholder,
       }}
       record={toCard}
+      tableLabels={{ title: f.id }}
     />
   )
 }
 
+/** Вэбийн `crypto/coins/components/columns.tsx`-ийн дараалал (Image-гүй). */
+const COLUMNS = [
+  f.coin,
+  f.name,
+  'status',
+  f.featured,
+  f.trading,
+  f.deposit,
+  f.withdraw,
+  f.networks,
+  f.createdAt,
+] as const
+
+/** Вэб идэвхтэйг ногоон "Enabled", идэвхгүйг улаан "Disabled" гэж харуулдаг. */
+const enabled = (label: string, value: boolean) => ({
+  label,
+  value: value ? 'Enabled' : 'Disabled',
+  tone: value ? ('success' as const) : ('danger' as const),
+})
+
 function toCard(item: CoinListing): RecordView {
-  const yesNo = (value: boolean) => (value ? text.yes : text.no)
   return {
     title: item.coin,
+    tableTitle: item.id,
     subtitle: item.name,
     status: {
-      label: item.isEnabled ? f.enabled : text.no,
-      tone: item.isEnabled ? 'success' : 'neutral',
+      label: item.isEnabled ? 'Enabled' : 'Disabled',
+      tone: item.isEnabled ? 'success' : 'danger',
     },
     fields: [
-      { label: f.deposit, value: yesNo(item.depositEnabled) },
-      { label: f.withdraw, value: yesNo(item.withdrawEnabled) },
-      { label: f.trading, value: yesNo(item.trading) },
-      { label: f.featured, value: yesNo(item.isFeatured) },
+      enabled(f.deposit, item.depositEnabled),
+      enabled(f.withdraw, item.withdrawEnabled),
+      enabled(f.trading, item.trading),
+      {
+        label: f.featured,
+        value: item.isFeatured ? 'Yes' : 'No',
+        tone: item.isFeatured ? 'success' : 'neutral',
+      },
     ],
-    details: [{ label: f.networks, value: item.networks.join(', ') }],
+    details: [
+      { label: f.coin, value: item.coin },
+      { label: f.name, value: item.name },
+      { label: f.networks, value: item.networks.join(', ') },
+      {
+        label: f.createdAt,
+        value: item.createdAt ? formatDate(item.createdAt) : undefined,
+      },
+    ],
+    columns: COLUMNS,
   }
 }

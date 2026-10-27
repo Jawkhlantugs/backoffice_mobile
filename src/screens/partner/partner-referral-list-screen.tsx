@@ -9,7 +9,12 @@ import { usePartnerReferrals } from '@/hooks/use-partners'
 import { formatDate } from '@/lib/date'
 import { messages } from '@/lib/messages'
 
-import { ALL, partnerStatus, partnerStatusChips } from './partner-status'
+import {
+  ALL,
+  PARTNER_TONES,
+  partnerStatus,
+  partnerStatusChips,
+} from './partner-status'
 
 const text = messages.partner
 const f = text.fields
@@ -17,11 +22,21 @@ const f = text.fields
 const dateOrUndefined = (value: string | undefined) =>
   value ? formatDate(value) : undefined
 
+/** Вэбийн `partner/referrals/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.partnerCode,
+  f.kyc,
+  'status',
+  f.registeredAt,
+  f.firstTrade,
+  f.unlinkedAt,
+] as const
+
 function toRecord(item: PartnerReferral): RecordView {
   return {
     title: item.referredUser ?? item.id,
     subtitle: item.referredName,
-    status: partnerStatus(item.status),
+    status: partnerStatus(item.status, PARTNER_TONES.referrals),
     fields: [
       { label: f.partner, value: item.partner },
       { label: f.referralCode, value: item.code },
@@ -32,7 +47,12 @@ function toRecord(item: PartnerReferral): RecordView {
       { label: f.firstDeposit, value: dateOrUndefined(item.firstDepositAt) },
       { label: f.firstTrade, value: dateOrUndefined(item.firstTradeAt) },
       { label: f.unlinkedAt, value: dateOrUndefined(item.endedAt) },
+      {
+        label: f.partnerCode,
+        value: [item.partner, item.code].filter(Boolean).join(' · '),
+      },
     ],
+    columns: COLUMNS,
   }
 }
 

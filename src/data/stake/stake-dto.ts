@@ -10,6 +10,7 @@ export type UserStakeDto = {
   uid?: string
   stakeContractId?: string
   stakeStatus?: string
+  status?: string
   stakedAmount?: number
   totalAmount?: number
   rewardAmount?: number
@@ -17,6 +18,7 @@ export type UserStakeDto = {
   asset?: string
   createTime?: number
   updateTime?: number
+  cancelTime?: number
   metadata?: { history?: { txnId?: string; binanceTxnId?: string }[] }
 }
 
@@ -28,6 +30,7 @@ export type StakeAssetDto = {
   maxSize?: number
   usedMaxSize?: number
   totalStakedAmountSize?: number
+  createTime?: number
   updateTime?: number
 }
 
@@ -56,6 +59,7 @@ export function toUserStake(dto: UserStakeDto): UserStake {
     uid: dto.uid,
     asset,
     stakeStatus: dto.stakeStatus ?? '',
+    status: dto.status,
     staked: { raw: dto.stakedAmount ?? 0, currency: asset },
     total: { raw: dto.totalAmount ?? 0, currency: asset },
     reward: { raw: dto.rewardAmount ?? 0, currency: asset },
@@ -63,6 +67,7 @@ export function toUserStake(dto: UserStakeDto): UserStake {
     contractId: dto.stakeContractId,
     createdAt: dto.createTime,
     updatedAt: dto.updateTime,
+    cancelTime: dto.cancelTime,
     txnIds: (dto.metadata?.history ?? []).flatMap((item) =>
       item.txnId ? [item.txnId] : item.binanceTxnId ? [item.binanceTxnId] : [],
     ),
@@ -79,6 +84,7 @@ export function toStakeAsset(dto: StakeAssetDto): StakeAsset {
     maxSize: amount(dto.maxSize, asset),
     usedMaxSize: amount(dto.usedMaxSize, asset),
     totalStaked: amount(dto.totalStakedAmountSize, asset),
+    createdAt: dto.createTime,
     updatedAt: dto.updateTime,
   }
 }

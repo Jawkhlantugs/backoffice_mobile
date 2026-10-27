@@ -9,6 +9,7 @@ import { careerRepository } from '@/data/career/career-repository'
 import { complianceMonitorRepository } from '@/data/compliance-monitor/compliance-monitor-repository'
 import { convertLimitRepository } from '@/data/convert-limit/convert-limit-repository'
 import { crystalRepository } from '@/data/crystal/crystal-repository'
+import { withUserSearch } from '@/data/exchange-user/user-search'
 import { jumioBackupRepository } from '@/data/jumio-backup/jumio-backup-repository'
 import type { MatchMarket } from '@/data/match-engine/match-engine-model'
 import { matchEngineRepository } from '@/data/match-engine/match-engine-repository'
@@ -64,10 +65,14 @@ export const useBuyNowSymbols = (search: string) =>
   useCursorList('buynow-symbols', buyNowSymbolRepository.list, { search })
 
 export const useMonitorUsers = (search: string, status?: string) =>
-  useCursorList('compliance-monitor', complianceMonitorRepository.list, {
-    search,
-    filters: { status },
-  })
+  useCursorList(
+    'compliance-monitor',
+    withUserSearch(complianceMonitorRepository.list),
+    {
+      search,
+      filters: { status },
+    },
+  )
 
 export const useStakeStatistics = () =>
   useQuery({

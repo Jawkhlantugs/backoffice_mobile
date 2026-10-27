@@ -5,7 +5,7 @@ import { messages } from '@/lib/messages'
 
 import { AppSwitch } from './app-switch'
 import { AppText } from './app-text'
-import { BottomSheet } from './bottom-sheet'
+import { BackofficeBottomSheet } from './backoffice-bottom-sheet'
 import type { TableColumn } from './record-table'
 import { TextButton } from './text-button'
 
@@ -28,7 +28,7 @@ export function ColumnPickerSheet({
   const showAllColumns = useListViewStore((state) => state.showAllColumns)
 
   return (
-    <BottomSheet
+    <BackofficeBottomSheet
       visible={visible}
       onClose={onClose}
       title={messages.table.columns}
@@ -60,6 +60,6 @@ export function ColumnPickerSheet({
           className="self-start"
         />
       ) : null}
-    </BottomSheet>
+    </BackofficeBottomSheet>
   )
 }

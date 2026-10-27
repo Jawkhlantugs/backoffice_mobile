@@ -26,23 +26,31 @@ export function InternalTransactionListScreen() {
         placeholder: text.searchPlaceholder,
       }}
       record={toCard}
+      tableLabels={{ title: f.txnId }}
     />
   )
 }
 
+/** Вэбийн `internal-transaction/transactions/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [f.asset, 'amount', f.code, f.from, f.to, f.createdAt] as const
+
 function toCard(item: InternalTransaction): RecordView {
   return {
     title: item.to ?? item.txnId,
+    tableTitle: item.txnId,
     subtitle: formatDate(item.createdAt),
     amount: item.amount,
     fields: [
       { label: f.from, value: item.from },
       { label: f.code, value: item.code },
+      { label: f.asset, value: item.amount?.currency },
     ],
     details: [
       { label: f.to, value: item.to },
       { label: f.txnId, value: item.txnId },
       { label: f.binanceTxnId, value: item.binanceTxnId },
+      { label: f.createdAt, value: formatDate(item.createdAt) },
     ],
+    columns: COLUMNS,
   }
 }

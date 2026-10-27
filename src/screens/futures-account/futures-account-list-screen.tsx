@@ -26,18 +26,35 @@ export function FuturesAccountListScreen() {
         placeholder: text.searchPlaceholder,
       }}
       record={toCard}
+      tableLabels={{ title: f.userId }}
     />
   )
 }
 
+/** Вэбийн `futures/users/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.email,
+  f.traderUserId,
+  f.role,
+  f.subAccountId,
+  f.createdAt,
+] as const
+
 function toCard(item: FuturesAccount): RecordView {
   return {
     title: item.email,
+    tableTitle: item.userId,
     subtitle: formatDate(item.createdAt),
-    fields: [{ label: f.role, value: item.role }],
-    details: [
-      { label: f.user, value: item.userId },
-      { label: f.account, value: item.traderUserId },
+    fields: [
+      { label: f.role, value: item.role },
+      { label: f.subAccountId, value: item.subAccountId },
     ],
+    details: [
+      { label: f.email, value: item.email },
+      { label: f.user, value: item.userId },
+      { label: f.traderUserId, value: item.traderUserId },
+      { label: f.createdAt, value: formatDate(item.createdAt) },
+    ],
+    columns: COLUMNS,
   }
 }

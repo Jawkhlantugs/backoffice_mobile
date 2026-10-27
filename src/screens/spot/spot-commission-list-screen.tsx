@@ -5,7 +5,6 @@ import type { SpotCommission } from '@/data/spot/spot-model'
 import { useSpotCommissions } from '@/hooks/use-spot'
 import { formatDate } from '@/lib/date'
 import { messages } from '@/lib/messages'
-import { statusTone } from '@/lib/status-tone'
 
 const text = messages.lists
 const f = text.fields
@@ -27,19 +26,45 @@ export function SpotCommissionListScreen() {
         placeholder: text.searchPlaceholder,
       }}
       record={toCard}
+      tableLabels={{ title: f.id }}
     />
   )
 }
 
+const dateOf = (value?: string) => (value ? formatDate(value) : undefined)
+
+/** Вэбийн `spot/commissions/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.date,
+  f.broker,
+  f.tradeId,
+  f.income,
+  'status',
+  f.collected,
+] as const
+
 function toCard(item: SpotCommission): RecordView {
+  const completed = item.status === '1'
   return {
     title: item.user ?? item.tradeId,
+    tableTitle: item.id,
     subtitle: formatDate(item.fetchedAt),
-    status: { label: item.status, tone: statusTone(item.status) },
+    // Вэб: '1' → Completed (ногоон), бусад нь утгаараа (default Badge).
+    status: {
+      label: completed ? 'Completed' : item.status,
+      tone: completed ? 'success' : 'neutral',
+    },
     fields: [
       { label: f.income, value: item.income },
-      { label: f.collected, value: item.isCollected ? text.yes : text.no },
+      {
+        label: f.collected,
+        value: item.isCollected ? 'Yes' : 'No',
+        tone: item.isCollected ? 'success' : 'neutral',
+      },
+      { label: f.broker, value: item.user },
+      { label: f.date, value: dateOf(item.createdAt) },
     ],
-    details: [{ label: f.txnId, value: item.tradeId }],
+    details: [{ label: f.tradeId, value: item.tradeId }],
+    columns: COLUMNS,
   }
 }

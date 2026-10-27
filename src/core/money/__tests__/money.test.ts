@@ -1,4 +1,10 @@
-import { formatAmountSafe, formatMoney, moneyToApiNumber, moneyToApiString } from '../format'
+import {
+  formatAmountField,
+  formatAmountSafe,
+  formatMoney,
+  moneyToApiNumber,
+  moneyToApiString,
+} from '../format'
 import {
   addMoney,
   parseMoney,
@@ -89,7 +95,7 @@ describe('formatMoney', () => {
 
   it('тэмдэггүй валютын код ард бичигдэнэ', () => {
     expect(formatMoney(parseMoney('1.5', 'USDT'), { withSymbol: true })).toBe(
-      '1.500000 USDT',
+      '1.50 USDT',
     )
   })
 
@@ -128,11 +134,70 @@ describe('API руу явах хэлбэр', () => {
 describe('formatAmountSafe', () => {
   it('бүртгэлтэй валют дээр formatMoney-той ижил гарна', () => {
     expect(formatAmountSafe('12.34', 'MNT')).toBe('12.34')
-    expect(formatAmountSafe(100, 'USDT')).toBe('100')
+    expect(formatAmountSafe(100, 'USDT')).toBe('100.00')
   })
 
   it('CURRENCIES-д байхгүй ticker дээр шидэлгүй, түүхий дүнг харуулна', () => {
     expect(formatAmountSafe(1.23456789, 'SOL')).toBe('1.23456789 SOL')
     expect(formatAmountSafe('42', 'DOGE')).toBe('42 DOGE')
+  })
+
+  it('1e-8 шиг бичиглэлийг энгийн тоо болгоно', () => {
+    expect(formatAmountSafe(1e-8, 'IHC')).toBe('0.00000001 IHC')
+    expect(formatAmountSafe(2.5e-5, 'USDT')).toBe('0.00')
+    expect(formatAmountSafe(1.5e21, 'IHC')).toBe(
+      '1,500,000,000,000,000,000,000 IHC',
+    )
+  })
+
+  it('валютаас олон оронтой үнэлгээг доош тайрч харуулна', () => {
+    expect(formatAmountSafe(0.0745438230708132, 'USDT')).toBe('0.07')
+    expect(formatAmountSafe(7.72062909e-7, 'USDT')).toBe('0.00')
+    expect(formatAmountSafe(0.00288083175, 'MNT')).toBe('0.00')
+    expect(formatAmountSafe('1236.519', 'MNT')).toBe('1,236.51')
+  })
+})
+
+describe('USDT / MNT — вэбийн адил яг 2 орон', () => {
+  it('урт бутархайг 2 орон хүртэл доош тайрна', () => {
+    expect(formatAmountSafe(25004.143827, 'USDT')).toBe('25,004.14')
+    expect(formatAmountSafe('3890.03607', 'USDT')).toBe('3,890.03')
+    expect(formatAmountSafe('9.999999', 'USDT')).toBe('9.99')
+  })
+
+  it('бүхэл ба нэг оронтой дүнг 2 орон болгож нөхнө', () => {
+    expect(formatAmountSafe('237.5', 'USDT')).toBe('237.50')
+    expect(formatAmountSafe(27000, 'USDT')).toBe('27,000.00')
+  })
+
+  it('crypto хэвээр — илүү тэгийг хасна, 2 оронд тайрахгүй', () => {
+    expect(formatAmountSafe('0.00019', 'BTC')).toBe('0.00019')
+    expect(formatAmountSafe('0.235764', 'LTC')).toBe('0.235764 LTC')
+  })
+
+  it('сүлжээнд явах дүн бүтэн нарийвчлалтай хэвээр', () => {
+    expect(moneyToApiString(parseMoney('9.02962042', 'USDT'))).toBe(
+      '9.02962042',
+    )
+  })
+})
+
+describe('formatAmountField', () => {
+  it('showCode бол вэб шиг ард нь код, үгүй бол formatAmountSafe', () => {
+    expect(
+      formatAmountField({ raw: 976000, currency: 'MNT', showCode: true }),
+    ).toBe('976,000.00 MNT')
+    expect(formatAmountField({ raw: 976000, currency: 'MNT' })).toBe(
+      '976,000.00',
+    )
+  })
+
+  it('танихгүй ticker эсвэл хоосон код дээр давхардуулахгүй', () => {
+    expect(
+      formatAmountField({ raw: '42', currency: 'DOGE', showCode: true }),
+    ).toBe('42 DOGE')
+    expect(formatAmountField({ raw: 5, currency: '', showCode: true })).toBe(
+      '5',
+    )
   })
 })

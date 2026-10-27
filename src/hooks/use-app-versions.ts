@@ -1,6 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import type { AppOs, AppVersionInput } from '@/data/app-version/app-version-model'
+import type {
+  AppOs,
+  AppVersionInput,
+} from '@/data/app-version/app-version-model'
 import { appVersionRepository } from '@/data/app-version/app-version-repository'
 
 import { useCursorList } from './use-cursor-list'
@@ -22,7 +25,9 @@ export function useSaveAppVersion(id?: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (input: AppVersionInput) =>
-      id ? appVersionRepository.update(id, input) : appVersionRepository.create(input),
+      id
+        ? appVersionRepository.update(id, input)
+        : appVersionRepository.create(input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: [KEY] })
     },

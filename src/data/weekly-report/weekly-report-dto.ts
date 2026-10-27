@@ -26,6 +26,7 @@ export type WeeklyReportDto = {
   status?: string
   submittedAt?: string | null
   created_at?: string
+  updated_at?: string
 }
 
 export function toAuthor(dto: ReportAuthorDto): ReportAuthor {
@@ -51,6 +52,7 @@ export function toWeeklyReport(dto: WeeklyReportDto): WeeklyReport {
     status: dto.status === 'SUBMITTED' ? 'SUBMITTED' : 'DRAFT',
     submittedAt: dto.submittedAt ?? undefined,
     createdAt: dto.created_at ?? '',
+    updatedAt: dto.updated_at,
   }
 }
 

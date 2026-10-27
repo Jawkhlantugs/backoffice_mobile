@@ -1,14 +1,23 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { buyNowOrderRepository } from '@/data/buy-now-order/buy-now-order-repository'
+import { withDefaultRange, type ListFilters } from '@/lib/list-filters'
 
 import { usePagedList } from './use-paged-list'
 
-export function useBuyNowOrders(options: { search?: string } = {}) {
+export function useBuyNowOrders(
+  options: { search?: string; status?: string; filters?: ListFilters } = {},
+) {
   return usePagedList(
     'buy-now-orders',
     (params) => buyNowOrderRepository.list(params),
-    { search: options.search },
+    {
+      search: options.search,
+      filters: {
+        status: options.status,
+        ...withDefaultRange(options.filters ?? {}),
+      },
+    },
   )
 }
 

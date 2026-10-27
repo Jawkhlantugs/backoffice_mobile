@@ -20,6 +20,7 @@ export function toCryptoFailedWithdrawal(
     id: dto.id ?? '',
     userEmail: dto.User?.email,
     userId: dto.User?.id ?? dto.uid ?? undefined,
+    uid: dto.uid,
     feeRefundStatus: dto.feeRefundStatus,
     mainRefundStatus: dto.mainRefundStatus,
     resolvedAt: dto.resolvedAt ?? undefined,

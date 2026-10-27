@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, type RecordView } from '@/components'
+import { PagedListScreen, type RecordView, type StatusTone } from '@/components'
 import { formatAmountSafe } from '@/core/money/format'
 import {
   CONVERT_LIMIT_STATUSES,
@@ -17,10 +17,33 @@ import {
 import { formatDate } from '@/lib/date'
 import { labelOf } from '@/lib/label-of'
 import { messages } from '@/lib/messages'
-import { statusTone } from '@/lib/status-tone'
 
 const text = messages.convertLimit
 const f = text.fields
+
+/** Вэбийн `convert/limit/constants.ts`-ийн `getConvertLimitStatusVariant`. */
+const STATUS_TONE: Record<string, StatusTone> = {
+  COMPLETED: 'success',
+  OFFERED: 'warning',
+  COUNTER_OFFERED: 'warning',
+  PROCESSING: 'warning',
+  INITIATING: 'warning',
+  SETTLING: 'warning',
+  FAILED: 'danger',
+  REJECTED: 'danger',
+}
+
+/** Вэбийн `convert/limit/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.createdAt,
+  f.uid,
+  f.direction,
+  'amount',
+  f.rate,
+  f.expected,
+  'status',
+  f.expiresAt,
+] as const
 
 /**
  * Мөнгө хөдөлгөнө — товч нь вэбийн `ConvertLimitAction`-тай ижил статусаар:
@@ -41,19 +64,22 @@ export function ConvertLimitListScreen() {
     const failedWithPayout = item.status === 'FAILED' && !!item.payoutTxnId
     return {
       title: item.uid || item.id,
+      tableTitle: item.id,
       subtitle: `${item.fromAsset} → ${item.toAsset} · ${formatDate(item.createdAt)}`,
       status: {
         label: labelOf(text.statuses, item.status) ?? item.status,
-        tone: failedWithPayout ? 'danger' : statusTone(item.status),
+        tone: STATUS_TONE[item.status] ?? 'neutral',
       },
-      amount: item.amount,
+      amount: { ...item.amount, showCode: true },
       fields: [
         { label: f.rate, value: item.rate },
-        { label: f.expected, amount: item.expectedTo },
+        { label: f.expected, amount: { ...item.expectedTo, showCode: true } },
         { label: f.expiresAt, value: formatDate(item.expiresAt) },
         { label: f.offers, value: item.offers },
       ],
       details: [
+        { label: f.uid, value: item.uid },
+        { label: f.direction, value: `${item.fromAsset} → ${item.toAsset}` },
         { label: f.agreedRate, value: item.agreedRate },
         { label: f.agreedAmount, amount: item.agreedAmount },
         { label: f.lastActor, value: item.lastActor },
@@ -66,6 +92,7 @@ export function ConvertLimitListScreen() {
         { label: f.refund, value: item.refundTxnId },
         { label: f.createdAt, value: formatDate(item.createdAt) },
       ],
+      columns: COLUMNS,
       actions: [
         {
           key: 'accept',
@@ -133,7 +160,7 @@ export function ConvertLimitListScreen() {
         value: status,
         onChange: setStatus,
       }}
-      tableLabels={{ title: f.uid, amount: f.amount }}
+      tableLabels={{ title: f.id, amount: f.amount }}
       record={toRecord}
     />
   )

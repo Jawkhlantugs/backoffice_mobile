@@ -146,10 +146,16 @@ GIP / Inter фонт ачаалаагүй — системийн фонт нь �
 | `title`   | 18 / 24            | толгой, карт, sheet-ийн гарчиг |
 | `body-lg` | 16 / 24            | чухал текст                  |
 | `body`    | 14 / 20            | үндсэн текст, жагсаалтын мөр |
+| `field`   | 14 / —             | нэг мөрт `TextInput` л       |
 | `caption` | 12 / 16            | тайлбар                      |
 | `tiny`    | 11 / 14            | таб, хэсгийн гарчиг, шошго   |
 
 Хэсгийн гарчиг (`SectionHeader`) нь `tiny` + том үсэг + сийрэг зай.
+
+⚠️ Нэг мөрт `TextInput`-д `text-body` бүү өг: iOS дээр line-height нь текстийг
+доош түлхэж, `g`, `y`-ийн доод хэсгийг тайрдаг. Өндрийг `h-11` өгнө,
+фонтыг `text-field` (`text-input` биш — `input` өнгөтэй давхцана).
+Олон мөрт (`multiline`) оролтод `text-body` зүгээр.
 
 ---
 
@@ -182,7 +188,7 @@ iOS 26+ дээр жинхэнэ glass, бусад (Android, хуучин iOS) д
 | Дугуй дүрс товч — толгой, drawer хаах, macro | `IconButton` |
 | Хөвөгч таб капсул (контент ард нь гүйнэ) | `AppTabBar` + `useTabBarInset()` |
 | Segment, шүүлтүүрийн чип, хайлт | `SegmentedControl`, `FilterChips`, `SearchInput` |
-| Доод хавтан, toast | `BottomSheet`, `ToastHost` |
+| Доод хавтан, toast | `BackofficeBottomSheet`, `ToastHost` |
 
 🔴 **Карт, жагсаалтын мөр glass биш** — олон давхар glass уншигдахгүй, удаан.
 Glass зөвхөн контентын **дээр хөвөх** удирдлагад.

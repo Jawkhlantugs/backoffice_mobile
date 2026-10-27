@@ -459,9 +459,6 @@ const supportRoutes: Route[] = [
       body,
     ),
   ),
-  route('backoffice', 'get', '/support/tickets/:id', (data, _r, { id }) =>
-    ok(find(data.tickets, id)),
-  ),
   route(
     'backoffice',
     'put',

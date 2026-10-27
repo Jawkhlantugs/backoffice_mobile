@@ -32,6 +32,8 @@ export type UserStake = {
   uid?: string
   asset: string
   stakeStatus: string
+  /** Вэбийн "Status" багана (`active` …) — `stakeStatus`-аас тусдаа. */
+  status?: string
   staked: AmountField
   total: AmountField
   reward: AmountField
@@ -39,6 +41,7 @@ export type UserStake = {
   contractId?: string
   createdAt?: number
   updatedAt?: number
+  cancelTime?: number
   txnIds: string[]
 }
 
@@ -51,6 +54,7 @@ export type StakeAsset = {
   maxSize?: AmountField
   usedMaxSize?: AmountField
   totalStaked?: AmountField
+  createdAt?: number
   updatedAt?: number
 }
 

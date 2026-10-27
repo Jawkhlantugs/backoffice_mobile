@@ -14,12 +14,28 @@ import {
 import { formatDate, formatDateOnly } from '@/lib/date'
 import { messages } from '@/lib/messages'
 
-import { ALL, partnerStatus, partnerStatusChips } from './partner-status'
+import {
+  ALL,
+  PARTNER_TONES,
+  partnerStatus,
+  partnerStatusChips,
+} from './partner-status'
 
 const text = messages.partner
 const f = text.fields
 
 /** Мөнгө хөдөлгөнө — батлах/татгалзах нь зөвхөн `pending` үед (вэбтэй ижил). */
+/** Вэбийн `partner/payouts/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  'amount',
+  f.commissionCount,
+  f.period,
+  'status',
+  f.transfer,
+  f.processedAt,
+  f.createdAt,
+] as const
+
 export function PartnerPayoutListScreen() {
   const [status, setStatus] = useState<string>(ALL)
   const list = usePartnerPayouts(status === ALL ? undefined : status)
@@ -32,8 +48,8 @@ export function PartnerPayoutListScreen() {
     return {
       title: item.partner,
       subtitle: formatDate(item.createdAt),
-      status: partnerStatus(item.status),
-      amount: item.amount,
+      status: partnerStatus(item.status, PARTNER_TONES.payouts),
+      amount: { ...item.amount, showCode: true },
       fields: [
         { label: f.commissionCount, value: item.commissionCount },
         {
@@ -48,7 +64,11 @@ export function PartnerPayoutListScreen() {
       details: [
         { label: f.transactionId, value: item.transactionId },
         { label: f.failureReason, value: item.failureReason },
+        // Вэб outline Badge — өнгөгүй.
+        { label: f.transfer, value: item.transferStatus ?? 'not_started' },
+        { label: f.createdAt, value: formatDate(item.createdAt) },
       ],
+      columns: COLUMNS,
       actions: [
         {
           key: 'approve',

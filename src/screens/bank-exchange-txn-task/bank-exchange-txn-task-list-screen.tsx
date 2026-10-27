@@ -24,6 +24,7 @@ export function BankExchangeTxnTaskListScreen() {
         placeholder: messages.finance.searchPlaceholder,
       }}
       record={bankExchangeTxnTaskRecord}
+      tableLabels={{ title: messages.finance.fields.id }}
     />
   )
 }

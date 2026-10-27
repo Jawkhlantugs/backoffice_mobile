@@ -6,7 +6,7 @@ import { messages } from '@/lib/messages'
 import { AppButton } from './app-button'
 import { AppInput } from './app-input'
 import { AppText } from './app-text'
-import { BottomSheet } from './bottom-sheet'
+import { BackofficeBottomSheet } from './backoffice-bottom-sheet'
 
 export type ConfirmSheetProps = {
   visible: boolean
@@ -14,7 +14,14 @@ export type ConfirmSheetProps = {
   /** Юу хийх гэж байгаа, хэний, ямар дүн — §1.5. */
   description: string
   /** Буцаах боломжгүй үйлдэлд шалтгаан шаардана. */
-  reason?: { label: string; required: boolean; placeholder?: string }
+  reason?: {
+    label: string
+    required: boolean
+    placeholder?: string
+    /** Алдааны текст буцаавал Батлах товч идэвхгүй (жишээ нь имэйлийн хэлбэр). */
+    validate?: (value: string) => string | undefined
+    keyboardType?: 'default' | 'email-address'
+  }
   confirmLabel?: string
   destructive?: boolean
   onConfirm: (reason?: string) => void | Promise<void>
@@ -37,7 +44,11 @@ export function ConfirmSheet({
 }: ConfirmSheetProps) {
   const [text, setText] = useState('')
 
-  const blocked = reason?.required === true && text.trim().length === 0
+  const invalid =
+    text.trim().length > 0 ? reason?.validate?.(text.trim()) : undefined
+  const blocked =
+    (reason?.required === true && text.trim().length === 0) ||
+    invalid !== undefined
 
   // Хаагдах үед л цэвэрлэнэ — алдаа гарвал бичсэн шалтгаан хэвээр үлдэнэ.
   const [wasVisible, setWasVisible] = useState(visible)
@@ -47,7 +58,7 @@ export function ConfirmSheet({
   }
 
   return (
-    <BottomSheet visible={visible} title={title} onClose={onCancel}>
+    <BackofficeBottomSheet visible={visible} title={title} onClose={onCancel}>
       <AppText variant="body" className="text-muted-foreground">
         {description}
       </AppText>
@@ -58,7 +69,12 @@ export function ConfirmSheet({
           value={text}
           onChangeText={setText}
           placeholder={reason.placeholder}
-          multiline
+          error={invalid}
+          keyboardType={reason.keyboardType}
+          autoCapitalize={
+            reason.keyboardType === 'email-address' ? 'none' : undefined
+          }
+          multiline={reason.keyboardType !== 'email-address'}
         />
       ) : null}
 
@@ -75,6 +91,6 @@ export function ConfirmSheet({
           onPress={onCancel}
         />
       </View>
-    </BottomSheet>
+    </BackofficeBottomSheet>
   )
 }

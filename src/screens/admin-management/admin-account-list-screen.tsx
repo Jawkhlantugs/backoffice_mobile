@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { PagedListScreen, type RecordView } from '@/components'
+import { PagedListScreen, type RecordView, type StatusTone } from '@/components'
 import {
   ADMIN_ACCOUNT_ENABLED,
   type AdminAccount,
@@ -23,6 +23,16 @@ const ALL = 'all'
  * Админ хэрэглэгчид. Нууц үг сэргээх, хандалт хаах/нээх нь вэбтэй ижил
  * Super Admin-д л; өөрийгөө хаах боломжгүй.
  */
+/** Вэбийн `admin-management/users/constants.ts`-ийн `getStatusVariant`. */
+const STATUS_TONE: Record<string, StatusTone> = {
+  active: 'success',
+  disabled: 'danger',
+  force_change_password: 'warning',
+}
+
+/** Вэбийн `admin-management/users/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [f.user, f.group, 'status', f.enabled, f.joined] as const
+
 export function AdminAccountListScreen() {
   const me = useSessionStore((state) => state.user)
   const [search, setSearch] = useState('')
@@ -38,20 +48,26 @@ export function AdminAccountListScreen() {
     const self = me?.id === item.id
     return {
       title: item.email || item.id,
+      tableTitle: item.id,
       subtitle: item.group,
       status: {
-        label: item.isEnabled
-          ? text.enabledChips.true
-          : text.enabledChips.false,
-        tone: item.isEnabled ? 'success' : 'danger',
+        label: item.status,
+        tone: STATUS_TONE[item.status.toLowerCase()] ?? 'neutral',
       },
       fields: [
+        {
+          label: f.enabled,
+          value: item.isEnabled
+            ? text.enabledChips.true
+            : text.enabledChips.false,
+          tone: item.isEnabled ? 'success' : 'danger',
+        },
         { label: f.group, value: item.group },
         { label: f.department, value: item.department },
-        { label: f.status, value: item.status },
-        { label: f.createdAt, value: formatDate(item.createdAt) },
+        { label: f.joined, value: formatDate(item.createdAt) },
       ],
       details: [
+        { label: f.user, value: item.email },
         { label: f.id, value: item.id },
         {
           label: f.userCreateDate,
@@ -60,6 +76,7 @@ export function AdminAccountListScreen() {
             : undefined,
         },
       ],
+      columns: COLUMNS,
       actions: [
         {
           key: 'reset-password',
@@ -112,7 +129,7 @@ export function AdminAccountListScreen() {
         value: enabled,
         onChange: setEnabled,
       }}
-      tableLabels={{ title: f.email }}
+      tableLabels={{ title: f.id }}
       record={toRecord}
     />
   )

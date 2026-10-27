@@ -9,6 +9,7 @@ import type {
 
 export type CoinListingDto = {
   id: string
+  created_at?: string
   coin?: string
   name?: string
   isEnabled?: number
@@ -16,7 +17,7 @@ export type CoinListingDto = {
   trading?: boolean
   depositAllEnable?: boolean
   withdrawAllEnable?: boolean
-  networkList?: { network?: string }[]
+  networkList?: { name?: string; network?: string }[]
 }
 
 export type UserWalletAddressDto = {
@@ -25,8 +26,10 @@ export type UserWalletAddressDto = {
   User?: PartyDto
   address?: string
   coin?: string
+  coinNetwork?: string
   network?: string
   tag?: string
+  url?: string
   isDefault?: boolean
 }
 
@@ -67,9 +70,11 @@ export function toCoinListing(dto: CoinListingDto): CoinListing {
     trading: dto.trading === true,
     depositEnabled: dto.depositAllEnable === true,
     withdrawEnabled: dto.withdrawAllEnable === true,
-    networks: (dto.networkList ?? []).flatMap((item) =>
-      item.network ? [item.network] : [],
-    ),
+    networks: (dto.networkList ?? []).flatMap((item) => {
+      const name = item.name || item.network
+      return name ? [name] : []
+    }),
+    createdAt: dto.created_at,
   }
 }
 
@@ -79,9 +84,12 @@ export function toUserWalletAddress(
   return {
     id: dto.id,
     owner: partyLabel(dto.User),
+    userEmail: dto.User?.email ?? undefined,
     address: dto.address,
     coin: dto.coin,
+    coinNetwork: dto.coinNetwork,
     network: dto.network,
+    url: dto.url,
     tag: dto.tag,
     isDefault: dto.isDefault === true,
     createdAt: dto.created_at ?? '',
@@ -92,6 +100,8 @@ export function toWithdrawBan(dto: WithdrawBanDto): WithdrawBan {
   return {
     id: dto.id,
     owner: partyLabel(dto.User) ?? dto.userId,
+    userId: dto.User?.id,
+    userEmail: dto.User?.email ?? undefined,
     reason: dto.reason ?? undefined,
     status: dto.status ?? undefined,
     startTime: dto.start_time ?? undefined,
@@ -109,6 +119,9 @@ export function toDelistedTransfer(dto: DelistedTransferDto): DelistedTransfer {
   return {
     id: dto.id,
     owner: partyLabel(dto.User) ?? dto.subAccountId,
+    subAccountId: dto.User?.subAccountId ?? undefined,
+    userEmail: dto.User?.email ?? undefined,
+    asset: dto.asset,
     amount: amountOf(dto.amount, dto.asset),
     returnAmount: amountOf(dto.returnAmount, dto.returnAsset),
     price: dto.price,

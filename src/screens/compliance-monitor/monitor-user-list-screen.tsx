@@ -15,26 +15,53 @@ const text = messages.monitorUsers
 const f = text.fields
 const ALL = 'all'
 
-const yesNo = (value: boolean) =>
-  value ? messages.lists.yes : messages.lists.no
+/** Вэбийн `compliance/monitor-users/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.email,
+  f.description,
+  f.threshold,
+  'status',
+  f.cryptoDeposit,
+  f.cryptoWithdrawal,
+  f.fiatDeposit,
+  f.fiatWithdrawal,
+  f.createdAt,
+  f.addedAt,
+] as const
+
+/** Вэб идэвхтэй урсгалыг ногоон "Enabled", бусдыг саарал "Disabled" гэж. */
+const flag = (label: string, value: boolean) => ({
+  label,
+  value: value ? 'Enabled' : 'Disabled',
+  tone: value ? ('success' as const) : ('neutral' as const),
+})
 
 function toRecord(item: MonitorUser): RecordView {
   return {
     title: item.email ?? item.userId,
+    tableTitle: item.userId,
     subtitle: item.description,
     status: {
       label: labelOf(text.statuses, item.status) ?? item.status,
-      tone: item.status === 'monitoring' ? 'warning' : 'neutral',
+      // Вэбийн `getStatusVariant`: monitoring ногоон, paused шар.
+      tone:
+        item.status === 'monitoring'
+          ? 'success'
+          : item.status === 'paused'
+            ? 'warning'
+            : 'neutral',
     },
     fields: [
       { label: f.threshold, value: groupDigits(item.threshold) },
-      { label: f.cryptoDeposit, value: yesNo(item.cryptoDeposit) },
-      { label: f.cryptoWithdrawal, value: yesNo(item.cryptoWithdrawal) },
-      { label: f.fiatDeposit, value: yesNo(item.fiatDeposit) },
+      flag(f.cryptoDeposit, item.cryptoDeposit),
+      flag(f.cryptoWithdrawal, item.cryptoWithdrawal),
+      flag(f.fiatDeposit, item.fiatDeposit),
     ],
     details: [
       { label: f.userId, value: item.userId },
-      { label: f.fiatWithdrawal, value: yesNo(item.fiatWithdrawal) },
+      { label: f.email, value: item.email },
+      { label: f.description, value: item.description },
+      flag(f.fiatWithdrawal, item.fiatWithdrawal),
       { label: f.createdAt, value: formatDate(item.createdAt) },
       {
         label: f.addedAt,
@@ -42,6 +69,7 @@ function toRecord(item: MonitorUser): RecordView {
       },
       { label: f.addedBy, value: item.addedBy },
     ],
+    columns: COLUMNS,
   }
 }
 
@@ -74,7 +102,7 @@ export function MonitorUserListScreen() {
         value: status,
         onChange: setStatus,
       }}
-      tableLabels={{ title: f.email }}
+      tableLabels={{ title: f.userId, status: f.status }}
       record={toRecord}
     />
   )

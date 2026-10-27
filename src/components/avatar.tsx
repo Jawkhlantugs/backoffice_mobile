@@ -11,10 +11,9 @@ function initials(source: string | undefined): string {
 
   const name = clean.split('@')[0] ?? clean
   const parts = name.split(/[.\-_\s]+/).filter((part) => part.length > 0)
-  const first = parts[0]?.[0] ?? ''
-  const second = parts[1]?.[0] ?? ''
+  if (parts.length < 2) return name.slice(0, 2).toUpperCase()
 
-  return (first + second).toUpperCase() || name.slice(0, 2).toUpperCase()
+  return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase()
 }
 
 export function Avatar({

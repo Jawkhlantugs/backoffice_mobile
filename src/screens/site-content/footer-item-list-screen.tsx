@@ -13,6 +13,16 @@ const f = text.fields
 const ALL = 'all'
 
 /** Ангиллын нэрийг вэб шиг идэвхтэй ангиллын жагсаалтаас тааруулна. */
+/** Вэбийн `footer-menu/menu/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.nameEn,
+  f.order,
+  f.category,
+  f.type,
+  f.target,
+  'status',
+] as const
+
 export function FooterItemListScreen() {
   const [category, setCategory] = useState<string>(ALL)
   const categories = useFooterCategories()
@@ -26,7 +36,7 @@ export function FooterItemListScreen() {
     return {
       title: item.nameMn || item.nameEn || item.id,
       subtitle: item.nameEn,
-      status: activeStatus(item.isActive),
+      status: activeStatus(item.isActive, 'neutral'),
       fields: [
         {
           label: f.category,
@@ -34,6 +44,7 @@ export function FooterItemListScreen() {
             ? (names.get(item.categoryId) ?? item.categoryId)
             : undefined,
         },
+        { label: f.nameEn, value: item.nameEn },
         { label: f.order, value: item.order },
         { label: f.type, value: labelOf(text.itemTypes, item.type) },
         { label: f.target, value: item.target },
@@ -42,6 +53,7 @@ export function FooterItemListScreen() {
         { label: f.link, value: item.link },
         { label: f.createdAt, value: formatDate(item.createdAt) },
       ],
+      columns: COLUMNS,
     }
   }
 

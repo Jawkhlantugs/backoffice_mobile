@@ -8,11 +8,21 @@ import { messages } from '@/lib/messages'
 const text = messages.siteContent
 const f = text.fields
 
+/** Вэбийн `additional/head-config/components/columns.tsx`-ийн дараалал (Config-гүй). */
+const COLUMNS = [
+  f.locale,
+  f.meta,
+  f.scripts,
+  f.links,
+  'status',
+  f.updatedAt,
+] as const
+
 function toRecord(item: HeadConfig): RecordView {
   return {
     title: item.route || item.id,
     subtitle: item.app,
-    status: activeStatus(item.enabled),
+    status: activeStatus(item.enabled, 'neutral'),
     fields: [
       { label: f.locale, value: item.locale },
       { label: f.meta, value: item.metaCount },
@@ -20,6 +30,7 @@ function toRecord(item: HeadConfig): RecordView {
       { label: f.scripts, value: item.scriptCount },
     ],
     details: [{ label: f.updatedAt, value: formatDate(item.updatedAt) }],
+    columns: COLUMNS,
   }
 }
 

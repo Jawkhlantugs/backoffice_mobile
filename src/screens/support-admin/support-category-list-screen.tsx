@@ -14,8 +14,19 @@ const typeLabel = (type: string | undefined) => {
   return labels[type] ?? type
 }
 
+/** Вэбийн `support/ticket-category/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.nameMn,
+  f.createdBy,
+  f.parent,
+  'status',
+  f.createdAt,
+  f.updatedAt,
+] as const
+
 function toRecord(item: SupportCategory): RecordView {
   return {
+    tableTitle: item.nameEn || item.id,
     title: item.nameEn || item.nameMn || item.id,
     subtitle: item.parent ? `↳ ${item.parent}` : item.nameMn,
     status: activeStatus(item.isActive),
@@ -30,6 +41,7 @@ function toRecord(item: SupportCategory): RecordView {
       { label: f.createdAt, value: formatDate(item.createdAt) },
       { label: f.updatedAt, value: formatDate(item.updatedAt) },
     ],
+    columns: COLUMNS,
   }
 }
 
@@ -46,7 +58,7 @@ export function SupportCategoryListScreen() {
       emptyIcon="tags"
       searchText={(item) => `${item.nameEn} ${item.nameMn}`}
       searchPlaceholder={text.searchPlaceholder}
-      tableLabels={{ title: f.nameEn }}
+      tableLabels={{ title: f.nameEn, status: f.active }}
       record={toRecord}
     />
   )

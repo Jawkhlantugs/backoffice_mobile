@@ -10,8 +10,19 @@ import { messages } from '@/lib/messages'
 const text = messages.supportAdmin
 const f = text.fields
 
+/** Вэбийн `support/support-user-teams/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.name,
+  f.description,
+  'status',
+  f.createdBy,
+  f.createdAt,
+  f.updatedAt,
+] as const
+
 function toRecord(item: SupportTeam): RecordView {
   return {
+    tableTitle: item.id,
     title: item.name,
     subtitle: item.description,
     status: activeStatus(item.isActive),
@@ -21,7 +32,11 @@ function toRecord(item: SupportTeam): RecordView {
       { label: f.createdAt, value: formatDate(item.createdAt) },
       { label: f.updatedAt, value: formatDate(item.updatedAt) },
     ],
-    details: [{ label: f.description, value: item.description }],
+    details: [
+      { label: f.name, value: item.name },
+      { label: f.description, value: item.description },
+    ],
+    columns: COLUMNS,
   }
 }
 
@@ -41,7 +56,7 @@ export function SupportTeamListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      tableLabels={{ title: f.name }}
+      tableLabels={{ title: f.id, status: f.active }}
       record={toRecord}
     />
   )

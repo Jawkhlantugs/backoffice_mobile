@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import {
   FlatList,
@@ -6,42 +6,41 @@ import {
   Platform,
   TextInput,
   View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import {
   AppButton,
   AppCard,
   AppHeader,
   AppText,
-  FilterChips,
   IconButton,
-  InfoRow,
   Screen,
   StateView,
   TextButton,
-  type FilterChip,
 } from '@/components'
-import type { TicketStatus } from '@/data/support-ticket/support-ticket-model'
 import type { TicketMacro } from '@/data/support-ticket/ticket-macro-model'
+import {
+  openingMessage,
+  type TicketMessage,
+} from '@/data/support-ticket/ticket-conversation-model'
 import {
   useSupportTicket,
   useUpdateTicketStatus,
 } from '@/hooks/use-support-tickets'
 import { useTicketConversation } from '@/hooks/use-ticket-conversation'
-import { formatDate } from '@/lib/date'
 import { messages, translateUnknownError } from '@/lib/messages'
 import { useAppColors } from '@/theme/use-theme'
 
+import { TicketInfoSheet } from './ticket-info-sheet'
 import { TicketMacroSheet } from './ticket-macro-sheet'
 import { TicketMessageBubble } from './ticket-message-bubble'
-import { TicketStatusPill } from './ticket-status-pill'
+import { TicketStatusSelect } from './ticket-status-select'
 
-const statusChips = (): FilterChip<TicketStatus>[] => [
-  { value: 'new', label: messages.supportTickets.statuses.new },
-  { value: 'open', label: messages.supportTickets.statuses.open },
-  { value: 'pending', label: messages.supportTickets.statuses.pending },
-  { value: 'solved', label: messages.supportTickets.statuses.solved },
-]
+/** Доороос энэ зайд байвал шинэ мессеж ирэхэд доош гүйлгэнэ (вэбийн 120px). */
+const NEAR_BOTTOM_PX = 120
 
 const connectionLabel = () => ({
   idle: '',
@@ -53,6 +52,7 @@ const connectionLabel = () => ({
 export function TicketDetailScreen() {
   const router = useRouter()
   const { colors } = useAppColors()
+  const insets = useSafeAreaInsets()
   const { id } = useLocalSearchParams<{ id: string }>()
   const ticketId = id ?? ''
 
@@ -63,9 +63,27 @@ export function TicketDetailScreen() {
   const [draft, setDraft] = useState('')
   const [macroVisible, setMacroVisible] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
+  const [infoVisible, setInfoVisible] = useState(false)
+
+  const listRef = useRef<FlatList<TicketMessage>>(null)
+  // Хуучин мессеж уншиж байхад шинэ мессеж ирвэл үсрэхгүй — вэбийн адил.
+  const nearBottomRef = useRef(true)
+
+  function scrollToLatest(animated: boolean) {
+    if (nearBottomRef.current) listRef.current?.scrollToEnd({ animated })
+  }
+
+  function trackScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent
+    nearBottomRef.current =
+      contentSize.height - contentOffset.y - layoutMeasurement.height <
+      NEAR_BOTTOM_PX
+  }
 
   const ticket = query.data
-  const messagesList = conversation.query.data?.items ?? []
+  const messagesList = conversation.messages
+  const opening = ticket ? openingMessage(ticket) : null
+  const thread = opening ? [opening, ...messagesList] : messagesList
 
   function selectMacro(macro: TicketMacro) {
     setDraft((current) =>
@@ -78,8 +96,9 @@ export function TicketDetailScreen() {
     const text = draft.trim()
     if (!text) return
     setSendError(null)
+    nearBottomRef.current = true
     try {
-      await conversation.sendMessage(text)
+      await conversation.sendMessage(text, ticket?.customerUid)
       setDraft('')
     } catch (error) {
       setSendError(translateUnknownError(error))
@@ -90,14 +109,34 @@ export function TicketDetailScreen() {
     <Screen edges={['top', 'bottom']} padded={false}>
       <View className="px-4">
         <AppHeader
-          title={messages.supportTickets.title}
+          title={ticket?.title || messages.supportTickets.title}
+          subtitle={ticket?.requesterLabel}
           leading={{
             icon: 'back',
             label: messages.nav.back,
             onPress: () => router.back(),
           }}
+          actions={
+            ticket
+              ? [
+                  {
+                    icon: 'info',
+                    label: messages.supportTickets.info,
+                    onPress: () => setInfoVisible(true),
+                  },
+                ]
+              : []
+          }
           right={
-            ticket ? <TicketStatusPill status={ticket.status} /> : undefined
+            ticket ? (
+              <TicketStatusSelect
+                status={ticket.status}
+                disabled={updateStatus.isPending}
+                onChange={(status) =>
+                  updateStatus.mutate({ id: ticket.id, status })
+                }
+              />
+            ) : undefined
           }
         />
       </View>
@@ -105,7 +144,9 @@ export function TicketDetailScreen() {
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={12}
+        // ⚠️ KAV байрлалаа эцэг View-ээс хэмждэг — `Screen`-ий дээд safe area-г
+        // нэмэхгүй бол reply мөр keyboard-ийн ард нуугдана.
+        keyboardVerticalOffset={insets.top}
       >
         <StateView
           className="px-4"
@@ -115,55 +156,48 @@ export function TicketDetailScreen() {
         >
           {ticket ? (
             <FlatList
-              data={messagesList}
+              ref={listRef}
+              data={thread}
               keyExtractor={(item, index) => item.id || String(index)}
-              contentContainerClassName="gap-3 px-4 pb-4"
-              renderItem={({ item }) => <TicketMessageBubble message={item} />}
-              ListHeaderComponent={
-                <View className="gap-4 pb-4">
-                  <AppCard className="gap-3">
-                    <AppText variant="label">{ticket.title}</AppText>
-                    <InfoRow
-                      label={messages.supportTickets.requester}
-                      value={ticket.requesterLabel}
-                    />
-                    {ticket.assignee ? (
-                      <InfoRow
-                        label={messages.supportTickets.assignee}
-                        value={ticket.assignee}
-                      />
-                    ) : null}
-                    {ticket.categoryLabel ? (
-                      <InfoRow
-                        label={messages.supportTickets.category}
-                        value={ticket.categoryLabel}
-                      />
-                    ) : null}
-                    {ticket.priority ? (
-                      <InfoRow
-                        label={messages.supportTickets.priority}
-                        value={
-                          messages.supportTickets.priorities[ticket.priority]
-                        }
-                      />
-                    ) : null}
-                    <InfoRow
-                      label={messages.supportTickets.createdAt}
-                      value={formatDate(ticket.createdAt)}
-                    />
+              contentContainerClassName="grow gap-3 px-4 py-4"
+              keyboardDismissMode="interactive"
+              keyboardShouldPersistTaps="handled"
+              onScroll={trackScroll}
+              scrollEventThrottle={100}
+              onContentSizeChange={() => scrollToLatest(true)}
+              onLayout={() => scrollToLatest(false)}
+              renderItem={({ item }) => (
+                <TicketMessageBubble
+                  message={item}
+                  customerLabel={ticket.requesterLabel}
+                />
+              )}
+              ListFooterComponent={
+                ticket.note ? (
+                  <AppCard className="mt-1 gap-1">
+                    <AppText variant="caption">
+                      {messages.supportTickets.internalNote}
+                    </AppText>
+                    <AppText variant="body">{ticket.note}</AppText>
                   </AppCard>
-
-                  <FilterChips
-                    chips={statusChips()}
-                    value={ticket.status}
-                    onChange={(status) =>
-                      updateStatus.mutate({ id: ticket.id, status })
-                    }
-                  />
-                </View>
+                ) : null
               }
               ListEmptyComponent={
-                conversation.query.isPending ? null : (
+                conversation.query.isPending ? null : conversation.query
+                    .error ? (
+                  <View className="items-center gap-2 px-4">
+                    <AppText
+                      variant="caption"
+                      className="text-center text-destructive"
+                    >
+                      {translateUnknownError(conversation.query.error)}
+                    </AppText>
+                    <TextButton
+                      label={messages.common.retry}
+                      onPress={() => void conversation.query.refetch()}
+                    />
+                  </View>
+                ) : (
                   <AppText variant="caption" className="px-4 text-center">
                     {messages.supportTickets.reply.empty}
                   </AppText>
@@ -205,6 +239,8 @@ export function TicketDetailScreen() {
               placeholder={messages.supportTickets.reply.placeholder}
               placeholderTextColor={colors.mutedForeground}
               multiline
+              autoCorrect={false}
+              spellCheck={false}
               className="min-h-11 flex-1 rounded-lg border border-input bg-card px-3 py-2.5 text-body text-foreground"
             />
 
@@ -217,6 +253,14 @@ export function TicketDetailScreen() {
           </View>
         </View>
       </KeyboardAvoidingView>
+
+      {ticket ? (
+        <TicketInfoSheet
+          ticket={ticket}
+          visible={infoVisible}
+          onClose={() => setInfoVisible(false)}
+        />
+      ) : null}
 
       <TicketMacroSheet
         visible={macroVisible}

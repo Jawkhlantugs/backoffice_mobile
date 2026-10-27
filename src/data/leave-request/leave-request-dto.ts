@@ -46,6 +46,17 @@ function toStatus(raw: string | undefined): LeaveStatus {
   return KNOWN_STATUSES.find((status) => status === raw) ?? 'PENDING'
 }
 
+/** Сервер `2026-10-26T00:00:00Z` гэж буцаадаг ч энэ нь агшин биш, хуанлийн
+ * өдөр — dayjs-ээр задалбал UTC-ээс хойшхи бүсэд өмнөх өдөр рүү шилжинэ. */
+function toCalendarDate(raw: string | undefined): string | undefined {
+  return raw?.match(/^\d{4}-\d{2}-\d{2}/)?.[0] ?? raw
+}
+
+/** `16:30:00` → `16:30`; секунд картанд илүүц. */
+function toClockTime(raw: string | undefined): string | undefined {
+  return raw?.match(/^\d{2}:\d{2}/)?.[0] ?? (raw || undefined)
+}
+
 export function toLeaveRequest(dto: LeaveRequestDto): LeaveRequest {
   return {
     id: dto.id ?? '',
@@ -53,10 +64,10 @@ export function toLeaveRequest(dto: LeaveRequestDto): LeaveRequest {
     department: dto.adminUser?.department ?? dto.adminUser?.adminGroup?.name,
     type: toType(dto.leaveType),
     unit: dto.requestType === 'hour' ? 'hour' : 'day',
-    startDate: dto.startDate ?? '',
-    endDate: dto.endDate ?? dto.startDate ?? '',
-    startTime: dto.startTime,
-    endTime: dto.endTime,
+    startDate: toCalendarDate(dto.startDate) ?? '',
+    endDate: toCalendarDate(dto.endDate ?? dto.startDate) ?? '',
+    startTime: toClockTime(dto.startTime),
+    endTime: toClockTime(dto.endTime),
     reason: dto.reason ?? '',
     status: toStatus(dto.status),
     reviewer: dto.reviewer?.email,

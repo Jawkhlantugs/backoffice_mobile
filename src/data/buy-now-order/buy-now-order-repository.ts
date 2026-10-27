@@ -11,6 +11,9 @@ export type BuyNowOrderListParams = {
   query?: string
   status?: string
   cryptoCurrency?: string
+  orderId?: string
+  start_day?: string
+  end_day?: string
 }
 
 export const buyNowOrderRepository = {
@@ -22,6 +25,10 @@ export const buyNowOrderRepository = {
       ...(params.status ? { status: params.status } : {}),
       ...(params.cryptoCurrency
         ? { cryptoCurrency: params.cryptoCurrency }
+        : {}),
+      ...(params.orderId ? { orderId: params.orderId } : {}),
+      ...(params.start_day && params.end_day
+        ? { sortDate: { start_day: params.start_day, end_day: params.end_day } }
         : {}),
     })
 

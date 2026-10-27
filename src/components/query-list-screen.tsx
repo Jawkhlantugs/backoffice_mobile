@@ -43,7 +43,7 @@ export function QueryListScreen<T, S extends string = string>({
   /** Өгвөл хайлтын талбар гарч, энэ текстээр шүүнэ. */
   searchText?: (item: T) => string
   searchPlaceholder?: string
-  tableLabels?: { title?: string; amount?: string }
+  tableLabels?: { title?: string; amount?: string; status?: string }
   emptyIcon: AppIconName
   emptyLabel?: string
   statusChips?: {

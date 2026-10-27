@@ -1,6 +1,6 @@
 import { FlatList, Pressable } from 'react-native'
 
-import { AppText, BottomSheet, StateView } from '@/components'
+import { AppText, BackofficeBottomSheet, StateView } from '@/components'
 import type { TicketMacro } from '@/data/support-ticket/ticket-macro-model'
 import { useTicketMacros } from '@/hooks/use-ticket-macros'
 import { messages } from '@/lib/messages'
@@ -18,7 +18,7 @@ export function TicketMacroSheet({
   const items = query.data?.items ?? []
 
   return (
-    <BottomSheet
+    <BackofficeBottomSheet
       visible={visible}
       title={messages.supportTickets.reply.macros}
       onClose={onClose}
@@ -49,6 +49,6 @@ export function TicketMacroSheet({
           )}
         />
       </StateView>
-    </BottomSheet>
+    </BackofficeBottomSheet>
   )
 }

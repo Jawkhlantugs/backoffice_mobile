@@ -1,8 +1,4 @@
-import type {
-  SupportTicket,
-  TicketPriority,
-  TicketStatus,
-} from './support-ticket-model'
+import type { SupportTicket, TicketStatus } from './support-ticket-model'
 
 /**
  * Серверийн JSON. `xmeta-admin`-ийн `support.types.ts`-ийн `Ticket`-тэй ижил
@@ -32,6 +28,7 @@ export type SupportTicketDto = {
   agentId?: string
   category?: { categoryNameMn?: string; categoryNameEn?: string }
   notes?: string
+  file?: string
   ticket_message?: string
   ticketMessage?: string
   created_at?: string
@@ -41,14 +38,27 @@ export type SupportTicketDto = {
 }
 
 const KNOWN_STATUSES: TicketStatus[] = ['new', 'open', 'pending', 'solved']
-const KNOWN_PRIORITIES: TicketPriority[] = ['high', 'medium', 'low']
 
 function toStatus(raw: string | undefined): TicketStatus {
   return KNOWN_STATUSES.find((status) => status === raw) ?? 'new'
 }
 
-function toPriority(raw: string | undefined): TicketPriority | undefined {
-  return KNOWN_PRIORITIES.find((priority) => priority === raw)
+/** Вэбийн `getVisibleTicketNote`: Zendesk-ээс импортолсон JSON тэмдэглэлийг нуух. */
+function visibleNote(raw: string | undefined): string | undefined {
+  const note = raw?.trim()
+  if (!note) return undefined
+  try {
+    const parsed = JSON.parse(note) as {
+      source?: unknown
+      zendesk_ticket_id?: unknown
+    }
+    if (parsed.source === 'zendesk' && parsed.zendesk_ticket_id) {
+      return undefined
+    }
+  } catch {
+    return note
+  }
+  return note
 }
 
 function requesterLabel(dto: SupportTicketDto): string {
@@ -66,17 +76,28 @@ function requesterId(dto: SupportTicketDto): string | undefined {
   return dto.userId ?? dto.user_id ?? dto.uid
 }
 
+/** Вэбийн `support/tickets/index.tsx`-ийн `uid` — дараалал нь яг тэр. */
+function customerUid(dto: SupportTicketDto): string | undefined {
+  const top = dto.uid ?? dto.user_id ?? dto.userId
+  if (top || typeof dto.user !== 'object') return top
+  return dto.user?.uid ?? dto.user?.user_id ?? dto.user?.userId ?? dto.user?.id
+}
+
 export function toSupportTicket(dto: SupportTicketDto): SupportTicket {
   return {
     id: dto.id ?? '',
     title: dto.title ?? '',
     requesterLabel: requesterLabel(dto),
     requesterId: requesterId(dto),
+    customerUid: customerUid(dto),
     status: toStatus(dto.status),
-    priority: toPriority(dto.priority),
+    priority: dto.priority || undefined,
     assignee: dto.agent?.email ?? dto.assignee,
     categoryLabel: dto.category?.categoryNameMn ?? dto.category?.categoryNameEn,
-    message: dto.notes ?? dto.ticket_message ?? dto.ticketMessage,
+    ticketMessage:
+      (dto.ticket_message ?? dto.ticketMessage)?.trim() || undefined,
+    file: dto.file?.trim() || undefined,
+    note: visibleNote(dto.notes),
     createdAt: dto.created_at ?? dto.createdAt,
     updatedAt: dto.updated_at ?? dto.updatedAt,
   }

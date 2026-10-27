@@ -9,17 +9,18 @@ import { iconSize } from '@/theme/tokens'
 import { AppButton } from './app-button'
 import { AppIcon } from './app-icon'
 import { AppText } from './app-text'
-import { BottomSheet } from './bottom-sheet'
+import { BackofficeBottomSheet } from './backoffice-bottom-sheet'
 import { FilterChips } from './filter-chips'
 import { NativeDatePicker } from './native-date-picker'
 
 /** Утга нь API-тай ижил `YYYY-MM-DD` — цагийн бүс хөрвүүлэхгүй. */
 const FORMAT = 'YYYY-MM-DD'
 
-type Quick = 'today' | 'tomorrow' | 'nextWeek' | 'none'
+type Quick = 'yesterday' | 'today' | 'tomorrow' | 'nextWeek'
 
-function quickValue(quick: Quick): string | null {
+function quickValue(quick: Quick | 'none'): string | null {
   const today = dayjs()
+  if (quick === 'yesterday') return today.subtract(1, 'day').format(FORMAT)
   if (quick === 'today') return today.format(FORMAT)
   if (quick === 'tomorrow') return today.add(1, 'day').format(FORMAT)
   if (quick === 'nextWeek') return today.add(1, 'week').format(FORMAT)
@@ -35,11 +36,17 @@ export function DateField({
   value,
   onChange,
   clearable = true,
+  quickPicks = ['today', 'tomorrow', 'nextWeek'],
+  clearLabel,
 }: {
   label: string
   value: string | null
   onChange: (value: string | null) => void
   clearable?: boolean
+  /** Түүх харах талбарт ирээдүйн сонголт утгагүй — `['today', 'yesterday']`. */
+  quickPicks?: Quick[]
+  /** Хоосон утгын утга талбараас хамаарна: "Хугацаагүй", "Одоогийн". */
+  clearLabel?: string
 }) {
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState(() =>
@@ -47,11 +54,11 @@ export function DateField({
   )
   const text = messages.form.date
 
-  const quicks: { value: Quick; label: string }[] = [
-    { value: 'today', label: text.today },
-    { value: 'tomorrow', label: text.tomorrow },
-    { value: 'nextWeek', label: text.nextWeek },
-    ...(clearable ? [{ value: 'none' as const, label: text.none }] : []),
+  const quicks: { value: Quick | 'none'; label: string }[] = [
+    ...quickPicks.map((quick) => ({ value: quick, label: text[quick] })),
+    ...(clearable
+      ? [{ value: 'none' as const, label: clearLabel ?? text.none }]
+      : []),
   ]
   const activeQuick = quicks.find(
     (quick) => quickValue(quick.value) === value,
@@ -80,11 +87,15 @@ export function DateField({
       </Pressable>
       <FilterChips
         chips={quicks}
-        value={activeQuick ?? ('' as Quick)}
+        value={activeQuick ?? ('' as Quick | 'none')}
         onChange={(quick) => onChange(quickValue(quick))}
       />
 
-      <BottomSheet visible={open} title={label} onClose={() => setOpen(false)}>
+      <BackofficeBottomSheet
+        visible={open}
+        title={label}
+        onClose={() => setOpen(false)}
+      >
         <ScrollView contentContainerClassName="items-center">
           <NativeDatePicker value={draft} onChange={setDraft} />
         </ScrollView>
@@ -95,7 +106,7 @@ export function DateField({
             setOpen(false)
           }}
         />
-      </BottomSheet>
+      </BackofficeBottomSheet>
     </View>
   )
 }

@@ -20,14 +20,33 @@ const TITLES = {
   'usdt-mnt': () => text.usdtMnt,
 } as const
 
+/** Вэбийн `match-*-mnt/components/columns.tsx`-ийн дараалал (хоёулаа ижил). */
+const COLUMNS = [
+  f.pair,
+  f.price,
+  f.makerOrder,
+  f.takerOrder,
+  f.makerTxin,
+  f.takerTxin,
+  f.makerUser,
+  f.takerUser,
+  'amount',
+  f.takerAmount,
+  f.makerType,
+  f.takerType,
+  'status',
+  f.createdAt,
+] as const
+
 function toRecord(item: MatchResult): RecordView {
   const side = (buyer: boolean) => (buyer ? text.buyer : text.seller)
   return {
     title: item.id,
     subtitle: `${item.pair} · ${formatDate(item.createdAt)}`,
+    // Вэб `is_cancel`-ийг "Yes" улаан, "No" саарал Badge-аар харуулдаг.
     status: item.cancelled
       ? { label: text.cancelled, tone: 'danger' }
-      : { label: text.matched, tone: 'success' },
+      : { label: text.matched, tone: 'neutral' },
     amount: item.maker.amount,
     fields: [
       { label: f.price, value: item.price },
@@ -42,6 +61,11 @@ function toRecord(item: MatchResult): RecordView {
       },
     ],
     details: [
+      { label: f.pair, value: item.pair },
+      {
+        label: f.createdAt,
+        value: item.createdAt ? formatDate(item.createdAt) : undefined,
+      },
       { label: f.makerOrder, value: item.maker.orderId },
       { label: f.takerOrder, value: item.taker.orderId },
       { label: f.makerUser, value: item.maker.userId },
@@ -51,6 +75,7 @@ function toRecord(item: MatchResult): RecordView {
       { label: f.makerFee, amount: item.maker.fee },
       { label: f.takerFee, amount: item.taker.fee },
     ],
+    columns: COLUMNS,
   }
 }
 

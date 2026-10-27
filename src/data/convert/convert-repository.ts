@@ -10,6 +10,10 @@ export type ConvertListParams = {
   pageSize: number
   query?: string
   status?: string
+  fromAsset?: string
+  toAsset?: string
+  start_day?: string
+  end_day?: string
 }
 
 export const convertRepository = {
@@ -19,6 +23,11 @@ export const convertRepository = {
       pageSize: params.pageSize,
       ...(params.query ? { query: params.query } : {}),
       ...(params.status ? { status: params.status } : {}),
+      ...(params.fromAsset ? { fromAsset: params.fromAsset } : {}),
+      ...(params.toAsset ? { toAsset: params.toAsset } : {}),
+      ...(params.start_day && params.end_day
+        ? { sortDate: { start_day: params.start_day, end_day: params.end_day } }
+        : {}),
     })
 
     const page = unwrapList<ConvertRecordDto>(response.data, 'convert')

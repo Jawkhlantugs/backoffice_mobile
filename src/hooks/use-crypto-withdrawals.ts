@@ -1,14 +1,23 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { cryptoWithdrawalRepository } from '@/data/crypto-withdrawal/crypto-withdrawal-repository'
+import { withDefaultRange, type ListFilters } from '@/lib/list-filters'
 
 import { usePagedList } from './use-paged-list'
 
-export function useCryptoWithdrawals(options: { search?: string } = {}) {
+export function useCryptoWithdrawals(
+  options: { search?: string; status?: string; filters?: ListFilters } = {},
+) {
   return usePagedList(
     'crypto-withdrawals',
     (params) => cryptoWithdrawalRepository.list(params),
-    { search: options.search },
+    {
+      search: options.search,
+      filters: {
+        status: options.status,
+        ...withDefaultRange(options.filters ?? {}),
+      },
+    },
   )
 }
 

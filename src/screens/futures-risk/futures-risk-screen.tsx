@@ -8,12 +8,13 @@ import {
   SectionHeader,
   SummaryScreen,
 } from '@/components'
-import { formatMoney, type AmountField } from '@/core/money/format'
+import { formatAmountSafe, type AmountField } from '@/core/money/format'
 import { tryParseMoney } from '@/core/money/money'
 import {
   useFuturesMasterRisk,
   useFuturesOpenOrders,
 } from '@/hooks/use-futures-risk'
+import { fixedDecimals } from '@/lib/fixed-decimals'
 import { groupDigits } from '@/lib/group-digits'
 import { messages, translateUnknownError } from '@/lib/messages'
 
@@ -21,14 +22,12 @@ import { RiskMetricCard, type MetricTone } from './risk-metric-card'
 
 const text = messages.futures
 
-/** Вэбийн `formatRiskValue`-тай ижил — 2 орон, доош тайрна. */
-const RISK_DECIMALS = 2
-
+/**
+ * Вэбийн `formatRiskValue`-тай ижил — 2 орон, доош тайрна. Binance 8-аас
+ * олон оронтой утга буцаадаг тул түүхийгээр нь биш `formatAmountSafe`-ээр.
+ */
 function riskAmount(amount: AmountField): string {
-  const money = tryParseMoney(amount.raw, amount.currency)
-  return money
-    ? formatMoney(money, { fractionDigits: RISK_DECIMALS })
-    : String(amount.raw)
+  return formatAmountSafe(amount.raw, amount.currency)
 }
 
 function pnlTone(amount: AmountField): MetricTone {
@@ -116,11 +115,11 @@ export function FuturesRiskScreen() {
             />
             <InfoRow
               label={text.entryPrice}
-              value={groupDigits(position.entryPrice)}
+              value={fixedDecimals(position.entryPrice, position.priceDecimals)}
             />
             <InfoRow
               label={text.markPrice}
-              value={groupDigits(position.markPrice)}
+              value={fixedDecimals(position.markPrice, position.priceDecimals)}
             />
 
             <View className="flex-row items-center justify-between gap-3">

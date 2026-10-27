@@ -20,12 +20,32 @@ describe('toSupportTicket', () => {
     expect(toSupportTicket({ uid: 'uid-5' }).requesterId).toBe('uid-5')
   })
 
+  it('customerUid нь вэбийн дарааллаар uid → user_id → userId → user объект', () => {
+    expect(
+      toSupportTicket({ uid: 'uid-1', user_id: 'snake-1', userId: 'camel-1' })
+        .customerUid,
+    ).toBe('uid-1')
+    expect(
+      toSupportTicket({ user_id: 'snake-1', userId: 'camel-1' }).customerUid,
+    ).toBe('snake-1')
+    expect(
+      toSupportTicket({ user: { uid: 'obj-uid', id: 'obj-id' } }).customerUid,
+    ).toBe('obj-uid')
+    expect(toSupportTicket({ user: { id: 'obj-id' } }).customerUid).toBe(
+      'obj-id',
+    )
+    expect(
+      toSupportTicket({ user: 'client@example.com' }).customerUid,
+    ).toBeUndefined()
+  })
+
   it('танихгүй статусыг new болгоно', () => {
     expect(toSupportTicket({ status: 'archived' }).status).toBe('new')
   })
 
-  it('танихгүй priority-г undefined болгоно', () => {
-    expect(toSupportTicket({ priority: 'urgent' }).priority).toBeUndefined()
+  it('priority-г вэбийн адил түүхийгээр нь үлдээнэ', () => {
+    expect(toSupportTicket({ priority: 'normal' }).priority).toBe('normal')
+    expect(toSupportTicket({ priority: '' }).priority).toBeUndefined()
   })
 
   it('agent.email эсвэл assignee-ийг хариуцагч болгоно', () => {
@@ -37,11 +57,46 @@ describe('toSupportTicket', () => {
     )
   })
 
-  it('notes/ticket_message/ticketMessage-ийн эхнийхийг агуулга болгоно', () => {
-    expect(toSupportTicket({ notes: 'a', ticket_message: 'b' }).message).toBe(
-      'a',
-    )
-    expect(toSupportTicket({ ticketMessage: 'c' }).message).toBe('c')
+  it('ticketMessage ба дотоод тэмдэглэлийг тусад нь задална', () => {
+    const ticket = toSupportTicket({
+      notes: 'jawhaaa',
+      ticketMessage: 'Backoffixe ticket test',
+    })
+    expect(ticket.ticketMessage).toBe('Backoffixe ticket test')
+    expect(ticket.note).toBe('jawhaaa')
+    expect(toSupportTicket({ ticket_message: 'b' }).ticketMessage).toBe('b')
+  })
+
+  it('Zendesk-ийн JSON тэмдэглэлийг нууна', () => {
+    expect(
+      toSupportTicket({
+        notes: '{"source":"zendesk","zendesk_ticket_id":12}',
+      }).note,
+    ).toBeUndefined()
+    expect(toSupportTicket({ notes: '   ' }).note).toBeUndefined()
+  })
+
+  it('backoffice-ийн бодит хариуг задална', () => {
+    const ticket = toSupportTicket({
+      id: 'e10b8e2b',
+      created_at: '2026-10-26T13:55:46.591508+08:00',
+      title: 'Jawkhaa test',
+      userId: '2dcfc869',
+      user: { id: '2dcfc869', email: 'ancergc@gmail.com' },
+      status: 'new',
+      priority: 'normal',
+      ticketMessage: 'Backoffixe ticket test',
+      category: { categoryNameMn: 'Орлого & Зарлага' },
+    })
+
+    expect(ticket).toMatchObject({
+      requesterLabel: 'ancergc@gmail.com',
+      customerUid: '2dcfc869',
+      status: 'new',
+      priority: 'normal',
+      ticketMessage: 'Backoffixe ticket test',
+      categoryLabel: 'Орлого & Зарлага',
+    })
   })
 
   it('вэб админы бүтэн хариуг задална', () => {

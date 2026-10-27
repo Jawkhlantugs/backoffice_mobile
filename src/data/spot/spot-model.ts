@@ -15,6 +15,7 @@ export type SpotOrder = {
   clientOrderId: string
   user?: string
   transactTime: string
+  createdAt?: string
 }
 
 /** `spotTradeHistorySchema` — `/spot/history/list`. */
@@ -40,6 +41,13 @@ export type SpotTrade = {
   tradeId: string
   symbol: string
   asset: string
+  rate?: string
+  quote?: string
+  formattedDate?: string
+  isBuyerMaker?: boolean
+  subAccountId?: string
+  commissionTime?: string
+  createdAt?: string
   side: string
   tradeType: string
   price: AmountField
@@ -62,6 +70,7 @@ export type SpotCommission = {
   status: string
   user?: string
   fetchedAt: string
+  createdAt?: string
 }
 
 /** `spotSymbolSchema`. */
@@ -69,6 +78,7 @@ export type SpotSymbol = {
   id: string
   symbol: string
   baseAsset: string
+  baseAssetName?: string
   quoteAsset: string
   status: string
   isEnabled: boolean

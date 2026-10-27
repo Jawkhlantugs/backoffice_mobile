@@ -84,6 +84,7 @@ export type PartnerPayoutDto = {
   periodStart?: string
   periodEnd?: string
   status?: string
+  transferStatus?: string
   processedAt?: string | null
   transactionId?: string
   failureReason?: string
@@ -183,6 +184,7 @@ export function toPartnerPayout(dto: PartnerPayoutDto): PartnerPayout {
     periodStart: dto.periodStart ?? '',
     periodEnd: dto.periodEnd ?? '',
     status: dto.status ?? '',
+    transferStatus: dto.transferStatus || undefined,
     processedAt: optional(dto.processedAt),
     transactionId: dto.transactionId || undefined,
     failureReason: dto.failureReason || undefined,

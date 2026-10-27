@@ -6,10 +6,27 @@ import { usePartners, useUpdatePartnerStatus } from '@/hooks/use-partners'
 import { formatDate } from '@/lib/date'
 import { messages } from '@/lib/messages'
 
-import { ALL, partnerStatus, partnerStatusChips } from './partner-status'
+import {
+  ALL,
+  PARTNER_TONES,
+  partnerStatus,
+  partnerStatusChips,
+} from './partner-status'
 
 const text = messages.partner
 const f = text.fields
+
+/** Вэбийн `partner/partners/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.name,
+  f.company,
+  f.tier,
+  f.referralCode,
+  f.referrals,
+  'amount',
+  'status',
+  f.createdAt,
+] as const
 
 export function PartnerListScreen() {
   const [search, setSearch] = useState('')
@@ -22,7 +39,7 @@ export function PartnerListScreen() {
     return {
       title: label,
       subtitle: [item.name, item.companyName].filter(Boolean).join(' · '),
-      status: partnerStatus(item.status),
+      status: partnerStatus(item.status, PARTNER_TONES.partners),
       amount: item.totalEarnings,
       fields: [
         { label: f.tier, value: item.tier },
@@ -36,6 +53,7 @@ export function PartnerListScreen() {
         { label: f.website, value: item.website },
         { label: f.kyc, value: item.kycLevel },
       ],
+      columns: COLUMNS,
       actions: [
         {
           key: 'activate',

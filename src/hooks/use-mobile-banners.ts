@@ -1,6 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import type { BannerType, MobileBannerInput } from '@/data/mobile-banner/mobile-banner-model'
+import type {
+  BannerType,
+  MobileBannerInput,
+} from '@/data/mobile-banner/mobile-banner-model'
 import { mobileBannerRepository } from '@/data/mobile-banner/mobile-banner-repository'
 import { pickImage } from '@/services/media/image-picker-service'
 
@@ -24,7 +27,9 @@ export function useSaveMobileBanner(id?: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (input: MobileBannerInput) =>
-      id ? mobileBannerRepository.update(id, input) : mobileBannerRepository.create(input),
+      id
+        ? mobileBannerRepository.update(id, input)
+        : mobileBannerRepository.create(input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: [KEY] })
     },

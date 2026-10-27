@@ -13,11 +13,21 @@ import {
 import { formatDate } from '@/lib/date'
 import { labelOf } from '@/lib/label-of'
 import { messages } from '@/lib/messages'
-import { statusTone } from '@/lib/status-tone'
 
 const text = messages.assetRecovery
 const f = text.fields
 const ALL = 'all'
+
+/** Вэбийн `asset-recovery/recovery-record/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.email,
+  f.uid,
+  f.asset,
+  'amount',
+  f.category,
+  'status',
+  f.updatedAt,
+] as const
 
 /** Хөрөнгө олгоно — зөвшөөрөх нь вэб шиг зөвхөн `user_claimed` үед. */
 export function AssetRecoveryListScreen() {
@@ -29,10 +39,12 @@ export function AssetRecoveryListScreen() {
   function toRecord(item: AssetRecoveryRecord): RecordView {
     return {
       title: item.email || item.uid || item.id,
+      tableTitle: item.id,
       subtitle: `#${item.id} · ${item.category ?? ''}`,
+      // Вэб статусыг өнгөгүй (default/secondary) Badge-аар харуулдаг.
       status: {
         label: labelOf(text.statuses, item.status) ?? item.status,
-        tone: statusTone(item.status),
+        tone: 'neutral',
       },
       amount: item.amount,
       fields: [
@@ -42,11 +54,14 @@ export function AssetRecoveryListScreen() {
         { label: f.updatedAt, value: formatDate(item.updatedAt) },
       ],
       details: [
+        { label: f.email, value: item.email },
+        { label: f.asset, value: item.amount.currency },
         { label: f.recordId, value: item.id },
         { label: f.subId, value: item.subId },
         { label: f.distributeDate, value: item.distributeDate },
         { label: f.distributeHash, value: item.distributeHash },
       ],
+      columns: COLUMNS,
       actions: [
         {
           key: 'approve',
@@ -86,7 +101,7 @@ export function AssetRecoveryListScreen() {
         value: status,
         onChange: setStatus,
       }}
-      tableLabels={{ title: f.email }}
+      tableLabels={{ title: f.recordId }}
       record={toRecord}
     />
   )

@@ -1,7 +1,12 @@
 import { useState } from 'react'
 import { View } from 'react-native'
 
-import { AppButton, AppInput, BottomSheet, InfoRow } from '@/components'
+import {
+  AppButton,
+  AppInput,
+  BackofficeBottomSheet,
+  InfoRow,
+} from '@/components'
 import { formatMoney } from '@/core/money/format'
 import type { Money } from '@/core/money/money'
 import { amountMatches } from '@/data/transfer/transfer-validation'
@@ -54,7 +59,7 @@ export function TransferConfirmSheet({
     CODE.test(code)
 
   return (
-    <BottomSheet
+    <BackofficeBottomSheet
       visible={summary !== null}
       title={text.confirm.title}
       onClose={onCancel}
@@ -102,6 +107,6 @@ export function TransferConfirmSheet({
           onPress={onCancel}
         />
       </View>
-    </BottomSheet>
+    </BackofficeBottomSheet>
   )
 }

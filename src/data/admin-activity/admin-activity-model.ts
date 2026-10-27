@@ -22,4 +22,5 @@ export type OperationAccountRow = {
   description?: string
   canTrade: boolean
   canWithdraw: boolean
+  createdAt?: string
 }

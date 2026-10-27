@@ -7,7 +7,7 @@ import type { StatusTone } from './status-pill'
 
 export type TableCell =
   | { kind: 'text'; text: string }
-  | { kind: 'amount'; amount: AmountField }
+  | { kind: 'amount'; amount: AmountField; tone?: StatusTone }
   | { kind: 'status'; label: string; tone: StatusTone }
 
 export type TableColumn = {
@@ -60,7 +60,7 @@ function cellText(cell: TableCell | undefined): string {
 
 function toCells(view: RecordView): Record<string, TableCell> {
   const cells: Record<string, TableCell> = {
-    [TITLE_COLUMN]: { kind: 'text', text: view.title },
+    [TITLE_COLUMN]: { kind: 'text', text: view.tableTitle ?? view.title },
   }
   if (view.status) cells[STATUS_COLUMN] = { kind: 'status', ...view.status }
   if (view.amount)
@@ -72,8 +72,10 @@ function toCells(view: RecordView): Record<string, TableCell> {
     const key = fieldKey(field.label)
     if (key in cells) continue
     cells[key] = field.amount
-      ? { kind: 'amount', amount: field.amount }
-      : { kind: 'text', text: String(field.value) }
+      ? { kind: 'amount', amount: field.amount, tone: field.tone }
+      : field.tone
+        ? { kind: 'status', label: String(field.value), tone: field.tone }
+        : { kind: 'text', text: String(field.value) }
   }
   return cells
 }
@@ -83,24 +85,44 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 function widthOf(column: Omit<TableColumn, 'width'>, rows: TableRow[]): number {
-  const longest = rows
-    .slice(0, WIDTH_SAMPLE)
-    .reduce(
-      (max, row) => Math.max(max, cellText(row.cells[column.key]).length),
-      0,
-    )
+  const sample = rows.slice(0, WIDTH_SAMPLE)
+  const longest = sample.reduce(
+    (max, row) => Math.max(max, cellText(row.cells[column.key]).length),
+    0,
+  )
   const chars = Math.max(longest, column.label.length)
-  const chrome = column.key === STATUS_COLUMN ? STATUS_CHROME : 0
+  const pill = sample.some((row) => row.cells[column.key]?.kind === 'status')
+  const chrome = pill ? STATUS_CHROME : 0
   const width = chars * CHAR_WIDTH + CELL_CHROME + chrome
   return column.sticky
     ? clamp(width, STICKY_MIN_WIDTH, STICKY_MAX_WIDTH)
     : clamp(width, MIN_WIDTH, MAX_WIDTH)
 }
 
+function columnKey(name: string): string {
+  if (name === STATUS_COLUMN || name === AMOUNT_COLUMN) return name
+  return fieldKey(name)
+}
+
+/**
+ * `RecordView.columns` өгөгдвөл хүснэгт яг тэр баганууд, тэр дарааллаар —
+ * жагсаагүй талбар картан дээр л үлдэнэ (вэбийн хүснэгтэд байхгүй тул).
+ */
+function applyColumnOrder<C extends { key: string; sticky: boolean }>(
+  columns: C[],
+  names: readonly string[] | undefined,
+): C[] {
+  if (!names?.length) return columns
+  const byKey = new Map(columns.map((column) => [column.key, column]))
+  const listed = names.flatMap((name) => byKey.get(columnKey(name)) ?? [])
+  return [...columns.filter((column) => column.sticky), ...listed]
+}
+
 /**
  * Картын өгөгдлөөс хүснэгт гаргана: гарчиг (sticky) → статус → дүн →
- * `fields` → `details`. Багана нь ачаалсан мөрүүдийн талбарын нэгдэл —
- * хоосон талбартай мөрөнд нүд нь зураас болно.
+ * `fields` → `details`, эсвэл зөвхөн `RecordView.columns`-ийнх. Багана нь
+ * ачаалсан мөрүүдийн талбарын нэгдэл — хоосон талбартай мөрөнд нүд нь
+ * зураас болно.
  */
 export function buildRecordTable(
   records: readonly { key: string; view: RecordView }[],
@@ -132,10 +154,9 @@ export function buildRecordTable(
     }
   }
 
-  const columns = order.map((column) => ({
-    ...column,
-    width: widthOf(column, rows),
-  }))
+  const columns = applyColumnOrder(order, records[0]?.view.columns).map(
+    (column) => ({ ...column, width: widthOf(column, rows) }),
+  )
   return { columns, rows }
 }
 

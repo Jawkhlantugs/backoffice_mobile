@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { PagedListScreen } from '@/components'
 import { useCryptoDeposits } from '@/hooks/use-crypto-deposits'
@@ -13,6 +13,7 @@ export function CryptoDepositListScreen({
 }) {
   const [search, setSearch] = useState('')
   const list = useCryptoDeposits(isOperation, { search })
+  const record = useMemo(() => cryptoDepositRecord(isOperation), [isOperation])
   const copy = isOperation
     ? messages.finance.cryptoDepositOperations
     : messages.finance.cryptoDepositUsers
@@ -30,7 +31,8 @@ export function CryptoDepositListScreen({
         onChange: setSearch,
         placeholder: messages.finance.searchPlaceholder,
       }}
-      record={cryptoDepositRecord}
+      record={record}
+      tableLabels={{ title: messages.finance.fields.id }}
     />
   )
 }

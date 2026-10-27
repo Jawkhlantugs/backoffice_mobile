@@ -56,7 +56,7 @@ export const DataTableRow = memo(function DataTableRow({
             numberOfLines={1}
             className="font-semibold text-foreground"
           >
-            {row.view.title}
+            {row.view.tableTitle ?? row.view.title}
           </AppText>
           {row.view.subtitle ? (
             <AppText variant="tiny" numberOfLines={1}>

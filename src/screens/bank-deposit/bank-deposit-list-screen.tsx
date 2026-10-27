@@ -24,6 +24,7 @@ export function BankDepositListScreen() {
         placeholder: messages.finance.searchPlaceholder,
       }}
       record={bankDepositRecord}
+      tableLabels={{ title: messages.finance.fields.id }}
     />
   )
 }

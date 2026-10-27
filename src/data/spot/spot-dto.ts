@@ -29,6 +29,7 @@ export type SpotOrderDto = {
   clientOrderId?: string
   brokerUser?: PartyDto | null
   transactTime?: string
+  created_at?: string
 }
 
 export type SpotFillDto = {
@@ -64,9 +65,15 @@ export type SpotTradeDto = {
   mntPrice?: number
   income?: string | null
   spotCommissionsStatus?: string | null
+  spotCommissionsTime?: string | null
+  brokerUserId?: string
   brokerUser?: PartyDto | null
   postDate?: string
   created_at?: string
+  rate?: string | null
+  qoute?: string | null
+  formatedDate?: string | null
+  isBuyerMaker?: boolean
 }
 
 export type SpotCommissionDto = {
@@ -77,12 +84,14 @@ export type SpotCommissionDto = {
   status?: string
   brokerUser?: PartyDto | null
   fetchedAt?: string
+  created_at?: string
 }
 
 export type SpotSymbolDto = {
   id: string
   symbol?: string
   baseAsset?: string
+  baseAssetName?: string
   quoteAsset?: string
   status?: string
   isEnabled?: number
@@ -111,6 +120,7 @@ export function toSpotOrder(dto: SpotOrderDto): SpotOrder {
     clientOrderId: dto.clientOrderId ?? '',
     user: partyLabel(dto.brokerUser),
     transactTime: dto.transactTime ?? '',
+    createdAt: dto.created_at,
   }
 }
 
@@ -142,6 +152,13 @@ export function toSpotTrade(dto: SpotTradeDto): SpotTrade {
     tradeId: dto.tradeId ?? dto.id,
     symbol: symbolName(dto),
     asset,
+    rate: dto.rate ?? undefined,
+    quote: dto.qoute ?? undefined,
+    formattedDate: dto.formatedDate ?? undefined,
+    isBuyerMaker: dto.isBuyerMaker,
+    subAccountId: dto.brokerUser?.subAccountId ?? dto.brokerUserId,
+    commissionTime: dto.spotCommissionsTime ?? undefined,
+    createdAt: dto.created_at,
     side: dto.side ?? '',
     tradeType: dto.tradeType ?? '',
     price: { raw: dto.price ?? 0, currency: quoteOf(dto.symbol) },
@@ -165,6 +182,7 @@ export function toSpotCommission(dto: SpotCommissionDto): SpotCommission {
     status: dto.status ?? '',
     user: partyLabel(dto.brokerUser),
     fetchedAt: dto.fetchedAt ?? '',
+    createdAt: dto.created_at,
   }
 }
 
@@ -173,6 +191,7 @@ export function toSpotSymbol(dto: SpotSymbolDto): SpotSymbol {
     id: dto.id,
     symbol: dto.symbol ?? '',
     baseAsset: dto.baseAsset ?? '',
+    baseAssetName: dto.baseAssetName,
     quoteAsset: dto.quoteAsset ?? '',
     status: dto.status ?? '',
     isEnabled: dto.isEnabled === 1,

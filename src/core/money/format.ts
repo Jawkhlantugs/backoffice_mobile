@@ -1,3 +1,7 @@
+import { groupDigits } from '@/lib/group-digits'
+import { plainDecimal } from '@/lib/plain-decimal'
+
+import { tryCurrencyOf } from './currency'
 import type { Money } from './money'
 import { tryParseMoney } from './money'
 
@@ -87,9 +91,27 @@ export function moneyToApiNumber(money: Money): number {
  * (§10). Танихгүй ticker дээр тооцоо хийхгүй, зөвхөн түүхий дүнг харуулна.
  */
 export function formatAmountSafe(raw: string | number, code: string): string {
-  const money = tryParseMoney(raw, code)
-  if (money) return formatMoney(money, { trimTrailingZeros: true })
-  return `${raw} ${code}`.trim()
+  const text = plainDecimal(raw)
+  const money = tryParseMoney(displayPrecision(text, code), code)
+  if (money) {
+    return formatMoney(money, {
+      trimTrailingZeros: !money.currency.fixedDecimals,
+    })
+  }
+  return `${groupDigits(text)} ${code}`.trim()
+}
+
+/**
+ * Үнэлгээ (`usdtValuation` г.м.) валютаас олон оронтой ирдэг. Харуулахад
+ * `formatMoney`-ийн адил доош тайрна; `tryParseMoney` өөрөө хатуу хэвээр —
+ * тооцоонд ийм дүн орохгүй.
+ */
+function displayPrecision(text: string, code: string): string {
+  const decimals = tryCurrencyOf(code)?.decimals
+  if (decimals === undefined) return text
+  const [whole, fraction] = text.split('.')
+  if (fraction === undefined || fraction.length <= decimals) return text
+  return decimals === 0 ? `${whole}` : `${whole}.${fraction.slice(0, decimals)}`
 }
 
 /**
@@ -97,4 +119,21 @@ export function formatAmountSafe(raw: string | number, code: string): string {
  * зориудаар: валют нь `CURRENCIES`-д байхгүй байж болно (§10-ийн доорх
  * тайлбар), тооцоо хийхгүй, зөвхөн харуулна (`AmountText`, `formatAmountSafe`).
  */
-export type AmountField = { raw: string | number; currency: string }
+export type AmountField = {
+  raw: string | number
+  currency: string
+  /** Вэб кодыг дүнгийн ард бичдэг газар (`976,000 MNT`). */
+  showCode?: boolean
+}
+
+/** `formatAmountSafe` + `showCode` бол ард нь валютын код. */
+export function formatAmountField({
+  raw,
+  currency,
+  showCode,
+}: AmountField): string {
+  const text = formatAmountSafe(raw, currency)
+  // Танихгүй валютад `formatAmountSafe` кодыг аль хэдийн залгасан.
+  if (!showCode || !currency || text.endsWith(currency)) return text
+  return `${text} ${currency}`
+}

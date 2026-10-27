@@ -5,7 +5,7 @@ import {
   AppButton,
   AppIcon,
   AppText,
-  BottomSheet,
+  BackofficeBottomSheet,
   StateView,
 } from '@/components'
 import type { CompanyTask } from '@/data/company-task/company-task-model'
@@ -104,7 +104,7 @@ export function TaskPickerSheet({
   }
 
   return (
-    <BottomSheet visible={visible} title={text.title} onClose={close}>
+    <BackofficeBottomSheet visible={visible} title={text.title} onClose={close}>
       <StateView
         loading={query.isPending}
         error={query.error}
@@ -131,6 +131,6 @@ export function TaskPickerSheet({
           close()
         }}
       />
-    </BottomSheet>
+    </BackofficeBottomSheet>
   )
 }

@@ -31,8 +31,8 @@ export const AppInput = forwardRef<TextInput, AppInputProps>(function AppInput(
         multiline={multiline}
         placeholderTextColor={colors.mutedForeground}
         className={cn(
-          'rounded-lg border bg-card px-3 text-body text-foreground',
-          multiline ? 'min-h-24 py-3' : 'h-11 py-0',
+          'rounded-lg border bg-card px-3 text-foreground',
+          multiline ? 'min-h-24 py-3 text-body' : 'h-11 py-0 text-field',
           error ? 'border-destructive' : 'border-input',
           className,
         )}

@@ -1,10 +1,8 @@
 import { clients } from '@/core/network/clients'
-import { unwrapList, type ListPage } from '@/core/network/envelope'
+import type { ListPage } from '@/core/network/envelope'
+import { decodeCursor } from '@/data/shared/cursor'
 
-import {
-  toTicketMessage,
-  type TicketMessageDto,
-} from './ticket-conversation-dto'
+import { toConversationPage, toTicketMessage } from './ticket-conversation-dto'
 import type { TicketMessage } from './ticket-conversation-model'
 
 /**
@@ -23,17 +21,14 @@ export const ticketConversationRepository = {
   async list(params: ConversationListParams): Promise<ListPage<TicketMessage>> {
     const response = await clients.support.post('admin/tickets/conversation', {
       ticketId: params.ticketId,
-      ...(params.page ? { page: params.page } : {}),
-      ...(params.pageSize ? { pageSize: params.pageSize } : {}),
+      page: params.page ?? 1,
+      pageSize: params.pageSize ?? 20,
       ...(params.lastEvaluatedKey
-        ? { lastEvaluatedKey: params.lastEvaluatedKey }
+        ? { lastEvaluatedKey: decodeCursor(params.lastEvaluatedKey) }
         : {}),
     })
 
-    const page = unwrapList<TicketMessageDto>(
-      response.data,
-      'ticket-conversation',
-    )
+    const page = toConversationPage(response.data)
     return { ...page, items: page.items.map(toTicketMessage) }
   },
 }

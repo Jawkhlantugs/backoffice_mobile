@@ -1,37 +1,51 @@
 import { View } from 'react-native'
 
-import { AppText } from '@/components'
+import { AppText, Avatar } from '@/components'
 import type { TicketMessage } from '@/data/support-ticket/ticket-conversation-model'
-import { formatDate } from '@/lib/date'
-import { stripHtml } from '@/lib/html'
 import { cn } from '@/lib/cn'
+import { formatRelativeTime } from '@/lib/date'
+import { stripHtml } from '@/lib/html'
+import { messages } from '@/lib/messages'
 
-export function TicketMessageBubble({ message }: { message: TicketMessage }) {
-  const fromSupport = message.senderType === 'support'
+/** Вэбийн яриатай ижил: харилцагч зүүн талд, ажилтан баруун талд аватартай. */
+export function TicketMessageBubble({
+  message,
+  customerLabel,
+}: {
+  message: TicketMessage
+  /** Харилцагчийн имэйл — аватарын үсэг. */
+  customerLabel: string
+}) {
+  const fromCustomer = message.fromCustomer
 
   return (
     <View
       className={cn(
-        'max-w-[85%] gap-1',
-        fromSupport ? 'items-end self-end' : 'self-start',
+        'flex-row items-start gap-2',
+        fromCustomer ? 'justify-start' : 'justify-end',
       )}
     >
+      {fromCustomer ? <Avatar source={customerLabel} size="sm" /> : null}
+
       <View
         className={cn(
-          'rounded-xl px-3 py-2',
-          fromSupport ? 'bg-primary' : 'bg-muted',
+          'max-w-[80%] gap-1 rounded-lg border border-border px-3 py-2',
+          fromCustomer
+            ? 'rounded-tl-none bg-card'
+            : 'rounded-tr-none bg-secondary',
         )}
       >
-        <AppText
-          variant="body"
-          className={
-            fromSupport ? 'text-primary-foreground' : 'text-foreground'
-          }
-        >
+        <AppText variant="body" className="text-foreground" selectable>
           {stripHtml(message.message)}
         </AppText>
+        <AppText variant="tiny">
+          {formatRelativeTime(message.createdAt)}
+        </AppText>
       </View>
-      <AppText variant="tiny">{formatDate(message.createdAt)}</AppText>
+
+      {fromCustomer ? null : (
+        <Avatar source={messages.supportTickets.agentInitials} size="sm" />
+      )}
     </View>
   )
 }

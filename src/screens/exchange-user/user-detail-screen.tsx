@@ -52,7 +52,7 @@ export function UserDetailScreen() {
             <ScrollView contentContainerClassName="gap-3 pb-8">
               {tab === 'basic' ? <UserBasicTab user={user} /> : null}
               {tab === 'assets' ? <UserAssetsTab uid={uid} /> : null}
-              {tab === 'security' ? <UserSecurityTab uid={uid} /> : null}
+              {tab === 'security' ? <UserSecurityTab user={user} /> : null}
             </ScrollView>
           </View>
         ) : null}

@@ -11,15 +11,19 @@ export type CoinListing = {
   depositEnabled: boolean
   withdrawEnabled: boolean
   networks: string[]
+  createdAt?: string
 }
 
 /** `walletAddressSchema` — хэрэглэгчийн deposit хаяг. */
 export type UserWalletAddress = {
   id: string
   owner?: string
+  userEmail?: string
   address?: string
   coin?: string
+  coinNetwork?: string
   network?: string
+  url?: string
   tag?: string
   isDefault: boolean
   createdAt: string
@@ -29,6 +33,8 @@ export type UserWalletAddress = {
 export type WithdrawBan = {
   id: string
   owner?: string
+  userId?: string
+  userEmail?: string
   reason?: string
   status?: string
   startTime?: string
@@ -40,6 +46,9 @@ export type WithdrawBan = {
 export type DelistedTransfer = {
   id: string
   owner?: string
+  subAccountId?: string
+  userEmail?: string
+  asset?: string
   amount?: AmountField
   returnAmount?: AmountField
   price?: string

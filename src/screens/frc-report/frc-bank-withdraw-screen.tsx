@@ -7,16 +7,33 @@ import { formatDate } from '@/lib/date'
 import type { RangePeriod } from '@/lib/date-range'
 import { messages } from '@/lib/messages'
 import { DEFAULT_PERIOD, periodChips } from '@/lib/period-chips'
-import { statusTone } from '@/lib/status-tone'
 
 const text = messages.frc
 const f = text.fields
 
+/** Вэб `success`-ийг ногоон, бусдыг шар Badge-аар харуулдаг. */
+const statusToneOf = (status: string) =>
+  status.toLowerCase() === 'success'
+    ? ('success' as const)
+    : ('warning' as const)
+
+/** Вэбийн `reports/frc-bank-withdraw/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.email,
+  f.subAccountId,
+  'amount',
+  f.bank,
+  f.accountNumber,
+  f.date,
+  'status',
+] as const
+
 function toRecord(item: FrcBankWithdraw): RecordView {
   return {
     title: item.email ?? item.uid,
+    tableTitle: item.uid,
     subtitle: formatDate(item.date),
-    status: { label: item.status, tone: statusTone(item.status) },
+    status: { label: item.status, tone: statusToneOf(item.status) },
     amount: item.amount,
     fields: [
       { label: f.bank, value: item.bankName },
@@ -24,6 +41,11 @@ function toRecord(item: FrcBankWithdraw): RecordView {
       { label: f.subAccountId, value: item.subAccountId },
       { label: f.uid, value: item.uid },
     ],
+    details: [
+      { label: f.email, value: item.email },
+      { label: f.date, value: item.date },
+    ],
+    columns: COLUMNS,
   }
 }
 
@@ -45,7 +67,7 @@ export function FrcBankWithdrawScreen() {
         placeholder: text.searchPlaceholder,
       }}
       statusChips={{ chips: periodChips(), value: period, onChange: setPeriod }}
-      tableLabels={{ title: f.email, amount: f.mntAmount }}
+      tableLabels={{ title: f.uid, amount: f.mntAmount }}
       record={toRecord}
     />
   )

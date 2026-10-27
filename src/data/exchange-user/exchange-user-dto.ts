@@ -9,6 +9,7 @@ export type ExchangeUserDto = {
   subAccountId?: string
   canTrade?: boolean
   canWithdraw?: boolean
+  futuresTrade?: number | null
   isWhitelistEnabled?: boolean
   kycLevel?: number
   vipLevel?: number
@@ -26,6 +27,11 @@ export function toExchangeUser(dto: ExchangeUserDto): ExchangeUser {
     subAccountId: dto.subAccountId,
     canTrade: dto.canTrade,
     canWithdraw: dto.canWithdraw,
+    // `null` = хэрэглэгч futures нээгээгүй — вэб энэ үед futures хоригийг нуудаг.
+    futuresTrade:
+      dto.futuresTrade === null || dto.futuresTrade === undefined
+        ? undefined
+        : dto.futuresTrade === 1,
     isWhitelistEnabled: dto.isWhitelistEnabled,
     kycLevel: dto.kycLevel,
     vipLevel: dto.vipLevel,

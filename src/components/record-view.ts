@@ -11,6 +11,11 @@ import type { StatusTone } from './status-pill'
  */
 export type RecordView = {
   title: string
+  /**
+   * Хүснэгтийн sticky баганы утга — вэбийн эхний багана (ихэвчлэн ID).
+   * Картын гарчиг уншигдахуйц (имэйл гэх мэт) хэвээр үлдэнэ.
+   */
+  tableTitle?: string
   subtitle?: string
   status?: { label: string; tone: StatusTone }
   amount?: AmountField
@@ -18,6 +23,12 @@ export type RecordView = {
   fields?: RecordField[]
   /** Картад зөвхөн дэлгэрэнгүйд; хүснэгтэд дараагийн баганууд. */
   details?: RecordField[]
+  /**
+   * Хүснэгтийн баганууд (гарчгийн дараа) — `'status'`, `'amount'` эсвэл
+   * талбарын `label`. Өгвөл хүснэгт яг эдгээрийг, энэ дарааллаар харуулна:
+   * вэбийн хүснэгтийг давтахад. Жагсаагүй талбар картад л үлдэнэ.
+   */
+  columns?: readonly string[]
   actions?: RecordAction[]
   /** Картын дээд хэсэгт харагдах зураг (banner гэх мэт). */
   image?: string

@@ -14,16 +14,21 @@ const text = messages.siteContent
 const f = text.fields
 const ALL = 'all'
 
+/** Вэбийн `footer-menu/page-category/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [f.nameEn, 'status', f.createdAt, f.updatedAt] as const
+
 function toRecord(item: PageCategory): RecordView {
   return {
     title: item.nameMn || item.nameEn || item.id,
     subtitle: item.nameEn,
-    status: activeStatus(item.status === 'active'),
+    status: activeStatus(item.status === 'active', 'neutral'),
     fields: [
+      { label: f.nameEn, value: item.nameEn },
       { label: f.createdAt, value: formatDate(item.createdAt) },
       { label: f.updatedAt, value: formatDate(item.updatedAt) },
     ],
     details: [{ label: f.description, value: item.descriptionMn }],
+    columns: COLUMNS,
   }
 }
 

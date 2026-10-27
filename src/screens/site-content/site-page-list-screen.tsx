@@ -22,13 +22,17 @@ const statusChips = () => [
   })),
 ]
 
+/** Вэбийн `footer-menu/page/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [f.nameEn, 'status', f.createdAt, f.updatedAt] as const
+
 function toRecord(item: SitePage): RecordView {
   return {
     title: item.nameMn || item.nameEn || item.id,
     subtitle: item.nameEn,
-    status: activeStatus(item.status === 'active'),
+    status: activeStatus(item.status === 'active', 'neutral'),
     fields: [
       { label: f.type, value: item.type },
+      { label: f.nameEn, value: item.nameEn },
       { label: f.createdAt, value: formatDate(item.createdAt) },
       { label: f.updatedAt, value: formatDate(item.updatedAt) },
     ],
@@ -36,6 +40,7 @@ function toRecord(item: SitePage): RecordView {
       { label: f.short, value: item.shortMn },
       { label: f.file, value: item.fileUrl },
     ],
+    columns: COLUMNS,
   }
 }
 

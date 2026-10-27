@@ -1,4 +1,4 @@
-import { formatAmountSafe, type AmountField } from '@/core/money/format'
+import { formatAmountField, type AmountField } from '@/core/money/format'
 
 import { AppText, type AppTextProps } from './app-text'
 
@@ -9,7 +9,7 @@ export function AmountText({
 }: { amount?: AmountField } & Omit<AppTextProps, 'children' | 'numeric'>) {
   return (
     <AppText numeric {...rest}>
-      {amount ? formatAmountSafe(amount.raw, amount.currency) : '—'}
+      {amount ? formatAmountField(amount) : '—'}
     </AppText>
   )
 }

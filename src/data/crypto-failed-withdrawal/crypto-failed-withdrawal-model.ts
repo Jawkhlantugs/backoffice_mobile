@@ -3,6 +3,8 @@ export type CryptoFailedWithdrawal = {
   id: string
   userEmail?: string
   userId?: string
+  /** Вэбийн «User ID» багана — `uid`. */
+  uid?: string
   feeRefundStatus?: number
   mainRefundStatus?: number
   resolvedAt?: number

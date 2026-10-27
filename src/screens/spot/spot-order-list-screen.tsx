@@ -5,7 +5,7 @@ import type { SpotOrder } from '@/data/spot/spot-model'
 import { useSpotOrders } from '@/hooks/use-spot'
 import { formatDate } from '@/lib/date'
 import { messages } from '@/lib/messages'
-import { statusTone } from '@/lib/status-tone'
+import { webStatusTone } from '@/lib/web-badge'
 
 const text = messages.lists
 const f = text.fields
@@ -27,20 +27,42 @@ export function SpotOrderListScreen() {
         placeholder: text.searchPlaceholder,
       }}
       record={toCard}
+      tableLabels={{ title: f.orderId }}
     />
   )
 }
 
+/** Вэб BUY-г ногоон, SELL-ийг улаан Badge-аар харуулдаг. */
+const sideTone = (side: string) => (side === 'BUY' ? 'success' : 'danger')
+
+const dateOf = (value?: string) => (value ? formatDate(value) : undefined)
+
+/** Вэбийн `spot/orders/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.date,
+  f.broker,
+  f.symbol,
+  f.side,
+  f.type,
+  f.price,
+  f.amount,
+  'status',
+] as const
+
 function toCard(item: SpotOrder): RecordView {
   return {
     title: item.symbol,
+    tableTitle: item.id,
     subtitle: [item.user, formatDate(item.transactTime)]
       .filter(Boolean)
       .join(' · '),
-    status: { label: item.status, tone: statusTone(item.status) },
+    status: {
+      label: item.status,
+      tone: webStatusTone(item.status, 'spot-order'),
+    },
     amount: item.quoteQty,
     fields: [
-      { label: f.side, value: item.side },
+      { label: f.side, value: item.side, tone: sideTone(item.side) },
       { label: f.type, value: item.type },
       { label: f.price, amount: item.price },
       {
@@ -49,10 +71,14 @@ function toCard(item: SpotOrder): RecordView {
       },
     ],
     details: [
+      { label: f.date, value: dateOf(item.createdAt) },
+      { label: f.broker, value: item.user },
+      { label: f.symbol, value: item.symbol },
+      { label: f.amount, value: item.origQty },
       { label: f.timeInForce, value: item.timeInForce },
       { label: f.clientOrderId, value: item.clientOrderId },
-      { label: f.user, value: item.user },
-      { label: f.createdAt, value: formatDate(item.transactTime) },
+      { label: f.createdAt, value: dateOf(item.transactTime) },
     ],
+    columns: COLUMNS,
   }
 }

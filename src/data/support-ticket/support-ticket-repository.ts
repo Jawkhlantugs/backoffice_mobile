@@ -29,11 +29,6 @@ export const supportTicketRepository = {
     return { ...page, items: page.items.map(toSupportTicket) }
   },
 
-  async byId(id: string): Promise<SupportTicket> {
-    const response = await clients.backoffice.get(`/support/tickets/${id}`)
-    return toSupportTicket(unwrap<SupportTicketDto>(response.data))
-  },
-
   /** Статус солих — `PUT {backoffice}/support/tickets/{id}`, хариу дахин уншиж холино. */
   async updateStatus(id: string, status: TicketStatus): Promise<SupportTicket> {
     const response = await clients.backoffice.put(`/support/tickets/${id}`, {

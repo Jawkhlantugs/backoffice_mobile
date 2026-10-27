@@ -8,16 +8,20 @@ import { messages } from '@/lib/messages'
 const text = messages.siteContent
 const f = text.fields
 
+/** Вэбийн `footer-menu/category/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [f.nameEn, 'status'] as const
+
 function toRecord(item: FooterCategory): RecordView {
   return {
     title: item.nameMn || item.nameEn || item.id,
     subtitle: item.nameEn,
-    status: activeStatus(item.isActive),
+    status: activeStatus(item.isActive, 'neutral'),
     fields: [
       { label: f.nameEn, value: item.nameEn },
       { label: f.createdAt, value: formatDate(item.createdAt) },
       { label: f.updatedAt, value: formatDate(item.updatedAt) },
     ],
+    columns: COLUMNS,
   }
 }
 

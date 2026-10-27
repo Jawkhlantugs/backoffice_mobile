@@ -25,6 +25,7 @@ export function CryptoFailedWithdrawalListScreen() {
         placeholder: messages.finance.searchPlaceholder,
       }}
       record={record}
+      tableLabels={{ title: messages.finance.fields.id }}
     />
   )
 }

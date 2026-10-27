@@ -40,7 +40,7 @@ export function SearchInput({
         autoCapitalize="none"
         autoCorrect={false}
         returnKeyType="search"
-        className="flex-1 p-0 text-body text-foreground"
+        className="flex-1 p-0 text-field text-foreground"
       />
 
       {value.length > 0 ? (

@@ -11,23 +11,47 @@ import { DEFAULT_PERIOD, periodChips } from '@/lib/period-chips'
 const text = messages.frc
 const f = text.fields
 
+/** Вэбийн `reports/frc-trade/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.email,
+  f.symbol,
+  f.type,
+  f.priceUsd,
+  f.priceMnt,
+  f.tokenAmount,
+  f.usdtAmount,
+  'amount',
+  f.rate,
+  f.date,
+] as const
+
 function toRecord(item: FrcTrade): RecordView {
   return {
     title: item.email ?? item.uid,
+    tableTitle: item.uid,
     subtitle: `${item.symbol} · ${item.tradeType} · ${formatDate(item.date)}`,
     amount: item.mntAmount,
     fields: [
+      // Вэб BUY-г ногоон, бусдыг улаан Badge-аар.
+      {
+        label: f.type,
+        value: item.tradeType,
+        tone: item.tradeType === 'BUY' ? 'success' : 'danger',
+      },
       { label: f.tokenAmount, value: item.tokenAmount },
       { label: f.usdtAmount, amount: item.usdtAmount },
       { label: f.priceUsd, amount: item.priceUsd },
-      { label: f.rate, amount: item.rate },
     ],
     details: [
       { label: f.uid, value: item.uid },
+      { label: f.email, value: item.email },
+      { label: f.symbol, value: item.symbol },
       { label: f.subAccountId, value: item.subAccountId },
       { label: f.priceMnt, amount: item.priceMnt },
+      { label: f.rate, amount: item.rate },
       { label: f.date, value: formatDate(item.date) },
     ],
+    columns: COLUMNS,
   }
 }
 
@@ -49,7 +73,7 @@ export function FrcTradeScreen() {
         placeholder: text.searchPlaceholder,
       }}
       statusChips={{ chips: periodChips(), value: period, onChange: setPeriod }}
-      tableLabels={{ title: f.email, amount: f.mntAmount }}
+      tableLabels={{ title: f.uid, amount: f.mntAmount }}
       record={toRecord}
     />
   )

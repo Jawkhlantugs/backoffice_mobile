@@ -26,15 +26,32 @@ export function InternalBalanceListScreen() {
         placeholder: text.searchPlaceholder,
       }}
       record={toCard}
+      tableLabels={{ title: f.id, amount: f.balance }}
     />
   )
 }
 
+/** Вэбийн `internal-transaction/balances/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.account,
+  f.subAccountId,
+  f.asset,
+  'amount',
+  f.updatedAt,
+] as const
+
 function toCard(item: InternalBalance): RecordView {
   return {
     title: item.owner ?? item.subAccountId,
+    tableTitle: item.id,
     subtitle: item.subAccountId,
     amount: item.balance,
+    fields: [
+      { label: f.account, value: item.owner },
+      { label: f.subAccountId, value: item.subAccountId },
+      { label: f.asset, value: item.balance.currency },
+    ],
     details: [{ label: f.updatedAt, value: formatDate(item.updatedAt) }],
+    columns: COLUMNS,
   }
 }

@@ -9,11 +9,18 @@ const TONES: Record<TicketStatus, StatusTone> = {
   solved: 'success',
 }
 
-export function TicketStatusPill({ status }: { status: TicketStatus }) {
+export function TicketStatusPill({
+  status,
+  className,
+}: {
+  status: TicketStatus
+  className?: string
+}) {
   return (
     <StatusPill
       label={messages.supportTickets.statuses[status]}
       tone={TONES[status]}
+      className={className}
     />
   )
 }

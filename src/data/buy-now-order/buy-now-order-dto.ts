@@ -6,7 +6,9 @@ export type BuyNowOrderDto = {
   orderId?: string
   created_at?: string
   symbol?: { symbol?: string }
-  User?: { id?: string; email?: string }
+  User?: { id?: string; email?: string; subAccountId?: string }
+  quotePrice?: number
+  metadata?: { fromBuyerToUser?: { data?: { txnId?: string } } } | null
   UserId?: string
   cryptoCurrency?: string
   orderStatus?: string
@@ -26,6 +28,7 @@ export function toBuyNowOrder(dto: BuyNowOrderDto): BuyNowOrder {
     orderId: dto.orderId,
     userEmail: dto.User?.email,
     userId: dto.User?.id ?? dto.UserId ?? undefined,
+    subAccountId: dto.User?.subAccountId,
     symbol: dto.symbol?.symbol,
     cryptoCurrency: crypto,
     orderStatus: dto.orderStatus ?? '',
@@ -34,6 +37,12 @@ export function toBuyNowOrder(dto: BuyNowOrderDto): BuyNowOrder {
       currency: 'MNT',
     },
     userGetAmount: { raw: dto.userGetAmountInCrypto ?? 0, currency: crypto },
+    userGetAmountFiat:
+      dto.userGetAmountInFiat === undefined
+        ? undefined
+        : { raw: dto.userGetAmountInFiat, currency: 'MNT' },
+    quotePrice: dto.quotePrice,
+    buyerToUserTxnId: dto.metadata?.fromBuyerToUser?.data?.txnId,
     userTotalFee: { raw: dto.userTotalFeeAmountInFiat ?? 0, currency: 'MNT' },
     createdAt: dto.created_at,
   }

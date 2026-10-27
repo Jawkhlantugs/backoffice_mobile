@@ -31,6 +31,7 @@ export type WeeklyReport = {
   status: WeeklyReportStatus
   submittedAt?: string
   createdAt: string
+  updatedAt?: string
 }
 
 /**

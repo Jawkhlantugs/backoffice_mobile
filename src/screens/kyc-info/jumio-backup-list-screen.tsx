@@ -9,8 +9,20 @@ import { messages } from '@/lib/messages'
 const text = messages.jumio
 const f = text.fields
 
+/** Вэбийн `user-management/jumio-backup/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.customerId,
+  f.firstName,
+  f.lastName,
+  f.type,
+  'status',
+  f.country,
+  f.createdAt,
+] as const
+
 function toRecord(item: JumioBackup): RecordView {
   return {
+    tableTitle: item.scanReference,
     title:
       [item.firstName, item.lastName].filter(Boolean).join(' ') ||
       item.scanReference,
@@ -19,7 +31,8 @@ function toRecord(item: JumioBackup): RecordView {
       item.verified === undefined
         ? undefined
         : item.verified
-          ? { label: text.verified, tone: 'success' }
+          ? // Вэб "Verified"-ийг өнгөгүй (default) Badge-аар.
+            { label: text.verified, tone: 'neutral' }
           : { label: text.notVerified, tone: 'danger' },
     fields: [
       { label: f.type, value: item.type },
@@ -27,7 +40,12 @@ function toRecord(item: JumioBackup): RecordView {
       { label: f.customerId, value: item.customerId },
       { label: f.createdAt, value: formatDate(item.createdAt) },
     ],
-    details: [{ label: f.scanReference, value: item.scanReference }],
+    details: [
+      { label: f.scanReference, value: item.scanReference },
+      { label: f.firstName, value: item.firstName },
+      { label: f.lastName, value: item.lastName },
+    ],
+    columns: COLUMNS,
   }
 }
 
@@ -48,7 +66,7 @@ export function JumioBackupListScreen() {
         onChange: setSearch,
         placeholder: text.searchPlaceholder,
       }}
-      tableLabels={{ title: f.firstName }}
+      tableLabels={{ title: f.scanReference, status: f.status }}
       record={toRecord}
     />
   )

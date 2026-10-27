@@ -5,8 +5,13 @@
 export type KycInfo = {
   id: string
   uid: string
+  /** `user.subAccountId || uid || id` — вэбийн subId багана. */
+  subAccountId: string
   email?: string
   fullName?: string
+  firstName?: string
+  lastName?: string
+  kycLevel?: number
   kycStatus?: string
   verificationStatus?: string
   passed: boolean
@@ -17,10 +22,13 @@ export type KycInfo = {
   pep: boolean
   sanctionHit: boolean
   country?: string
+  residenceCountry?: string
+  sanctionResult?: string
   nationality?: string
   dob?: string
   documentType?: string
   documentId?: string
   expiryDate?: string
   createdAt: string
+  updatedAt?: string
 }

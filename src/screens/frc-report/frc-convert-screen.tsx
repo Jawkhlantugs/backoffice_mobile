@@ -7,24 +7,47 @@ import { formatDate } from '@/lib/date'
 import type { RangePeriod } from '@/lib/date-range'
 import { messages } from '@/lib/messages'
 import { DEFAULT_PERIOD, periodChips } from '@/lib/period-chips'
-import { statusTone } from '@/lib/status-tone'
 
 const text = messages.frc
 const f = text.fields
 
+/** Вэбийн `reports/frc-convert/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.email,
+  f.subAccountId,
+  f.fromAmount,
+  f.fromAsset,
+  f.toAmount,
+  f.toAsset,
+  f.rate,
+  'status',
+  f.date,
+  f.convertId,
+] as const
+
+/** Вэб илгээсэн талыг улаан, хүлээн авсан талыг ногоон текстээр; статус өнгөгүй. */
 function toRecord(item: FrcConvert): RecordView {
   return {
     title: item.email ?? item.uid,
+    tableTitle: item.uid,
     subtitle: formatDate(item.postDate),
-    status: { label: item.status, tone: statusTone(item.status) },
+    status: { label: item.status, tone: 'neutral' },
     amount: item.toAmount,
     fields: [
-      { label: f.fromAmount, amount: item.fromAmount },
+      { label: f.fromAmount, amount: item.fromAmount, tone: 'danger' },
       { label: f.rate, value: item.rate },
+      { label: f.toAmount, amount: item.toAmount, tone: 'success' },
       { label: f.subAccountId, value: item.subAccountId },
-      { label: f.uid, value: item.uid },
     ],
-    details: [{ label: f.convertId, value: item.id }],
+    details: [
+      { label: f.uid, value: item.uid },
+      { label: f.email, value: item.email },
+      { label: f.fromAsset, value: item.fromAmount.currency },
+      { label: f.toAsset, value: item.toAmount.currency },
+      { label: f.date, value: item.postDate },
+      { label: f.convertId, value: item.id },
+    ],
+    columns: COLUMNS,
   }
 }
 
@@ -46,7 +69,7 @@ export function FrcConvertScreen() {
         placeholder: text.searchPlaceholder,
       }}
       statusChips={{ chips: periodChips(), value: period, onChange: setPeriod }}
-      tableLabels={{ title: f.email, amount: f.toAmount }}
+      tableLabels={{ title: f.uid, amount: f.toAmount }}
       record={toRecord}
     />
   )

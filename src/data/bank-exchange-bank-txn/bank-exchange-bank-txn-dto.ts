@@ -7,7 +7,9 @@ export type BankExchangeBankTxnDto = {
   amountType?: string
   beginBalance?: number
   currency?: string
+  description?: string
   endBalance?: number
+  mainAccountNumber?: string
   processStatus?: string
   relatedAccountNumber?: string
   txnTime?: string
@@ -31,6 +33,8 @@ export function toBankExchangeBankTxn(
       dto.endBalance === undefined
         ? undefined
         : { raw: dto.endBalance, currency },
+    description: dto.description,
+    mainAccountNumber: dto.mainAccountNumber,
     relatedAccountNumber: dto.relatedAccountNumber,
     processStatus: dto.processStatus,
     txnTime: dto.txnTime,

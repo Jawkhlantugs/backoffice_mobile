@@ -1,12 +1,19 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { convertRepository } from '@/data/convert/convert-repository'
+import { withDefaultRange, type ListFilters } from '@/lib/list-filters'
 
 import { usePagedList } from './use-paged-list'
 
-export function useConvertRecords(options: { search?: string } = {}) {
+export function useConvertRecords(
+  options: { search?: string; status?: string; filters?: ListFilters } = {},
+) {
   return usePagedList('convert', (params) => convertRepository.list(params), {
     search: options.search,
+    filters: {
+      status: options.status,
+      ...withDefaultRange(options.filters ?? {}),
+    },
   })
 }
 

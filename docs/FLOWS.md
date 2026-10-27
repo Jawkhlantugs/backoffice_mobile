@@ -308,7 +308,7 @@ scheme байгаа тул route бүрийг navigator түвшинд хаан�
 | Дэлгэц      | Route            | Дэлгэц (screens/)                  | Endpoint                          |
 | ----------- | ----------------- | ----------------------------------- | ---------------------------------- |
 | Жагсаалт    | `app/support/index.tsx`  | `support/ticket-list-screen.tsx`    | `POST {backoffice}/support/tickets/list` |
-| Дэлгэрэнгүй | `app/support/[id].tsx`   | `support/ticket-detail-screen.tsx`  | `GET {backoffice}/support/tickets/{id}`  |
+| Дэлгэрэнгүй | `app/support/[id].tsx`   | `support/ticket-detail-screen.tsx`  | Жагсаалтын cache-ээс (`useSupportTicket`) — `GET …/tickets/{id}` нь `x-support-key` шаарддаг, админд 401 |
 
 - Цэсний зам: `SUPPORT_TICKETS_MENU_PATH = '/portal/support/tickets'` →
   `MOBILE_ROUTES`-д `/support`.
@@ -339,6 +339,7 @@ scheme байгаа тул route бүрийг navigator түвшинд хаан�
 | Repository | `data/shared/fetch-list.ts` | POST → дугтуй → model, хоосон шүүлтүүр явуулахгүй |
 | Hook | `hooks/use-paged-list.ts` | `current/pageSize/query`, хайлт 400ms debounce, доош гүйлгэхэд дараагийн хуудас (`total` эсвэл дүүрэн хуудсаар) |
 | Дэлгэц | `components/paged-list-screen.tsx` | drawer/буцах, шинэчлэх, хайлт, "N бичлэг", карт ⇄ хүснэгт, хуудас ачаалах loader |
+| Имэйлээр хайх | `data/exchange-user/user-search.ts` | Зөвхөн ID хүлээдэг endpoint (stake, reward hub, monitor users, balance snapshot, order): `withUserSearch(repo.list)` имэйлийг `/users/list`-ээр яг таарах хэрэглэгчийн ID (эсвэл `subAccountId`) болгоно, олдохгүй бол хоосон. `query` нь имэйл хүлээдэг endpoint-д (bank/crypto жагсаалт) хэрэггүй |
 | Хуудасгүй | `components/query-list-screen.tsx` | `useQuery`-ийн бүх мөр нэг дор (тохиргоо, эрх, ангилал); хайлт ачаалсан мөрөн дотор (`searchText`) |
 | Мөр | `components/record-view.ts` | `RecordView` — нэг бичлэгийн дэлгэцийн хэлбэр; карт ч, хүснэгтийн мөр ч үүнээс |
 | Карт | `components/record-card.tsx` | гарчиг + статус + том дүн + 2 баганат 4 талбар; дарахад `RecordDetailSheet` — бүх талбар (удаан дарж хуулна) + `RecordActions` |
@@ -386,6 +387,50 @@ render хийдэг.
 `/portal/order-mnt/ihc-mnt` (вэбийн тэр хуудас `orderMntService.list`-ийг
 дууддаг — 2026-10-01-нд баталсан).
 
+**Банкны гүйлгээ / Банкны зарлагын шүүлтүүр (2026-10-26).** Вэбийн
+`exchange-txn/constants.ts`, `withdrawal/constants.ts`-ийн filter panel-ийг
+дагана: статус нь жагсаалтын чип (`processStatus` / `status`), бусад нь толгойн
+"Шүүлтүүр" товчоор нээгдэх `*-filter-sheet.tsx` (ID, данс, дүн + `condition`,
+огноо → `sortDate`). Дүнг `data/shared/amount-filter.ts` MNT-ээр шалгаж JSON
+тоогоор илгээнэ (§10.7). `query` нь Bank-Exch txn-д тайлбар, зарлагад
+User ID / Sub Account ID / имэйлээр хайна — "user ID" биш. Гурав дахь
+жагсаалт (жиш: Банкны орлого) ижил sheet авбал `components/` руу нэгтгэ.
+
+**Нийтлэг шүүлтүүр — `ListFilterSheet` (2026-10-27).** Тестийн санал: USDT/IHC
+orders, Bank Accounts, Convert, BuyNow orders. Вэбийн `constants.ts`-ийн
+`*_FILTER_FIELDS`-ийг **яг** дагана (талбар, огнооны дүрэм, limit). Ганц
+ялгаа: статус нь вэбд filter panel-ийн select, mobile-д жагсаалтын чип
+(нэг хүрэлтээр). Текст талбар + огнооны муж (эхлэх / дуусах өдөр, вэбийн
+`DateRangePicker`) нь толгойн "Шүүлтүүр" товчны `ListFilterSheet`-д. Утга нь
+`ListFilters` (`lib/list-filters.ts`, `start_day`/`end_day`).
+
+| Жагсаалт | Статус чип | Sheet-ийн талбар |
+| --- | --- | --- |
+| USDT / IHC orders | NEW, FILLED, PARTIALLY_FILLED, CANCELLED | Order ID, огноо, Limit |
+| Bank Accounts (`/bank/wallets`) | verified, pending_verification | Дансны ID, дугаар, нэр, огноо |
+| Convert | COMPLETED, PENDING, PARTIALLY_COMPLETED, FAILED | From / To asset, огноо |
+| BuyNow orders | SUCCESS, PENDING, FAILED, ERROR | Currency, Order ID, огноо |
+
+Огнооны дүрэм вэбээс:
+- Bank / Convert / BuyNow — `useFilterParams` (`defaultMonths: 0`): нэг өдөр
+  л сонговол нөгөөг өнөөдрөөр нөхнө (`withDefaultRange`) → `sortDate`.
+- Orders — `toListRequest`: хоёр өдөр хоёулаа байвал л `startTime`/`endTime`
+  = `new Date(day).getTime()` (UTC шөнө дунд). ⚠️ Дуусах өдрийг шөнө дундаар
+  авдаг тул тэр өдрийн захиалга орохгүй — вэбийн зан төлөв, зориуд давтсан.
+  `symbol` (`USDT_MNT` / `IHC_MNT`) үргэлж; `limit` 1–100, анхдагч 20
+  (`orderLimit`).
+- Дүнгийн нөхцөлтэй банкны хоёр sheet (`bank-*-filter-sheet.tsx`) тусдаа,
+  огноо нь чипээр хэвээр.
+
+**Crypto withdrawals (2026-10-27).** Статус чип: 1 Completed, 2 Suspended,
+5 Failed/Rejected, 7 Processing, 8 Cancelled (вэбийн тоон код). Sheet:
+Withdrawal ID, Amount + нөхцөл, USDT Valuation + нөхцөл, Coin, Network,
+Transaction ID, Address, огноо. `ListFilterSheet`-ийн `amount` талбар нь
+вэбийн `showWhen`-ийг дагана: дүн бичвэл Тэнцүү/Их/Бага гарч,
+`*Condition` (анхдагч `EQUAL`) хамт явна. Дүнг `amountFilterToApi(raw,
+currency)`-ээр шалгаж JSON тоогоор (§10.7): USDT Valuation — USDT (8 орон),
+Amount — coin бүр өөр тул `COIN_AMOUNT_CURRENCY` (ETH, 18 орон).
+
 ### Хүснэгт (DataTable) — карт ⇄ хүснэгт (2026-10-01)
 
 Бүх жагсаалт (`PagedListScreen`, `QueryListScreen`, `RecordListScreen`)
@@ -404,6 +449,13 @@ render хийдэг.
 - Багана = гарчиг (sticky) → статус → дүн → `fields` → `details`; ачаалсан
   мөрүүдийн талбарын нэгдэл. Өргөнийг эхний 60 мөрийн текстийн уртаар
   тооцоод дэлгэцээс нарийн бол илүү зайг хуваана (`fitColumns`).
+- Вэбийн хүснэгттэй яг ижил багана/дараалал хэрэгтэй бол `RecordView.columns`
+  (`'status'`, `'amount'` эсвэл талбарын `label`) — хүснэгт зөвхөн эдгээрийг
+  харуулна, жагсаагүй талбар картад л үлдэнэ. Вэбийн эхний багана (ихэвчлэн
+  ID) картын гарчгаас өөр бол `tableTitle`. Статусын өнгө вэбийн
+  `getStatusBadgeVariant`-аас → `lib/web-badge.ts`.
+- `RecordField.tone` өгвөл утга нь картанд ч, хүснэгтэд ч статусын pill
+  болно (вэбийн Badge — жиш. DEPOSIT ногоон, WITHDRAWAL улаан).
 - Хэвтээ гүйлгэлт нь `Animated.ScrollView` → дотор нь босоо `FlatList`.
   Гарчгийн нүд scroll-ын зайгаар буцаж шилждэг (native driver) тул зүүн
   талд наалдана; толгой нь `stickyHeaderIndices`.
@@ -558,21 +610,35 @@ render хийдэг.
 
 ### Ticket-д хариу бичих (2-р шат)
 
-`ticket-detail-screen.tsx` дотор нэмэгдсэн: статус чип (шууд солино),
-харилцааны FlatList + доод reply мөр (macro товч + текст оролт + илгээх).
+`ticket-detail-screen.tsx`: толгойд тасалбарын гарчиг + харилцагч, баруун талд
+ⓘ (`ticket-info-sheet.tsx` — дэлгэрэнгүй) ба статусын dropdown
+(`ticket-status-select.tsx`, шууд солино). Доор нь зөвхөн chat — шинэ мессеж
+ирэхэд доош гүйлгэнэ (хэрэглэгч дээш гүйлгэсэн бол үгүй), доод reply мөр
+(macro товч + текст оролт + илгээх).
 
 | Хэсэг | Файл | Юу болно |
 | --- | --- | --- |
 | Ярианы түүх (унших) | `data/support-ticket/ticket-conversation-*` | `POST {support}admin/tickets/conversation` |
 | Илгээх (WS) | `services/support/ticket-socket-service.ts` | `POST {socket}/ws/token` → `wss://…?token=` → `conversation.send` |
-| Холболтын амьдралын мөчлөг | `hooks/use-ticket-conversation.ts` | AppState идэвхжих бүрт дахин холбогдоно, 25 сек `ping` |
+| Холболтын амьдралын мөчлөг | `hooks/use-ticket-conversation.ts` | AppState идэвхжих бүрт дахин холбогдоно, 25 сек `{action:'ping'}`, серверийн ping-д `{action:'pong'}` |
 | Macro | `data/support-ticket/ticket-macro-*` | `POST {backoffice}/support/marcos/list` (backend-ийн алдаатай нэрийг **засаагүй**) |
 | Статус солих | `useUpdateTicketStatus` | `PUT {backoffice}/support/tickets/{id}` |
 
 - Илгээх зурвас `<p>…</p>`-ээр ороож явуулна (`lib/html.ts` `wrapAsHtmlParagraph`),
   уншихдаа `stripHtml` цэвэрлэнэ — бүрэн HTML renderer ашиглаагүй
   (`MOBILE_SCOPE_RESEARCH.md` §2.2-ийн зөвлөмж).
-- `senderId` нь session-ий `user.id`.
+- `senderId` нь session-ий `user.id`. `uid` нь харилцагчийн
+  `uid → user_id → userId → user.*` (`customerUid`) — байхгүй бол вэбийн адил илгээхгүй.
+- Яриа = REST (`staleTime: 0`) + WS-ээр ирсэн + илгээсэн (optimistic) мессеж,
+  `mergeConversation`-оор нэгтгэж цагаар эрэмбэлнэ — вэбийн `liveMessages`-тэй ижил.
+  WS frame-ийг `readSocketFrame` задална — хэрэглэгчийн апп
+  (`xmeta-web-v4-monorepo` `support-ticket-ws.ts`, Flutter `SupportController`)
+  уншдаг бүх хэлбэр (`params`/`payload`/`data.list`, `sendAt`/`epochTime`).
+  `tchId` (`<ticketId>_tk`) эсвэл `ticketId`-аар шүүнэ.
+- `conversation.send` frame ирэх бүрт, app foreground болох бүрт, мөн 15 сек
+  тутам REST-ээ дахин татна — frame-ийн хэлбэр таарахгүй байсан ч мессеж хоцрохгүй.
+- `connect()` нь socket `open` болох хүртэл (5 сек) хүлээнэ; нээгдэж буй
+  холболт байвал шинийг нээхгүй, түүнийг хүлээнэ (`waitForOpen`).
 - 🔴 React Compiler-ийн `set-state-in-effect` дүрэм: effect дотор `setState`
   хийдэг функцийг шууд дуудахгүй, `queueMicrotask`-аар хойшлуулна
   (`use-ticket-conversation.ts`).
@@ -630,12 +696,39 @@ render хийдэг.
 `response.data.data.data` (вэб код). `unwrap()` нэг л удаа задалдаг тул
 `user-balance-repository.ts` гараар хоёр дахь давхаргыг шалгана.
 
-Аюулгүй байдлын таб дахь бүх үйлдэл ConfirmSheet-тэй:
-- MFA reset (sms/token) — шалтгаангүй
-- Битүүмж гаргах (`account-enable`) — шалтгаангүй, **"битүүмжлэх" товч
-  байхгүй** (endpoint олдоогүй, §1.7)
-- Withdraw/Trade/Futures хориг унтраалга — шалтгаан **заавал**
+Табууд вэбийн `user-information/$id` хуудсыг дуурайна:
+
+| Таб | Вэб эх | Агуулга |
+| --- | --- | --- |
+| Үндсэн | `basic-information-tab.tsx` | User ID, нэр, sub-account, имэйл, VIP, бүртгүүлсэн, KYC статус → `UserBanCard` (хязгаарлалт) → Имэйл солих / Бүртгэл идэвхжүүлэх |
+| Хөрөнгө | `asset-content/` | Огноо сонгоогүй = одоогийн үлдэгдэл; огноо сонговол `{finance}/user/balance-snapshot` `{uid, date}` |
+| Аюулгүй байдал | `authentication-tab.tsx` | Баталгаажуулалтын төлөв + SMS / Authenticator reset |
+
+Хоригийн дүрэм `data/exchange-user/user-ban.ts`-д (вэбийн `ban-controls.tsx`):
+- Хаалттай эсэх: `can*` туг (security → user) байвал түүгээр, үгүй бол `is*Ban`.
+- `futuresTrade === null` (futures нээгээгүй) → futures хоригийг нууна.
+- Хориг байвал **MFA reset ба Бүртгэл идэвхжүүлэх нуугдана**.
+- KYC-гүй хэрэглэгчид хязгаарлалт, имэйл солих харагдахгүй.
+- Шалтгааны өмнө `ADMIN:<админы имэйл>: ` залгана (вэбтэй ижил аудит).
+- Хаалттай мөрийн доор шалтгаан (`user-ban-reason.ts`, вэбийн `BanBanner`).
+  Withdraw: `{compliance}/user/risk-score` (FREEZE эсвэл оноо ≥ 70) →
+  `{backoffice}/crypto/withdraw-bans/list` (subAccountId, сүүлийн BANNED) →
+  `{compliance}/user/withdraw-ban-log`. Trade/futures: зөвхөн `*-ban-log`.
+  Вэб нүдний товч дарахад татдаг; mobile хаалттай мөрөнд шууд татна.
+
+Бүх үйлдэл ConfirmSheet-тэй:
+- MFA reset — **зөвхөн идэвхтэй хүчин зүйлд** товч харагдана (тестийн санал;
+  вэб disable хийдэг)
+- Имэйл солих (`{security}/user/change-email`) — шинэ имэйлийг ConfirmSheet-ийн
+  `reason.validate`-ээр шалгана
+- Бүртгэл идэвхжүүлэх (`account-enable`) — **"битүүмжлэх" товч байхгүй**
+  (endpoint олдоогүй, §1.7)
+- Withdraw/Trade/Futures унтраалга — шалтгаан **заавал**
   (`compliance.user.*-ban`)
+
+Вэбд байгаа ч mobile-д ороогүй: Old Email (админы лог 200-г хайж
+тооцдог), Bank Information,
+KYC Info таб, доод 16 жагсаалт (Deposit, Withdraw, Orders, Auth Log …).
 
 - Цэсний зам: `/portal/user-information` → `/users`.
 
@@ -799,6 +892,6 @@ Apple-ийн reviewer бодит өгөгдөл харахгүйгээр апп�
 8. **Буцаах боломжгүй үйлдэл** — `RecordView.actions` (`confirm.reason` +
    idempotency key) — карт ба хүснэгтийн дэлгэрэнгүйд хоёуланд гарна.
    Формд сонголт → `<SelectField>`, жагсаалтаас сонгох хавтан →
-   `<SelectSheet>`, бусад хавтан → `<BottomSheet>`.
+   `<SelectSheet>`, бусад хавтан → `<BackofficeBottomSheet>`.
 9. **Энэ файлд урсгалаа нэм.**
 10. `npm run typecheck && npm run lint && npm test`

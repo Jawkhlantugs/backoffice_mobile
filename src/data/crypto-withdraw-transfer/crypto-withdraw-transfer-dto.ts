@@ -5,6 +5,7 @@ export type CryptoWithdrawTransferDto = {
   created_at?: string
   userId?: string | null
   User?: { id?: string; email?: string }
+  operationAccount?: { name?: string } | null
   coin?: { coin?: string }
   network?: string | null
   address?: string
@@ -26,6 +27,7 @@ export function toCryptoWithdrawTransfer(
     id: dto.id ?? '',
     userEmail: dto.User?.email,
     userId: dto.User?.id ?? dto.userId ?? undefined,
+    operationAccount: dto.operationAccount?.name,
     address: dto.address,
     amount:
       dto.amount === undefined ? undefined : { raw: dto.amount, currency },
@@ -37,6 +39,7 @@ export function toCryptoWithdrawTransfer(
       dto.receiveAmount === undefined
         ? undefined
         : { raw: dto.receiveAmount, currency },
+    coin: currency,
     network: dto.network ?? undefined,
     txId: dto.txId ?? undefined,
     status: dto.status ?? 0,

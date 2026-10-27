@@ -15,6 +15,16 @@ const text = messages.siteContent
 const f = text.fields
 const ALL = 'all'
 
+/** Вэбийн `additional/news/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.nameEn,
+  f.category,
+  'status',
+  f.views,
+  f.publishedAt,
+  f.createdAt,
+] as const
+
 function toRecord(item: NewsArticle): RecordView {
   return {
     title: item.nameMn || item.nameEn || item.id,
@@ -22,6 +32,7 @@ function toRecord(item: NewsArticle): RecordView {
     status: activeStatus(item.status === 'active'),
     image: item.imageUrl,
     fields: [
+      { label: f.nameEn, value: item.nameEn },
       { label: f.category, value: labelOf(text.newsCategories, item.category) },
       { label: f.views, value: item.views },
       {
@@ -31,6 +42,7 @@ function toRecord(item: NewsArticle): RecordView {
       { label: f.createdAt, value: formatDate(item.createdAt) },
     ],
     details: [{ label: f.likes, value: item.likes }],
+    columns: COLUMNS,
   }
 }
 

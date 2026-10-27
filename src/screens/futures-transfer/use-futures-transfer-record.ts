@@ -7,14 +7,38 @@ import {
 import { formatDate } from '@/lib/date'
 import { messages } from '@/lib/messages'
 
+/** Вэбийн `futures/transfer-requests/constants.ts`-ийн `getStatusVariant`. */
 const TONES = {
   PENDING: 'warning',
-  PROCESSING: 'info',
+  PROCESSING: 'warning',
   COMPLETED: 'success',
   APPROVED: 'success',
   REJECTED: 'danger',
   FAILED: 'danger',
 } as const
+
+const text = messages.futures
+
+/**
+ * Вэбийн `futures/transfer-requests/components/columns.tsx`-ийн дараалал.
+ * Email, Reviewed By нь raw хариунд байдаггүй (вэб ч "-") тул хасав.
+ */
+const COLUMNS = [
+  'status',
+  text.direction,
+  'amount',
+  text.usdtValue,
+  text.user,
+  text.requestedAt,
+] as const
+
+/** Вэбийн `normalizeFuturesTransferDirection` + `getDirectionText`. */
+function directionText(direction?: string): string {
+  const value = (direction ?? '').toLowerCase()
+  return value.includes('futures_to_spot') || value.includes('futures-to-spot')
+    ? 'Futures to Spot'
+    : 'Spot to Futures'
+}
 
 export function useFuturesTransferRecord(): (
   request: FuturesTransferRequest,
@@ -32,8 +56,23 @@ export function useFuturesTransferRecord(): (
         label: messages.futures.statuses[request.status],
         tone: TONES[request.status],
       },
-      amount: request.amount,
+      tableTitle: request.txnId,
+      amount: { ...request.amount, showCode: true },
+      fields: [
+        { label: text.direction, value: directionText(request.direction) },
+        {
+          // Вэб USDT дүнг дүнтэй ижил утгаар харуулдаг.
+          label: text.usdtValue,
+          amount: { raw: request.amount.raw, currency: 'USDT', showCode: true },
+        },
+        { label: text.user, value: request.userId },
+        {
+          label: text.requestedAt,
+          value: request.createdAt ? formatDate(request.createdAt) : undefined,
+        },
+      ],
       details: [{ label: messages.finance.fields.txnId, value: request.txnId }],
+      columns: COLUMNS,
       actions: [
         {
           key: 'approve',

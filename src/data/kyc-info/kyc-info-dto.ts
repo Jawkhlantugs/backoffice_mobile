@@ -3,9 +3,13 @@ import type { KycInfo } from './kyc-info-model'
 export type KycInfoDto = {
   id: string
   created_at?: string
+  updated_at?: string
   uid?: string
+  kycLevel?: number | null
   user?: {
     email?: string
+    subAccountId?: string | null
+    kycLevel?: number | null
     firstName?: string | null
     lastName?: string | null
   } | null
@@ -21,6 +25,8 @@ export type KycInfoDto = {
   link_pep?: number | null
   link_sanctionHit?: number | null
   link_country?: string | null
+  link_residenceCountry?: string | null
+  link_sanctionResult?: string | null
   link_nationality?: string | null
   link_dob?: string | null
   link_documentType?: string | null
@@ -40,8 +46,12 @@ export function toKycInfo(dto: KycInfoDto): KycInfo {
   return {
     id: dto.id,
     uid: dto.uid ?? '',
+    subAccountId: dto.user?.subAccountId || dto.uid || dto.id,
     email: dto.user?.email,
     fullName: name || undefined,
+    firstName: opt(dto.link_firstName),
+    lastName: opt(dto.link_lastName),
+    kycLevel: opt(dto.user?.kycLevel ?? dto.kycLevel),
     kycStatus: opt(dto.kycStatus),
     verificationStatus: opt(dto.verificationStatus),
     passed: dto.kycPassed === 1,
@@ -52,11 +62,14 @@ export function toKycInfo(dto: KycInfoDto): KycInfo {
     pep: dto.link_pep === 1,
     sanctionHit: dto.link_sanctionHit === 1,
     country: opt(dto.link_country),
+    residenceCountry: opt(dto.link_residenceCountry),
+    sanctionResult: opt(dto.link_sanctionResult),
     nationality: opt(dto.link_nationality),
     dob: opt(dto.link_dob),
     documentType: opt(dto.link_documentType),
     documentId: opt(dto.link_documentId),
     expiryDate: opt(dto.link_expiryDate),
     createdAt: dto.created_at ?? '',
+    updatedAt: dto.updated_at,
   }
 }

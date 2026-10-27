@@ -36,7 +36,7 @@ export function PagedListScreen<T, S extends string = string>({
   list: PagedList<T>
   keyExtractor: (item: T) => string
   record: (item: T) => RecordView
-  tableLabels?: { title?: string; amount?: string }
+  tableLabels?: { title?: string; amount?: string; status?: string }
   emptyIcon: AppIconName
   emptyLabel?: string
   search?: {

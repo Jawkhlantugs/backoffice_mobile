@@ -17,9 +17,13 @@ export function StakeContractListScreen() {
       keyExtractor={(item) => item.id}
       emptyIcon="stake"
       record={toCard}
+      tableLabels={{ title: f.contractName, amount: f.totalStaked }}
     />
   )
 }
+
+/** Вэбийн `stake/contract/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [f.asset, f.duration, f.apr, f.min, f.max, 'amount'] as const
 
 function toCard(item: StakeContract): RecordView {
   return {
@@ -40,6 +44,7 @@ function toCard(item: StakeContract): RecordView {
       { label: f.max, amount: item.maxAmount },
     ],
     details: [
+      { label: f.asset, value: item.asset },
       {
         label: text.stake.policies,
         value: item.cancelPolicies
@@ -50,5 +55,6 @@ function toCard(item: StakeContract): RecordView {
           .join('\n'),
       },
     ],
+    columns: COLUMNS,
   }
 }

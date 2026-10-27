@@ -32,6 +32,7 @@ export function BalanceSnapshotListScreen() {
         placeholder: text.subAccountPlaceholder,
       }}
       record={toCard}
+      tableLabels={{ title: f.id, amount: f.usdtValuation }}
     />
   )
 }
@@ -47,13 +48,17 @@ function balanceRows(
   }))
 }
 
+/** Вэбийн `user-management/balance-snapshots/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [f.subAccountId, f.date, f.mntValuation, 'amount'] as const
+
 function toCard(item: BalanceSnapshot): RecordView {
   return {
     title: item.user ?? item.subAccountId,
+    tableTitle: item.userId ?? item.id,
     subtitle: `${item.date} · ${item.subAccountId}`,
     amount: item.usdtValuation,
     fields: [
-      { label: f.mntTotal, amount: item.mntValuation },
+      { label: f.mntValuation, amount: item.mntValuation },
       { label: f.spot, value: item.spot.length },
       { label: f.futures, value: item.futures.length },
       { label: f.fiat, value: item.bank.length },
@@ -62,6 +67,9 @@ function toCard(item: BalanceSnapshot): RecordView {
       ...balanceRows(f.spot, item.spot),
       ...balanceRows(f.futures, item.futures),
       ...balanceRows(f.fiat, item.bank),
+      { label: f.subAccountId, value: item.subAccountId },
+      { label: f.date, value: item.date },
     ],
+    columns: COLUMNS,
   }
 }

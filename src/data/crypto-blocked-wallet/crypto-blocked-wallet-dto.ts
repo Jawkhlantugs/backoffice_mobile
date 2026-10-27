@@ -18,11 +18,8 @@ export function toCryptoBlockedWallet(
     id: dto.id ?? '',
     address: dto.address ?? '',
     network: dto.network ?? '',
-    createdByLabel:
-      dto.createdUser?.name ??
-      dto.createdUser?.email ??
-      dto.createdUserId ??
-      undefined,
+    // Вэбийн "Created By" нь имэйлийг түрүүлж харуулдаг.
+    createdByLabel: dto.createdUser?.email || dto.createdUser?.name,
     reason: dto.reason,
     status: dto.status ?? 0,
     createdAt: dto.created_at,

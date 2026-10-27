@@ -30,9 +30,10 @@ export function CryptoBlockedWalletListScreen() {
       search={{
         value: search,
         onChange: setSearch,
-        placeholder: messages.finance.searchPlaceholder,
+        placeholder: messages.finance.cryptoBlockedWallets.searchPlaceholder,
       }}
       record={cryptoBlockedWalletRecord}
+      tableLabels={{ title: messages.finance.fields.id }}
     />
   )
 }

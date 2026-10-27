@@ -13,7 +13,8 @@
       "infoPlist": {
         "NSFaceIDUsageDescription": "Админ аппыг нээхэд Face ID ашиглана.",
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "appleTeamId": "D9GB2ATU89"
     },
     "android": {
       "adaptiveIcon": {

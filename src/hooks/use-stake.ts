@@ -1,12 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
+import { withUserSearch } from '@/data/exchange-user/user-search'
 import type { UserStakeStatus } from '@/data/stake/stake-model'
 import { stakeRepository } from '@/data/stake/stake-repository'
 
 import { useCursorList } from './use-cursor-list'
 
 export const useUserStakes = (search: string, status?: string) =>
-  useCursorList('stake-users', stakeRepository.userStakes, {
+  useCursorList('stake-users', withUserSearch(stakeRepository.userStakes), {
     search,
     filters: { status },
   })

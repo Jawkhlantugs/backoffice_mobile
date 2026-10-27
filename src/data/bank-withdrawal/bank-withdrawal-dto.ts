@@ -4,7 +4,14 @@ export type BankWithdrawalDto = {
   id?: string
   created_at?: string
   accountNumber?: string
-  Bank?: { nameMn?: string; nameEn?: string } | null
+  Bank?: { code?: string } | null
+  Wallet?: { walletCode?: string }
+  metadata?: {
+    serviceFee?: number
+    serviceFeeTxnId?: string
+    txnFeeTxnId?: string
+    txnTaskId?: string
+  }
   currency?: string
   feeAmount?: number
   receiveAmount?: number
@@ -23,12 +30,20 @@ export function toBankWithdrawal(dto: BankWithdrawalDto): BankWithdrawal {
     userEmail: dto.User?.email,
     userId: dto.User?.id ?? dto.userId ?? undefined,
     accountNumber: dto.accountNumber,
-    bankLabel: dto.Bank?.nameMn ?? dto.Bank?.nameEn,
+    bankCode: dto.Bank?.code,
+    paymentWalletId: dto.Wallet?.walletCode,
     currency,
     feeAmount:
       dto.feeAmount === undefined
         ? undefined
         : { raw: dto.feeAmount, currency },
+    serviceFee:
+      dto.metadata?.serviceFee === undefined
+        ? undefined
+        : { raw: dto.metadata.serviceFee, currency },
+    serviceFeeTxnId: dto.metadata?.serviceFeeTxnId,
+    txnFeeTxnId: dto.metadata?.txnFeeTxnId,
+    txnTaskId: dto.metadata?.txnTaskId,
     receiveAmount:
       dto.receiveAmount === undefined
         ? undefined

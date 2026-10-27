@@ -26,21 +26,46 @@ export function CryptoWalletAddressListScreen() {
         placeholder: text.searchPlaceholder,
       }}
       record={toCard}
+      tableLabels={{ title: f.id }}
     />
   )
 }
 
+/** Вэбийн `crypto/wallet-address/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.address,
+  f.tag,
+  f.coin,
+  f.coinNetwork,
+  f.network,
+  f.isDefault,
+  f.url,
+  f.userEmail,
+  f.createdAt,
+] as const
+
 function toCard(item: UserWalletAddress): RecordView {
   return {
     title: item.owner ?? item.address ?? item.id,
+    tableTitle: item.id,
     subtitle: [item.coin, item.network].filter(Boolean).join(' · '),
     fields: [
       { label: f.address, value: item.address },
-      { label: f.isDefault, value: item.isDefault ? text.yes : text.no },
+      {
+        label: f.isDefault,
+        value: item.isDefault ? 'Yes' : 'No',
+        tone: item.isDefault ? 'success' : 'neutral',
+      },
+      { label: f.coin, value: item.coin },
+      { label: f.network, value: item.network },
     ],
     details: [
       { label: f.tag, value: item.tag },
+      { label: f.coinNetwork, value: item.coinNetwork },
+      { label: f.url, value: item.url },
+      { label: f.userEmail, value: item.userEmail },
       { label: f.createdAt, value: formatDate(item.createdAt) },
     ],
+    columns: COLUMNS,
   }
 }

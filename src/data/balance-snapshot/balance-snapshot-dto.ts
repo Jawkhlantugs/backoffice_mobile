@@ -34,6 +34,7 @@ export function toBalanceSnapshot(dto: BalanceSnapshotDto): BalanceSnapshot {
   return {
     id: dto.id,
     user: dto.User?.email ?? dto.userId,
+    userId: dto.userId,
     subAccountId: dto.subAccountId ?? '',
     date: dto.date ?? '',
     usdtValuation: { raw: dto.usdtValuation ?? 0, currency: 'USDT' },

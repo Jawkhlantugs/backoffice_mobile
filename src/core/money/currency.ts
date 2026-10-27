@@ -15,16 +15,34 @@ export type Currency = {
   displayDecimals: number
   /** Цифрийн өмнө тавих тэмдэг. Байхгүй бол дүнгийн ард `code` бичигдэнэ. */
   symbol?: string
+  /**
+   * Вэбийн `formatMoney` / `minimumFractionDigits: 2`: мөнгөн дүн үргэлж яг
+   * `displayDecimals` оронтой (`100.00`). Үгүй бол (crypto) илүү тэгийг хасна.
+   */
+  fixedDecimals?: boolean
 }
 
 export const CURRENCIES: Record<CurrencyCode, Currency> = {
-  MNT: { code: 'MNT', decimals: 2, displayDecimals: 2, symbol: '₮' },
-  USD: { code: 'USD', decimals: 2, displayDecimals: 2, symbol: '$' },
+  MNT: {
+    code: 'MNT',
+    decimals: 2,
+    displayDecimals: 2,
+    symbol: '₮',
+    fixedDecimals: true,
+  },
+  USD: {
+    code: 'USD',
+    decimals: 2,
+    displayDecimals: 2,
+    symbol: '$',
+    fixedDecimals: true,
+  },
   /**
    * ⚠️ **8, 6 биш.** Хуулганы endpoint `9.02962042` шиг найман оронтой дүн
    * илгээдэг. Зургаагаар барьвал parse татгалзаж, түүх уншигдахгүй болно.
+   * Дэлгэцэнд харин вэбийн адил 2 орон (доош тайрна) — 8 орон нь дансанд.
    */
-  USDT: { code: 'USDT', decimals: 8, displayDecimals: 6 },
+  USDT: { code: 'USDT', decimals: 8, displayDecimals: 2, fixedDecimals: true },
   BTC: { code: 'BTC', decimals: 8, displayDecimals: 8 },
   ETH: { code: 'ETH', decimals: 18, displayDecimals: 8 },
 }

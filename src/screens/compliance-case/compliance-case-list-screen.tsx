@@ -69,6 +69,7 @@ export function ComplianceCaseListScreen() {
       onRefresh={refresh.onRefresh}
       emptyIcon="compliance"
       emptyLabel={messages.complianceCases.empty}
+      tableLabels={{ title: messages.complianceCases.caseId }}
     />
   )
 }

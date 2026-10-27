@@ -54,6 +54,7 @@ export function FuturesTransferListScreen() {
       items={items}
       keyExtractor={(item) => item.txnId}
       record={record}
+      tableLabels={{ title: messages.futures.requestId }}
       loading={query.isPending}
       error={query.error}
       onRetry={() => query.refetch()}

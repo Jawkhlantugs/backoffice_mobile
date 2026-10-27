@@ -25,3 +25,15 @@ describe('toFuturesOpenOrder', () => {
     expect(order.symbol).toBe('')
   })
 })
+
+describe('priceDecimals', () => {
+  it('вэбийн getPriceDecimals — precision, tick, хамгийн багадаа 2', () => {
+    const decimals = (dto: object) =>
+      toFuturesMasterRisk({
+        positions: [{ symbol: 'X', positionAmt: '1', ...dto }],
+      }).positions[0]?.priceDecimals
+    expect(decimals({})).toBe(2)
+    expect(decimals({ pricePrecision: 4 })).toBe(4)
+    expect(decimals({ pricePrecision: 2, priceTickSize: '0.000100' })).toBe(4)
+  })
+})

@@ -11,9 +11,26 @@ import { DEFAULT_PERIOD, periodChips } from '@/lib/period-chips'
 const text = messages.frc
 const f = text.fields
 
+/** Вэбийн `reports/frc-crypto-deposit/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.email,
+  f.subAccountId,
+  f.coin,
+  'amount',
+  f.priceUsd,
+  f.priceMnt,
+  f.totalMnt,
+  f.rate,
+  f.createdAt,
+  f.from,
+  f.to,
+  f.txId,
+] as const
+
 function toRecord(item: FrcCryptoDeposit): RecordView {
   return {
     title: item.email ?? item.uid,
+    tableTitle: item.uid,
     subtitle: `${item.coin} · ${formatDate(item.createdAt)}`,
     amount: item.amount,
     fields: [
@@ -24,12 +41,15 @@ function toRecord(item: FrcCryptoDeposit): RecordView {
     ],
     details: [
       { label: f.uid, value: item.uid },
+      { label: f.email, value: item.email },
+      { label: f.coin, value: item.coin },
       { label: f.priceMnt, amount: item.priceMnt },
       { label: f.from, value: item.fromAddress },
       { label: f.to, value: item.toAddress },
       { label: f.txId, value: item.txId },
       { label: f.createdAt, value: formatDate(item.createdAt) },
     ],
+    columns: COLUMNS,
   }
 }
 
@@ -51,7 +71,7 @@ export function FrcCryptoDepositScreen() {
         placeholder: text.searchPlaceholder,
       }}
       statusChips={{ chips: periodChips(), value: period, onChange: setPeriod }}
-      tableLabels={{ title: f.email, amount: f.amount }}
+      tableLabels={{ title: f.uid, amount: f.amount }}
       record={toRecord}
     />
   )

@@ -10,10 +10,28 @@ import { formatDate } from '@/lib/date'
 import { formatRatio } from '@/lib/format-ratio'
 import { messages } from '@/lib/messages'
 
-import { ALL, partnerStatus, partnerStatusChips } from './partner-status'
+import {
+  ALL,
+  PARTNER_TONES,
+  partnerStatus,
+  partnerStatusChips,
+} from './partner-status'
 
 const text = messages.partner
 const f = text.fields
+
+/** Вэбийн `partner/commissions/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.partner,
+  f.market,
+  f.asset,
+  f.volume,
+  'amount',
+  f.rate,
+  f.partnerAmount,
+  'status',
+  f.tradeDate,
+] as const
 
 function toRecord(item: PartnerCommission): RecordView {
   return {
@@ -21,13 +39,13 @@ function toRecord(item: PartnerCommission): RecordView {
     subtitle: [item.marketId, formatDate(item.tradeDate)]
       .filter(Boolean)
       .join(' · '),
-    status: partnerStatus(item.status),
+    status: partnerStatus(item.status, PARTNER_TONES.commissions),
     amount: item.commission,
     fields: [
       { label: f.partner, value: item.partner },
       { label: f.volume, amount: item.volumeUsd },
       { label: f.rate, value: formatRatio(item.commissionRate) },
-      { label: f.rebate, amount: item.rebate },
+      { label: f.partnerAmount, amount: item.rebate },
     ],
     details: [
       { label: f.market, value: item.marketId },
@@ -35,6 +53,7 @@ function toRecord(item: PartnerCommission): RecordView {
       { label: f.positionId, value: item.positionId },
       { label: f.tradeDate, value: formatDate(item.tradeDate) },
     ],
+    columns: COLUMNS,
   }
 }
 
@@ -64,7 +83,7 @@ export function PartnerCommissionListScreen() {
         value: status,
         onChange: setStatus,
       }}
-      tableLabels={{ title: f.referredUser, amount: f.commission }}
+      tableLabels={{ title: f.referredUser, amount: f.tradingFee }}
       record={toRecord}
     />
   )

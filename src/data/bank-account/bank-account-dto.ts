@@ -21,6 +21,7 @@ export type UserBankWalletDto = {
 
 export type ExchangeBankWalletDto = {
   id: string
+  created_at?: string
   accountName?: string
   accountNumber?: string
   balance?: number
@@ -50,7 +51,9 @@ export function toUserBankWallet(dto: UserBankWalletDto): UserBankWallet {
   return {
     id: dto.id,
     owner: partyLabel(dto.User),
-    bankName: dto.Bank?.nameMn || dto.Bank?.nameEn || dto.Bank?.code,
+    subAccountId: dto.User?.subAccountId ?? undefined,
+    // Вэбийн хүснэгт `Bank.nameMn`-ийг л харуулдаг.
+    bankName: dto.Bank?.nameMn,
     accountName: dto.accountName,
     accountNumber: dto.accountNumber,
     iban: dto.iban,
@@ -74,9 +77,11 @@ export function toExchangeBankWallet(
       dto.balance === undefined
         ? undefined
         : { raw: dto.balance, currency: dto.currency ?? '' },
+    currency: dto.currency,
     status: dto.status,
     usage: dto.usage,
     order: dto.order,
+    createdAt: dto.created_at,
   }
 }
 
@@ -90,6 +95,7 @@ export function toBalanceTransaction(
     subAccountId: dto.subAccountId ?? '',
     owner: partyLabel(dto.brokerUser),
     txnId: dto.txnId ?? '',
+    asset: currency,
     type: dto.type ?? '',
     credit: { raw: credit, currency },
     debit: { raw: dto.debit ?? 0, currency },

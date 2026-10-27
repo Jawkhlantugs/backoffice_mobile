@@ -6,9 +6,11 @@ export const COMPLIANCE_CASE_STATUS_TONES: Record<
   ComplianceCaseStatus,
   StatusTone
 > = {
-  OPEN: 'warning',
-  UNDER_REVIEW: 'info',
-  CLOSED: 'success',
+  // Вэбийн `cases/constants.ts`-ийн `getStatusBadgeClassName`: цэнхэр,
+  // шар, саарал, улаан.
+  OPEN: 'info',
+  UNDER_REVIEW: 'warning',
+  CLOSED: 'neutral',
   REOPENED: 'danger',
 }
 

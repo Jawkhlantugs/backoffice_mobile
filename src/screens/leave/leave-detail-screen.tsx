@@ -14,7 +14,6 @@ import {
 } from '@/components'
 import { isOfficePrivileged } from '@/core/session/privileges'
 import { useSessionStore } from '@/core/session/session-store'
-import type { LeaveRequest } from '@/data/leave-request/leave-request-model'
 import {
   useLeaveRequest,
   useReviewLeaveRequest,
@@ -22,20 +21,10 @@ import {
 import { formatDate } from '@/lib/date'
 import { messages, translateUnknownError } from '@/lib/messages'
 
+import { leavePeriodLabel } from './leave-period-label'
 import { LeaveStatusPill } from './leave-status-pill'
 
 type Decision = 'APPROVED' | 'REJECTED'
-
-function periodLabel(request: LeaveRequest): string {
-  const range =
-    request.startDate === request.endDate
-      ? request.startDate
-      : `${request.startDate} → ${request.endDate}`
-
-  return request.unit === 'hour'
-    ? `${range} ${request.startTime ?? ''}–${request.endTime ?? ''}`.trim()
-    : range
-}
 
 export function LeaveDetailScreen() {
   const router = useRouter()
@@ -86,7 +75,7 @@ export function LeaveDetailScreen() {
                 />
                 <InfoRow
                   label={messages.leave.period}
-                  value={periodLabel(request)}
+                  value={leavePeriodLabel(request)}
                 />
                 <InfoRow
                   label={messages.leave.sentAt}
@@ -154,7 +143,7 @@ export function LeaveDetailScreen() {
           request
             ? `${request.requester} · ${
                 messages.leave.types[request.type]
-              } · ${periodLabel(request)}`
+              } · ${leavePeriodLabel(request)}`
             : ''
         }
         reason={{

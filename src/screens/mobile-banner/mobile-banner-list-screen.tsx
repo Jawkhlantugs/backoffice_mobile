@@ -41,6 +41,7 @@ export function MobileBannerListScreen() {
         value: type,
         onChange: setType,
       }}
+      tableLabels={{ title: text.fields.titleEn }}
       record={(item) => ({
         ...toCard(item),
         onPress: () =>
@@ -53,24 +54,45 @@ export function MobileBannerListScreen() {
   )
 }
 
+/** Вэбийн `mobile/banners/components/columns.tsx`-ийн дараалал (Image-гүй). */
+const COLUMNS = [
+  text.fields.titleMn,
+  text.fields.buttonEn,
+  text.fields.buttonMn,
+  text.fields.type,
+  text.fields.forType,
+  'status',
+  text.fields.priority,
+  text.fields.createdAt,
+] as const
+
 function toCard(item: MobileBanner): RecordView {
   const f = text.fields
   return {
     title: item.titleMn || item.titleEn,
+    tableTitle: item.titleEn,
     subtitle: item.titleEn,
     image: item.image || undefined,
     status: {
       label: text.statuses[item.status],
-      tone: item.status === 'active' ? 'success' : 'neutral',
+      // Вэб статусыг өнгөгүй (default/secondary) Badge-аар.
+      tone: 'neutral',
     },
     fields: [
       { label: f.type, value: text.types[item.type] },
-      { label: f.target, value: text.targets[item.target] },
+      { label: f.forType, value: text.targets[item.target] },
       { label: f.priority, value: item.priority },
       {
         label: f.updatedAt,
         value: formatDate(item.updateTime ?? item.createTime),
       },
     ],
+    details: [
+      { label: f.titleMn, value: item.titleMn },
+      { label: f.buttonEn, value: item.buttonTitleEn },
+      { label: f.buttonMn, value: item.buttonTitleMn },
+      { label: f.createdAt, value: formatDate(item.createTime) },
+    ],
+    columns: COLUMNS,
   }
 }

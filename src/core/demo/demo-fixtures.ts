@@ -377,7 +377,7 @@ function tickets(): SupportTicketDto[] {
       status: 'new',
       priority: 'high',
       category: { categoryNameMn: 'Deposits' },
-      notes: 'My bank transfer has not arrived after 2 hours.',
+      ticketMessage: 'My bank transfer has not arrived after 2 hours.',
       created_at: iso(0, 9),
     },
     {
@@ -388,7 +388,7 @@ function tickets(): SupportTicketDto[] {
       priority: 'medium',
       agent: { email: STAFF.bat.email },
       category: { categoryNameMn: 'Withdrawals' },
-      notes: 'My TRC20 withdrawal is still pending.',
+      ticketMessage: 'My TRC20 withdrawal is still pending.',
       created_at: iso(-1),
     },
     {
@@ -398,7 +398,7 @@ function tickets(): SupportTicketDto[] {
       status: 'pending',
       priority: 'low',
       category: { categoryNameMn: 'KYC' },
-      notes: 'Should I upload my ID photo again?',
+      ticketMessage: 'Should I upload my ID photo again?',
       created_at: iso(-2),
     },
     {
@@ -408,7 +408,7 @@ function tickets(): SupportTicketDto[] {
       status: 'solved',
       priority: 'low',
       category: { categoryNameMn: 'Account' },
-      notes: 'I am not receiving the email.',
+      ticketMessage: 'I am not receiving the email.',
       created_at: iso(-5),
     },
   ]
@@ -545,7 +545,7 @@ function bankWithdrawals(): BankWithdrawalDto[] {
     id: `bw-${n}`,
     created_at: iso(offset),
     accountNumber: `50000000${n}`,
-    Bank: { nameMn: 'Demo Bank' },
+    Bank: { code: '050000' },
     currency: 'MNT',
     feeAmount: 1000,
     receiveAmount: total - 1000,

@@ -34,6 +34,22 @@ describe('toLeaveRequest', () => {
     expect(request.endDate).toBe('2026-09-22')
   })
 
+  it('ISO огноо, секундтэй цагийг хуанлийн өдөр, HH:mm болгоно', () => {
+    const request = toLeaveRequest({
+      requestType: 'hour',
+      startDate: '2026-10-26T00:00:00Z',
+      startTime: '16:30:00',
+      endTime: '18:00:00',
+    })
+
+    expect(request).toMatchObject({
+      startDate: '2026-10-26',
+      endDate: '2026-10-26',
+      startTime: '16:30',
+      endTime: '18:00',
+    })
+  })
+
   it('вэб админы бүтэн хариуг задална', () => {
     const request = toLeaveRequest({
       id: 'lr-42',

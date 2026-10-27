@@ -81,6 +81,7 @@ export type PartnerPayout = {
   periodStart: string
   periodEnd: string
   status: string
+  transferStatus?: string
   processedAt?: string
   transactionId?: string
   failureReason?: string

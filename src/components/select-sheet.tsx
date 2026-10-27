@@ -7,7 +7,7 @@ import { iconSize } from '@/theme/tokens'
 
 import { AppIcon } from './app-icon'
 import { AppText } from './app-text'
-import { BottomSheet } from './bottom-sheet'
+import { BackofficeBottomSheet } from './backoffice-bottom-sheet'
 import { SearchInput } from './search-input'
 import { StateView } from './state-view'
 
@@ -65,7 +65,7 @@ export function SelectSheet<V extends string = string>({
   }
 
   return (
-    <BottomSheet visible={visible} title={title} onClose={close}>
+    <BackofficeBottomSheet visible={visible} title={title} onClose={close}>
       {options.length > SEARCH_THRESHOLD ? (
         <SearchInput value={search} onChangeText={setSearch} />
       ) : null}
@@ -115,6 +115,6 @@ export function SelectSheet<V extends string = string>({
           }}
         />
       </StateView>
-    </BottomSheet>
+    </BackofficeBottomSheet>
   )
 }

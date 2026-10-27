@@ -2,7 +2,7 @@ import { ScrollView, View } from 'react-native'
 
 import { AmountText } from './amount-text'
 import { AppText } from './app-text'
-import { BottomSheet } from './bottom-sheet'
+import { BackofficeBottomSheet } from './backoffice-bottom-sheet'
 import { RecordActions, type RecordAction } from './record-actions'
 import { visibleFields, type RecordField } from './record-field'
 import { RecordFieldValue } from './record-field-value'
@@ -31,7 +31,7 @@ export function RecordDetailSheet({
   actions?: RecordAction[]
 }) {
   return (
-    <BottomSheet visible={visible} onClose={onClose}>
+    <BackofficeBottomSheet visible={visible} onClose={onClose}>
       <View className="flex-row items-start gap-3">
         <AppText variant="title" selectable className="flex-1">
           {title}
@@ -54,6 +54,6 @@ export function RecordDetailSheet({
       </ScrollView>
 
       {actions?.length ? <RecordActions actions={actions} /> : null}
-    </BottomSheet>
+    </BackofficeBottomSheet>
   )
 }

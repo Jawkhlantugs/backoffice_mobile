@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { View } from 'react-native'
 
-import { AppButton, AppInput, BottomSheet } from '@/components'
+import { AppButton, AppInput, BackofficeBottomSheet } from '@/components'
 import type { TaskItem } from '@/data/company-task/company-task-model'
 import { messages } from '@/lib/messages'
 
@@ -27,7 +27,7 @@ export function TaskItemSheet({
   }
 
   return (
-    <BottomSheet
+    <BackofficeBottomSheet
       visible={item !== null}
       title={text.itemActions}
       onClose={onClose}
@@ -58,6 +58,6 @@ export function TaskItemSheet({
           }}
         />
       </View>
-    </BottomSheet>
+    </BackofficeBottomSheet>
   )
 }

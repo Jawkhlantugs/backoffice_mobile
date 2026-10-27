@@ -6,7 +6,7 @@ import {
   AppButton,
   AppIcon,
   AppText,
-  BottomSheet,
+  BackofficeBottomSheet,
   FilterChips,
 } from '@/components'
 import { NativeDatePicker } from '@/components/native-date-picker'
@@ -70,7 +70,7 @@ export function WeekRangeField({
         onChange={(quick) => onChange(quick === 'this' ? thisWeek : lastWeek)}
       />
 
-      <BottomSheet
+      <BackofficeBottomSheet
         visible={open}
         title={text.pickWeek}
         onClose={() => setOpen(false)}
@@ -85,7 +85,7 @@ export function WeekRangeField({
             setOpen(false)
           }}
         />
-      </BottomSheet>
+      </BackofficeBottomSheet>
     </View>
   )
 }

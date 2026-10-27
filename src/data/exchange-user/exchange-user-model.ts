@@ -14,6 +14,8 @@ export type ExchangeUser = {
   subAccountId?: string
   canTrade?: boolean
   canWithdraw?: boolean
+  /** `undefined` = futures данс нээгээгүй. */
+  futuresTrade?: boolean
   isWhitelistEnabled?: boolean
   kycLevel?: number
   vipLevel?: number

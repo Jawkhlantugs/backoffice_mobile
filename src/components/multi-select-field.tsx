@@ -8,7 +8,7 @@ import { iconSize } from '@/theme/tokens'
 import { AppButton } from './app-button'
 import { AppIcon } from './app-icon'
 import { AppText } from './app-text'
-import { BottomSheet } from './bottom-sheet'
+import { BackofficeBottomSheet } from './backoffice-bottom-sheet'
 import { SearchInput } from './search-input'
 import type { SelectOption } from './select-sheet'
 import { StateView } from './state-view'
@@ -95,7 +95,11 @@ export function MultiSelectField({
         </View>
       </Pressable>
 
-      <BottomSheet visible={open} title={label} onClose={() => setOpen(false)}>
+      <BackofficeBottomSheet
+        visible={open}
+        title={label}
+        onClose={() => setOpen(false)}
+      >
         <SearchInput value={search} onChangeText={setSearch} />
         <StateView
           loading={loading}
@@ -135,7 +139,7 @@ export function MultiSelectField({
           label={`${messages.common.confirm} (${values.length})`}
           onPress={() => setOpen(false)}
         />
-      </BottomSheet>
+      </BackofficeBottomSheet>
     </View>
   )
 }

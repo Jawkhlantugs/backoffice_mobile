@@ -14,12 +14,23 @@ import { ALL, rewardStatus, rewardStatusChips } from './reward-status'
 const text = messages.rewardHub
 const f = text.fields
 
+/** Вэбийн `reward-hub/users-task/components/columns.tsx`-ийн дараалал. */
+const COLUMNS = [
+  f.rewardId,
+  'status',
+  f.currentTask,
+  f.userType,
+  'amount',
+  f.startedAt,
+  f.deadline,
+] as const
+
 function toRecord(item: UserReward): RecordView {
   return {
     title: item.userId,
     subtitle: [item.rewardId, item.currentTaskCode].filter(Boolean).join(' · '),
     status: rewardStatus(item.status),
-    amount: item.claimable,
+    amount: { ...item.claimable, showCode: true },
     fields: [
       { label: f.currentTask, value: item.currentTaskCode },
       { label: f.userType, value: item.userType },
@@ -27,6 +38,7 @@ function toRecord(item: UserReward): RecordView {
       { label: f.deadline, value: formatDate(item.expiredAt) },
     ],
     details: [
+      { label: f.rewardId, value: item.rewardId },
       { label: f.claimed, amount: item.claimed },
       { label: f.minClaimable, amount: item.minClaimable },
       {
@@ -34,6 +46,7 @@ function toRecord(item: UserReward): RecordView {
         value: item.claimedAt ? formatDate(item.claimedAt) : undefined,
       },
     ],
+    columns: COLUMNS,
   }
 }
 

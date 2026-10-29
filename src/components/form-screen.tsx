@@ -1,10 +1,11 @@
-import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import { useRouter } from 'expo-router'
 
 import { messages } from '@/lib/messages'
 
 import { AppButton } from './app-button'
 import { AppHeader } from './app-header'
+import { KeyboardAvoider } from './keyboard-avoider'
 import { Screen } from './screen'
 import { StateView } from './state-view'
 
@@ -45,10 +46,7 @@ export function FormScreen({
           onPress: () => router.back(),
         }}
       />
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      <KeyboardAvoider>
         <StateView loading={loading} error={error} onRetry={onRetry}>
           <ScrollView
             className="flex-1"
@@ -62,7 +60,7 @@ export function FormScreen({
             <AppButton label={submitLabel} icon="check" onPress={onSubmit} />
           </View>
         </StateView>
-      </KeyboardAvoidingView>
+      </KeyboardAvoider>
     </Screen>
   )
 }

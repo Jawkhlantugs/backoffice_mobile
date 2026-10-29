@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 
 import {
   AppButton,
@@ -64,34 +64,41 @@ export function TransferConfirmSheet({
       title={text.confirm.title}
       onClose={onCancel}
     >
-      {summary ? (
-        <View className="gap-2 rounded-lg bg-muted p-3">
-          <InfoRow label={text.from} value={summary.from} />
-          <InfoRow label={text.to} value={summary.to} />
-          <InfoRow
-            label={text.amount}
-            value={`${plainAmount} ${summary.amount.currency.code}`}
-          />
-          <InfoRow label={text.reason} value={summary.reason} />
-        </View>
-      ) : null}
+      {/* Keyboard нээгдэхэд хавтан намсана — товч харагдсаар байхаар зөвхөн дээд хэсэг гүйнэ. */}
+      <ScrollView
+        className="shrink"
+        contentContainerClassName="gap-4"
+        keyboardShouldPersistTaps="handled"
+      >
+        {summary ? (
+          <View className="gap-2 rounded-lg bg-muted p-3">
+            <InfoRow label={text.from} value={summary.from} />
+            <InfoRow label={text.to} value={summary.to} />
+            <InfoRow
+              label={text.amount}
+              value={`${plainAmount} ${summary.amount.currency.code}`}
+            />
+            <InfoRow label={text.reason} value={summary.reason} />
+          </View>
+        ) : null}
 
-      <AppInput
-        label={text.confirm.retype}
-        placeholder={plainAmount}
-        value={typedAmount}
-        onChangeText={setTypedAmount}
-        keyboardType="decimal-pad"
-      />
-      <AppInput
-        label={text.confirm.code}
-        placeholder={text.confirm.codePlaceholder}
-        value={code}
-        onChangeText={setCode}
-        keyboardType="number-pad"
-        textContentType="oneTimeCode"
-        maxLength={6}
-      />
+        <AppInput
+          label={text.confirm.retype}
+          placeholder={plainAmount}
+          value={typedAmount}
+          onChangeText={setTypedAmount}
+          keyboardType="decimal-pad"
+        />
+        <AppInput
+          label={text.confirm.code}
+          placeholder={text.confirm.codePlaceholder}
+          value={code}
+          onChangeText={setCode}
+          keyboardType="number-pad"
+          textContentType="oneTimeCode"
+          maxLength={6}
+        />
+      </ScrollView>
 
       <View className="gap-2">
         <AppButton

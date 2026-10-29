@@ -40,6 +40,7 @@ function buildApi() {
     content: `${BASE}/backoffice/content/v3/admin`,
     compliance: `${BASE}/backoffice/compliance/v3/admin`,
     finance: `${BASE}/backoffice/finance/v3/admin`,
+    marketing: `${BASE}/backoffice/marketing/v3/admin`,
     security: `${BASE}/backoffice/security/v3/admin`,
     rewardHub: `${BASE}/backoffice/reward/v3/admin`,
     news: `${BASE}/news/v3/admin`,
@@ -48,7 +49,8 @@ function buildApi() {
     takeAction: `${BASE}/account/v3/admin/accounts`,
     support: `${BASE}/support/support-ticket/`,
     socket: `${BASE}/socket/v3/admin`,
-    wallet: `${BASE}/wallet/v3/admin/wallets`,
+    // Вэбтэй ижил (`16de80c`): `/api`-гүй ORIGIN дээр, давхар `/`-тэй.
+    wallet: `${ORIGIN}//wallet/v3/admin/wallets`,
     bankV2: `${ORIGIN}/v2/withdraw`,
 
     // Тусдаа host, заавал биш — хоосон бол `clients.partner` татгалзана.

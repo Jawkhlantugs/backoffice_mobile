@@ -20,7 +20,7 @@ import type {
 } from './compliance-case-model'
 
 /**
- * Endpoint: `compliance.service.ts` — `{compliance}/cases`. Cursor
+ * Endpoint: `compliance.service.ts` — `{compliance}/compliance/cases`. Cursor
  * pagination (`lastEvaluatedKey`), хариу `body`/`data` хоёулаа, `items`/`list`
  * хоёулаа — `unwrapList` бүгдийг барина.
  */
@@ -34,7 +34,7 @@ export const complianceCaseRepository = {
   async list(
     params: ComplianceCaseListParams,
   ): Promise<ListPage<ComplianceCase>> {
-    const response = await clients.compliance.post('/cases/list', {
+    const response = await clients.compliance.post('/compliance/cases/list', {
       ...(params.status ? { status: params.status } : {}),
       ...(params.severity ? { severity: params.severity } : {}),
       ...(params.lastEvaluatedKey
@@ -50,7 +50,9 @@ export const complianceCaseRepository = {
   },
 
   async byId(uid: string, caseId: string): Promise<ComplianceCase> {
-    const response = await clients.compliance.get(`/cases/${uid}/${caseId}`)
+    const response = await clients.compliance.get(
+      `/compliance/cases/${uid}/${caseId}`,
+    )
     return toComplianceCase(
       unwrapObject<ComplianceCaseDto>(response.data, 'compliance-case'),
     )
@@ -61,7 +63,7 @@ export const complianceCaseRepository = {
     caseId: string,
   ): Promise<ListPage<ComplianceCaseEvent>> {
     const response = await clients.compliance.post(
-      `/cases/${uid}/${caseId}/events/list`,
+      `/compliance/cases/${uid}/${caseId}/events/list`,
       {},
     )
     const page = unwrapList<ComplianceCaseEventDto>(
@@ -72,7 +74,9 @@ export const complianceCaseRepository = {
   },
 
   async addNote(uid: string, caseId: string, notes: string): Promise<void> {
-    await clients.compliance.post(`/cases/${uid}/${caseId}/notes`, { notes })
+    await clients.compliance.post(`/compliance/cases/${uid}/${caseId}/notes`, {
+      notes,
+    })
   },
 
   async assign(
@@ -80,7 +84,7 @@ export const complianceCaseRepository = {
     caseId: string,
     assignedAnalyst: string,
   ): Promise<void> {
-    await clients.compliance.post(`/cases/${uid}/${caseId}/assign`, {
+    await clients.compliance.post(`/compliance/cases/${uid}/${caseId}/assign`, {
       assignedAnalyst,
     })
   },
@@ -91,13 +95,15 @@ export const complianceCaseRepository = {
     resolution: ComplianceCaseResolution,
     notes: string,
   ): Promise<void> {
-    await clients.compliance.post(`/cases/${uid}/${caseId}/close`, {
+    await clients.compliance.post(`/compliance/cases/${uid}/${caseId}/close`, {
       resolution,
       notes,
     })
   },
 
   async reopen(uid: string, caseId: string, notes: string): Promise<void> {
-    await clients.compliance.post(`/cases/${uid}/${caseId}/reopen`, { notes })
+    await clients.compliance.post(`/compliance/cases/${uid}/${caseId}/reopen`, {
+      notes,
+    })
   },
 }

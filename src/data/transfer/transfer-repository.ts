@@ -2,7 +2,7 @@ import { moneyToApiNumber } from '@/core/money/format'
 import { clients } from '@/core/network/clients'
 import { unwrap, unwrapList } from '@/core/network/envelope'
 import {
-  toOperationAccount,
+  toOperationAccounts,
   type OperationAccountDto,
 } from '@/data/operation-account/operation-account-dto'
 
@@ -44,9 +44,7 @@ export const transferRepository = {
       response.data,
       'operation-accounts',
     )
-    return page.items
-      .map(toOperationAccount)
-      .filter((account): account is OperationAccount => account !== null)
+    return toOperationAccounts(page.items)
   },
 
   async operationAssets(

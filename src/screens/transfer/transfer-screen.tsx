@@ -7,6 +7,7 @@ import {
   AppHeader,
   AppInput,
   AppText,
+  KeyboardAvoider,
   Screen,
   SegmentedControl,
   SelectField,
@@ -163,145 +164,147 @@ export function TransferScreen() {
         }
       />
 
-      <ScrollView
-        contentContainerClassName="gap-4 pb-8"
-        keyboardShouldPersistTaps="handled"
-      >
-        <View className="gap-1.5">
-          <AppText variant="label">{text.direction}</AppText>
-          <SegmentedControl
-            options={TRANSFER_DIRECTIONS.map((value) => ({
-              value,
-              label: text.directions[value],
-            }))}
-            value={direction}
-            onChange={changeDirection}
-          />
-        </View>
-
-        {canTransferMnt ? (
+      <KeyboardAvoider>
+        <ScrollView
+          contentContainerClassName="gap-4 pb-8"
+          keyboardShouldPersistTaps="handled"
+        >
           <View className="gap-1.5">
-            <AppText variant="label">{text.type}</AppText>
+            <AppText variant="label">{text.direction}</AppText>
             <SegmentedControl
-              options={(['mnt', 'crypto'] as const).map((value) => ({
+              options={TRANSFER_DIRECTIONS.map((value) => ({
                 value,
-                label: text.types[value],
+                label: text.directions[value],
               }))}
-              value={type}
-              onChange={(next) => {
-                setType(next)
-                resetAmount()
-              }}
+              value={direction}
+              onChange={changeDirection}
             />
           </View>
-        ) : null}
 
-        <TransferAccountField
-          label={text.from}
-          isUser={fromIsUser}
-          value={fromAccount}
-          onChange={(value) => {
-            setFromAccount(value)
-            resetAmount()
-          }}
-          accounts={allAccounts.filter(
-            (account) => account.subAccountId !== toAccount,
-          )}
-          accountsLoading={accounts.isPending}
-          accountsError={accounts.error}
-          onRetryAccounts={() => accounts.refetch()}
-          matchedEmail={
-            fromUser.user?.email ??
-            (fromUser.user === null ? text.errors.userNotFound : undefined)
-          }
-          checking={fromUser.checking}
-          error={errorText('fromAccount')}
-        />
-
-        <TransferAccountField
-          label={text.to}
-          isUser={toIsUser}
-          value={toAccount}
-          onChange={setToAccount}
-          accounts={allAccounts.filter(
-            (account) => account.subAccountId !== fromAccount,
-          )}
-          accountsLoading={accounts.isPending}
-          accountsError={accounts.error}
-          onRetryAccounts={() => accounts.refetch()}
-          matchedEmail={
-            toUser.user?.email ??
-            (toUser.user === null ? text.errors.userNotFound : undefined)
-          }
-          checking={toUser.checking}
-          error={errorText('toAccount')}
-        />
-
-        <SelectField
-          label={text.asset}
-          placeholder={text.assetPlaceholder}
-          options={assets.map((item) => ({
-            value: item.asset,
-            label: item.asset,
-            description: `${text.available}: ${plain(item.available)}`,
-          }))}
-          value={assetCode}
-          onChange={(value) => {
-            setAssetCode(value)
-            setAmount('')
-          }}
-          disabled={!fromAccount.trim()}
-          loading={source.isFetching}
-          loadError={source.error}
-          onRetry={() => source.refetch()}
-          error={errorText('asset')}
-        />
-        {source.data?.unsupported.length ? (
-          <AppText variant="caption">
-            {`${text.unsupported}: ${source.data.unsupported.join(', ')}`}
-          </AppText>
-        ) : null}
-
-        <View className="gap-1.5">
-          <AppInput
-            label={text.amount}
-            placeholder="0"
-            value={amount}
-            onChangeText={setAmount}
-            keyboardType="decimal-pad"
-            editable={asset !== undefined}
-            error={errorText('amount')}
-          />
-          {asset ? (
-            <View className="flex-row items-center justify-between">
-              <AppText variant="caption">
-                {`${text.available}: ${plain(asset.available)} ${asset.asset}`}
-              </AppText>
-              <TextButton
-                label={text.max}
-                onPress={() => setAmount(plain(asset.available))}
+          {canTransferMnt ? (
+            <View className="gap-1.5">
+              <AppText variant="label">{text.type}</AppText>
+              <SegmentedControl
+                options={(['mnt', 'crypto'] as const).map((value) => ({
+                  value,
+                  label: text.types[value],
+                }))}
+                value={type}
+                onChange={(next) => {
+                  setType(next)
+                  resetAmount()
+                }}
               />
             </View>
           ) : null}
-        </View>
 
-        <AppInput
-          label={text.reason}
-          placeholder={text.reasonPlaceholder}
-          value={reason}
-          onChangeText={setReason}
-          multiline
-          error={errorText('reason')}
-        />
-
-        <View className="pt-2">
-          <AppButton
-            label={text.submit}
-            icon="transfer"
-            onPress={handleSubmit}
+          <TransferAccountField
+            label={text.from}
+            isUser={fromIsUser}
+            value={fromAccount}
+            onChange={(value) => {
+              setFromAccount(value)
+              resetAmount()
+            }}
+            accounts={allAccounts.filter(
+              (account) => account.subAccountId !== toAccount,
+            )}
+            accountsLoading={accounts.isPending}
+            accountsError={accounts.error}
+            onRetryAccounts={() => accounts.refetch()}
+            matchedEmail={
+              fromUser.user?.email ??
+              (fromUser.user === null ? text.errors.userNotFound : undefined)
+            }
+            checking={fromUser.checking}
+            error={errorText('fromAccount')}
           />
-        </View>
-      </ScrollView>
+
+          <TransferAccountField
+            label={text.to}
+            isUser={toIsUser}
+            value={toAccount}
+            onChange={setToAccount}
+            accounts={allAccounts.filter(
+              (account) => account.subAccountId !== fromAccount,
+            )}
+            accountsLoading={accounts.isPending}
+            accountsError={accounts.error}
+            onRetryAccounts={() => accounts.refetch()}
+            matchedEmail={
+              toUser.user?.email ??
+              (toUser.user === null ? text.errors.userNotFound : undefined)
+            }
+            checking={toUser.checking}
+            error={errorText('toAccount')}
+          />
+
+          <SelectField
+            label={text.asset}
+            placeholder={text.assetPlaceholder}
+            options={assets.map((item) => ({
+              value: item.asset,
+              label: item.asset,
+              description: `${text.available}: ${plain(item.available)}`,
+            }))}
+            value={assetCode}
+            onChange={(value) => {
+              setAssetCode(value)
+              setAmount('')
+            }}
+            disabled={!fromAccount.trim()}
+            loading={source.isFetching}
+            loadError={source.error}
+            onRetry={() => source.refetch()}
+            error={errorText('asset')}
+          />
+          {source.data?.unsupported.length ? (
+            <AppText variant="caption">
+              {`${text.unsupported}: ${source.data.unsupported.join(', ')}`}
+            </AppText>
+          ) : null}
+
+          <View className="gap-1.5">
+            <AppInput
+              label={text.amount}
+              placeholder="0"
+              value={amount}
+              onChangeText={setAmount}
+              keyboardType="decimal-pad"
+              editable={asset !== undefined}
+              error={errorText('amount')}
+            />
+            {asset ? (
+              <View className="flex-row items-center justify-between">
+                <AppText variant="caption">
+                  {`${text.available}: ${plain(asset.available)} ${asset.asset}`}
+                </AppText>
+                <TextButton
+                  label={text.max}
+                  onPress={() => setAmount(plain(asset.available))}
+                />
+              </View>
+            ) : null}
+          </View>
+
+          <AppInput
+            label={text.reason}
+            placeholder={text.reasonPlaceholder}
+            value={reason}
+            onChangeText={setReason}
+            multiline
+            error={errorText('reason')}
+          />
+
+          <View className="pt-2">
+            <AppButton
+              label={text.submit}
+              icon="transfer"
+              onPress={handleSubmit}
+            />
+          </View>
+        </ScrollView>
+      </KeyboardAvoider>
 
       <TransferConfirmSheet
         summary={summary}

@@ -1,7 +1,14 @@
 import { useState } from 'react'
-import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 
-import { AppButton, AppCard, AppInput, AppText, Screen } from '@/components'
+import {
+  AppButton,
+  AppCard,
+  AppInput,
+  AppText,
+  KeyboardAvoider,
+  Screen,
+} from '@/components'
 import { useSignIn } from '@/hooks/use-sign-in'
 import { messages } from '@/lib/messages'
 
@@ -21,10 +28,7 @@ export function SignInScreen() {
 
   return (
     <Screen>
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      <KeyboardAvoider>
         <ScrollView
           contentContainerClassName="grow justify-center gap-6 py-12"
           keyboardShouldPersistTaps="handled"
@@ -120,7 +124,7 @@ export function SignInScreen() {
             </AppText>
           ) : null}
         </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAvoider>
     </Screen>
   )
 }

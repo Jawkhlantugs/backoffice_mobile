@@ -4,6 +4,7 @@ export type TicketMacro = {
   id: string
   name: string
   description?: string
+  /** HTML-ийг цэвэрлэсэн текст — reply талбарт шууд орно. */
   value: string
   isActive: boolean
 }

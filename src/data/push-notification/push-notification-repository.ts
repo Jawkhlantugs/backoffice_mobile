@@ -11,10 +11,10 @@ import type {
   PushNotificationStatus,
 } from './push-notification-model'
 
-/** Endpoint: `push-notification.service.ts` — `{finance}/push-notification*`. */
+/** Endpoint: `push-notification.service.ts` — `{marketing}/push-notification*`. */
 export const pushNotificationRepository = {
   async list(): Promise<ListPage<PushNotification>> {
-    const response = await clients.finance.post('/push-notification/list', {})
+    const response = await clients.marketing.post('/push-notification/list', {})
     const page = unwrapList<PushNotificationDto>(
       response.data,
       'push-notifications',
@@ -23,7 +23,7 @@ export const pushNotificationRepository = {
   },
 
   async create(input: NewPushNotification): Promise<PushNotification> {
-    const response = await clients.finance.post('/push-notification', {
+    const response = await clients.marketing.post('/push-notification', {
       title: input.title,
       message: input.message,
       isBroadcast: input.isBroadcast,
@@ -39,7 +39,7 @@ export const pushNotificationRepository = {
     pid: string,
     status: Extract<PushNotificationStatus, 'PROCESSING' | 'REJECTED'>,
   ): Promise<PushNotification> {
-    const response = await clients.finance.put(
+    const response = await clients.marketing.put(
       `/push-notification/${pid}/status`,
       {
         status,

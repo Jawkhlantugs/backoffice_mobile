@@ -42,5 +42,6 @@ export function useCursorList<T, F extends Record<string, string | undefined>>(
         void result.fetchNextPage()
     },
     loadingMore: result.isFetchingNextPage,
+    hasMore: result.hasNextPage,
   }
 }

@@ -8,6 +8,7 @@ import {
   AppInput,
   AppText,
   ConfirmSheet,
+  KeyboardAvoider,
   Screen,
   ToggleRow,
 } from '@/components'
@@ -81,63 +82,68 @@ export function NewPushNotificationScreen() {
         }}
       />
 
-      <ScrollView contentContainerClassName="gap-4 pb-8">
-        <AppInput
-          label={messages.pushNotifications.form.title}
-          placeholder={messages.pushNotifications.form.titlePlaceholder}
-          value={title}
-          onChangeText={setTitle}
-          error={errors.title}
-        />
-
-        <AppInput
-          label={messages.pushNotifications.form.message}
-          placeholder={messages.pushNotifications.form.messagePlaceholder}
-          value={message}
-          onChangeText={setMessage}
-          multiline
-          error={errors.message}
-        />
-
-        <ToggleRow
-          icon="push"
-          title={messages.pushNotifications.form.broadcast}
-          value={isBroadcast}
-          onChange={setIsBroadcast}
-        />
-
-        {!isBroadcast ? (
+      <KeyboardAvoider>
+        <ScrollView
+          contentContainerClassName="gap-4 pb-8"
+          keyboardShouldPersistTaps="handled"
+        >
           <AppInput
-            label={messages.pushNotifications.form.emails}
-            placeholder={messages.pushNotifications.form.emailsPlaceholder}
-            value={emailsRaw}
-            onChangeText={setEmailsRaw}
+            label={messages.pushNotifications.form.title}
+            placeholder={messages.pushNotifications.form.titlePlaceholder}
+            value={title}
+            onChangeText={setTitle}
+            error={errors.title}
+          />
+
+          <AppInput
+            label={messages.pushNotifications.form.message}
+            placeholder={messages.pushNotifications.form.messagePlaceholder}
+            value={message}
+            onChangeText={setMessage}
             multiline
-            autoCapitalize="none"
-            autoCorrect={false}
-            error={errors.emails}
+            error={errors.message}
           />
-        ) : null}
 
-        {!isBroadcast ? (
-          <AppText variant="caption">
-            {messages.pushNotifications.form.emailsHint}
-          </AppText>
-        ) : null}
-
-        {create.error ? (
-          <AppText variant="body" className="text-center text-destructive">
-            {translateUnknownError(create.error)}
-          </AppText>
-        ) : null}
-
-        <View className="pt-2">
-          <AppButton
-            label={messages.pushNotifications.form.submit}
-            onPress={handleSubmit}
+          <ToggleRow
+            icon="push"
+            title={messages.pushNotifications.form.broadcast}
+            value={isBroadcast}
+            onChange={setIsBroadcast}
           />
-        </View>
-      </ScrollView>
+
+          {!isBroadcast ? (
+            <AppInput
+              label={messages.pushNotifications.form.emails}
+              placeholder={messages.pushNotifications.form.emailsPlaceholder}
+              value={emailsRaw}
+              onChangeText={setEmailsRaw}
+              multiline
+              autoCapitalize="none"
+              autoCorrect={false}
+              error={errors.emails}
+            />
+          ) : null}
+
+          {!isBroadcast ? (
+            <AppText variant="caption">
+              {messages.pushNotifications.form.emailsHint}
+            </AppText>
+          ) : null}
+
+          {create.error ? (
+            <AppText variant="body" className="text-center text-destructive">
+              {translateUnknownError(create.error)}
+            </AppText>
+          ) : null}
+
+          <View className="pt-2">
+            <AppButton
+              label={messages.pushNotifications.form.submit}
+              onPress={handleSubmit}
+            />
+          </View>
+        </ScrollView>
+      </KeyboardAvoider>
 
       <ConfirmSheet
         visible={confirming}

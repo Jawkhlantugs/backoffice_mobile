@@ -507,7 +507,7 @@ Amount — coin бүр өөр тул `COIN_AMOUNT_CURRENCY` (ETH, 18 орон).
 | Админ (4) | `app/admin/{menu-groups,menus,roles,accounts}` | `admin-management/` | `GET /admin/admin-menu-groups/`, `/admin-menus/all`, `/admin-roles/{groups,permissions}`; `POST /users/admins/list` | нууц үг сэргээх, хандалт хаах/нээх — `isSuperAdmin` л, өөрийгөө хаахгүй |
 | FRC тайлан (6) | `app/reports/frc-*` | `frc-report/` | `{backoffice}/admin/reports/frc-*` (`sortDate`) | — (Excel вэб дээр) |
 | Reward hub (3) | `app/reward/{welcome-tasks,user-rewards,transactions}` | `reward-hub/` | `{rewardHub}/reward-hub/{rewards,user-rewards,transaction-tasks}/list` | — |
-| Match engine (2) | `app/finance/match-{ihc,usdt}-mnt` | `match-engine/` | `{finance}/match-engine/{market}/list` (cursor, `pair`) | — |
+| Match engine (2) | `app/finance/match-{ihc,usdt}-mnt` | `match-engine/` | `{finance}/match-engine/{market}/list` (cursor, `pair`, вэбийн 6 шүүлтүүр + огноо) | — |
 | Convert limit | `app/finance/convert-limit` | `convert-limit/` | `GET {finance}/convert-limit/list` (`nextCursor`), `/{id}/{accept,reject,complete,reopen}` | вэбийн статусын дүрмээр; **x-idempotency-key** (вэб явуулдаг); эсрэг санал вэб дээр |
 | Хөрөнгө сэргээлт | `app/finance/asset-recovery` | `asset-recovery/` | `{finance}/asset-recovery/list`, `PUT /{id}/approve` | зөвшөөрөх — `user_claimed` үед л |
 | BuyNow хос | `app/finance/buynow-symbols` | `buy-now-symbol/` | `{finance}/buynow/symbol/list` | — |
@@ -519,6 +519,12 @@ Amount — coin бүр өөр тул `COIN_AMOUNT_CURRENCY` (ETH, 18 орон).
 | Operation данс | `app/admin/operation-accounts/[subAccountId]` | `operation-account/` | `GET /users/operation-accounts/detail/{id}`, `{finance}/operation-account/balance` | — (master данс вэб дээр) |
 | Dashboard | `app/dashboard` | `dashboard/` | `{backoffice}/dashboard/overview/{summary,revenue-sources}` | — (бусад 6 таб вэб дээр) |
 
+- Match engine "Txin дутуу" чип: backend-д параметр байхгүй тул **ачаалсан
+  мөрөөс** шүүнэ (`isMissingTxin`). "Цааш хайх" нь дараагийн хуудсыг татна;
+  нийт тоо нуугдана (шүүгээгүй дүн).
+- `startTime`/`endTime` огноо (match engine, order USDT/MNT): дуусах өдрийг
+  **бүтнээр** (`data/shared/day-time-range.ts`) — вэб шөнө дундаар явуулдаг тул
+  нэг өдөр сонгоход хоосон гардаг. Зориуд ялгаатай.
 - Partner API тусдаа host: `EXPO_PUBLIC_PARTNER_API_URL` (заавал биш).
   Хоосон бол `menu-items.ts`-ийн `PARTNER_ROUTES` идэвхгүй ("Вэб дээр"),
   шууд холбоосоор орвол `clients.partner` validation алдаа өгнө.
@@ -604,6 +610,12 @@ Amount — coin бүр өөр тул `COIN_AMOUNT_CURRENCY` (ETH, 18 орон).
 | `DateField` | өнөөдөр/маргааш/7 хоног нэг хүрэлтээр + native календарь (`@expo/ui`) |
 | `MultiSelectField` | олноор сонгох (хариуцагч) — чип дээр дарж хасна |
 | `ProgressBar` | явц 0–100 |
+| `KeyboardAvoider` | оролттой дэлгэц бүр (`FormScreen`, `BackofficeBottomSheet` дотор нь бий) — доод товчийг keyboard-оос дээш гаргана |
+
+🔴 Raw `KeyboardAvoidingView` бүү бич — RN-ийнх байрлалаа зөвхөн эцгээсээ
+хэмждэг тул `AppHeader` + safe area-г тооцохгүй, товч keyboard-ийн ард үлдэнэ.
+`KeyboardAvoider` цонхон дахь байрлалаа өөрөө хэмжинэ. Доторх `ScrollView`-д
+`keyboardShouldPersistTaps="handled"` — эс бөгөөс эхний дарахад зөвхөн keyboard хаагдана.
 
 Нэг форм компонент нэмэх ба засах хоёр дэлгэцэд (`mobile-banner-form.tsx`):
 засах дэлгэц өгөгдөл ачаалж `initial` өгнө.
@@ -624,9 +636,12 @@ Amount — coin бүр өөр тул `COIN_AMOUNT_CURRENCY` (ETH, 18 орон).
 | Macro | `data/support-ticket/ticket-macro-*` | `POST {backoffice}/support/marcos/list` (backend-ийн алдаатай нэрийг **засаагүй**) |
 | Статус солих | `useUpdateTicketStatus` | `PUT {backoffice}/support/tickets/{id}` |
 
-- Илгээх зурвас `<p>…</p>`-ээр ороож явуулна (`lib/html.ts` `wrapAsHtmlParagraph`),
-  уншихдаа `stripHtml` цэвэрлэнэ — бүрэн HTML renderer ашиглаагүй
+- Илгээх зурвасын мөр бүрийг `<p>…</p>` болгож явуулна (`lib/html.ts`
+  `wrapAsHtmlParagraphs`), уншихдаа `stripHtml` догол мөрийг мөр шилжилтээр
+  хадгалж цэвэрлэнэ — бүрэн HTML renderer ашиглаагүй
   (`MOBILE_SCOPE_RESEARCH.md` §2.2-ийн зөвлөмж).
+- Macro-ийн `value` вэбийн Tiptap HTML — DTO дээр `stripHtml`-ээр энгийн текст
+  болгоод reply талбарт оруулна.
 - `senderId` нь session-ий `user.id`. `uid` нь харилцагчийн
   `uid → user_id → userId → user.*` (`customerUid`) — байхгүй бол вэбийн адил илгээхгүй.
 - Яриа = REST (`staleTime: 0`) + WS-ээр ирсэн + илгээсэн (optimistic) мессеж,
@@ -647,8 +662,8 @@ Amount — coin бүр өөр тул `COIN_AMOUNT_CURRENCY` (ETH, 18 орон).
 
 | Дэлгэц | Route | Endpoint |
 | --- | --- | --- |
-| Жагсаалт + батлах/татгалзах | `app/notifications/index.tsx` | `POST {finance}/push-notification/list`, `PUT /{pid}/status` |
-| Шинэ | `app/notifications/new.tsx` | `POST {finance}/push-notification` |
+| Жагсаалт + батлах/татгалзах | `app/notifications/index.tsx` | `POST {marketing}/push-notification/list`, `PUT /{pid}/status` |
+| Шинэ | `app/notifications/new.tsx` | `POST {marketing}/push-notification` |
 
 - Зөвхөн broadcast эсвэл гараар 1-20 имэйл (CSV оруулах боломжгүй) —
   `MOBILE_SCOPE_RESEARCH.md` §2.3-ийн зөвлөмж.
@@ -665,7 +680,7 @@ Amount — coin бүр өөр тул `COIN_AMOUNT_CURRENCY` (ETH, 18 орон).
 
 | Дэлгэц | Route | Endpoint |
 | --- | --- | --- |
-| Жагсаалт | `app/compliance/cases/index.tsx` | `POST {compliance}/cases/list` |
+| Жагсаалт | `app/compliance/cases/index.tsx` | `POST {compliance}/compliance/cases/list` |
 | Дэлгэрэнгүй + үйлдэл | `app/compliance/cases/[uid]/[caseId].tsx` | `GET /cases/{uid}/{caseId}`, `/notes`, `/assign`, `/close`, `/reopen`, `/events/list` |
 
 - Тэмдэглэл нэмэх, хариуцуулах — ConfirmSheet-гүй (мөнгө/эрх өөрчлөхгүй,

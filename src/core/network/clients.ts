@@ -132,9 +132,13 @@ export const clients = {
   get backoffice() {
     return client('backoffice')
   },
-  /** Finance — futures transfer, retry, push notification, order-mnt/usdt. */
+  /** Finance — futures transfer, retry, order-mnt/usdt. */
   get finance() {
     return client('finance')
+  },
+  /** Marketing — push notification. */
+  get marketing() {
+    return client('marketing')
   },
   get security() {
     return client('security')

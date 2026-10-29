@@ -1,3 +1,5 @@
+import { stripHtml } from '@/lib/html'
+
 import type { TicketMacro } from './ticket-macro-model'
 
 export type TicketMacroDto = {
@@ -13,7 +15,7 @@ export function toTicketMacro(dto: TicketMacroDto): TicketMacro {
     id: String(dto.id ?? ''),
     name: dto.name ?? '',
     description: dto.description,
-    value: dto.value ?? '',
+    value: stripHtml(dto.value ?? ''),
     isActive: dto.is_active ?? true,
   }
 }

@@ -10,6 +10,7 @@ import {
   AppText,
   ConfirmSheet,
   InfoRow,
+  KeyboardAvoider,
   Screen,
   SegmentedControl,
   StateView,
@@ -69,172 +70,181 @@ export function ComplianceCaseDetailScreen() {
         }
       />
 
-      <ScrollView contentContainerClassName="gap-4 pb-8">
-        <StateView
-          loading={query.isPending}
-          error={query.error}
-          onRetry={() => query.refetch()}
+      <KeyboardAvoider>
+        <ScrollView
+          contentContainerClassName="gap-4 pb-8"
+          keyboardShouldPersistTaps="handled"
         >
-          {item ? (
-            <>
-              <AppCard className="gap-3">
-                <AppText variant="label">
-                  {item.caseType || item.caseId}
-                </AppText>
-                <InfoRow
-                  label={messages.complianceCases.caseCategory}
-                  value={item.caseCategory}
-                />
-                {item.triggerSource ? (
-                  <InfoRow
-                    label={messages.complianceCases.triggerSource}
-                    value={item.triggerSource}
-                  />
-                ) : null}
-                {item.riskScore !== undefined ? (
-                  <InfoRow
-                    label={messages.complianceCases.riskScore}
-                    value={String(item.riskScore)}
-                  />
-                ) : null}
-                {item.assignedAnalyst ? (
-                  <InfoRow
-                    label={messages.complianceCases.assignedAnalyst}
-                    value={item.assignedAnalyst}
-                  />
-                ) : null}
-                <InfoRow
-                  label={messages.complianceCases.createdAt}
-                  value={formatDate(item.createdAt)}
-                />
-              </AppCard>
-
-              {item.notes ? (
-                <AppCard className="gap-2">
+          <StateView
+            loading={query.isPending}
+            error={query.error}
+            onRetry={() => query.refetch()}
+          >
+            {item ? (
+              <>
+                <AppCard className="gap-3">
                   <AppText variant="label">
-                    {messages.complianceCases.notes}
+                    {item.caseType || item.caseId}
                   </AppText>
-                  <AppText variant="body">{item.notes}</AppText>
+                  <InfoRow
+                    label={messages.complianceCases.caseCategory}
+                    value={item.caseCategory}
+                  />
+                  {item.triggerSource ? (
+                    <InfoRow
+                      label={messages.complianceCases.triggerSource}
+                      value={item.triggerSource}
+                    />
+                  ) : null}
+                  {item.riskScore !== undefined ? (
+                    <InfoRow
+                      label={messages.complianceCases.riskScore}
+                      value={String(item.riskScore)}
+                    />
+                  ) : null}
+                  {item.assignedAnalyst ? (
+                    <InfoRow
+                      label={messages.complianceCases.assignedAnalyst}
+                      value={item.assignedAnalyst}
+                    />
+                  ) : null}
+                  <InfoRow
+                    label={messages.complianceCases.createdAt}
+                    value={formatDate(item.createdAt)}
+                  />
                 </AppCard>
-              ) : null}
 
-              {item.status !== 'CLOSED' ? (
-                <>
-                  <AppCard className="gap-3">
+                {item.notes ? (
+                  <AppCard className="gap-2">
                     <AppText variant="label">
-                      {messages.complianceCases.assign}
+                      {messages.complianceCases.notes}
                     </AppText>
-                    <AppInput
-                      placeholder={messages.complianceCases.assignPlaceholder}
-                      value={analystDraft}
-                      onChangeText={setAnalystDraft}
-                      autoCapitalize="none"
-                    />
-                    <AppButton
-                      label={messages.complianceCases.assign}
-                      variant="secondary"
-                      disabled={analystDraft.trim().length === 0}
-                      onPress={async () => {
-                        await assign.mutateAsync(analystDraft.trim())
-                        setAnalystDraft('')
-                      }}
-                    />
+                    <AppText variant="body">{item.notes}</AppText>
                   </AppCard>
+                ) : null}
 
-                  <AppCard className="gap-3">
-                    <AppText variant="label">
-                      {messages.complianceCases.addNote}
-                    </AppText>
-                    <AppInput
-                      placeholder={messages.complianceCases.addNotePlaceholder}
-                      value={noteDraft}
-                      onChangeText={setNoteDraft}
-                      multiline
-                    />
-                    <AppButton
-                      label={messages.complianceCases.addNote}
-                      variant="secondary"
-                      disabled={noteDraft.trim().length === 0}
-                      onPress={async () => {
-                        await addNote.mutateAsync(noteDraft.trim())
-                        setNoteDraft('')
-                      }}
-                    />
-                  </AppCard>
-
-                  <AppCard className="gap-3">
-                    <AppText variant="label">
-                      {messages.complianceCases.resolution}
-                    </AppText>
-                    <SegmentedControl<ComplianceCaseResolution>
-                      value={resolution}
-                      onChange={setResolution}
-                      options={[
-                        {
-                          value: 'FALSE_POSITIVE',
-                          label:
-                            messages.complianceCases.resolutions.FALSE_POSITIVE,
-                        },
-                        {
-                          value: 'CONFIRMED_MULE',
-                          label:
-                            messages.complianceCases.resolutions.CONFIRMED_MULE,
-                        },
-                      ]}
-                    />
-                    <AppButton
-                      label={messages.complianceCases.close}
-                      variant="destructive"
-                      onPress={() => setAction('close')}
-                    />
-                  </AppCard>
-                </>
-              ) : (
-                <AppButton
-                  label={messages.complianceCases.reopen}
-                  variant="secondary"
-                  onPress={() => setAction('reopen')}
-                />
-              )}
-
-              {addNote.error || assign.error ? (
-                <AppText
-                  variant="body"
-                  className="text-center text-destructive"
-                >
-                  {translateUnknownError(addNote.error ?? assign.error)}
-                </AppText>
-              ) : null}
-
-              <View className="gap-2">
-                <AppText variant="label">
-                  {messages.complianceCases.events}
-                </AppText>
-                {events.length === 0 ? (
-                  <AppText variant="caption">
-                    {messages.complianceCases.eventsEmpty}
-                  </AppText>
-                ) : (
-                  events.map((event, index) => (
-                    <AppCard key={index} className="gap-1">
-                      <AppText variant="body" className="font-semibold">
-                        {event.eventType}
+                {item.status !== 'CLOSED' ? (
+                  <>
+                    <AppCard className="gap-3">
+                      <AppText variant="label">
+                        {messages.complianceCases.assign}
                       </AppText>
-                      {event.details ? (
-                        <AppText variant="caption">{event.details}</AppText>
-                      ) : null}
-                      <AppText variant="tiny">
-                        {formatDate(event.timestamp)}
-                        {event.actor ? ` · ${event.actor}` : ''}
-                      </AppText>
+                      <AppInput
+                        placeholder={messages.complianceCases.assignPlaceholder}
+                        value={analystDraft}
+                        onChangeText={setAnalystDraft}
+                        autoCapitalize="none"
+                      />
+                      <AppButton
+                        label={messages.complianceCases.assign}
+                        variant="secondary"
+                        disabled={analystDraft.trim().length === 0}
+                        onPress={async () => {
+                          await assign.mutateAsync(analystDraft.trim())
+                          setAnalystDraft('')
+                        }}
+                      />
                     </AppCard>
-                  ))
+
+                    <AppCard className="gap-3">
+                      <AppText variant="label">
+                        {messages.complianceCases.addNote}
+                      </AppText>
+                      <AppInput
+                        placeholder={
+                          messages.complianceCases.addNotePlaceholder
+                        }
+                        value={noteDraft}
+                        onChangeText={setNoteDraft}
+                        multiline
+                      />
+                      <AppButton
+                        label={messages.complianceCases.addNote}
+                        variant="secondary"
+                        disabled={noteDraft.trim().length === 0}
+                        onPress={async () => {
+                          await addNote.mutateAsync(noteDraft.trim())
+                          setNoteDraft('')
+                        }}
+                      />
+                    </AppCard>
+
+                    <AppCard className="gap-3">
+                      <AppText variant="label">
+                        {messages.complianceCases.resolution}
+                      </AppText>
+                      <SegmentedControl<ComplianceCaseResolution>
+                        value={resolution}
+                        onChange={setResolution}
+                        options={[
+                          {
+                            value: 'FALSE_POSITIVE',
+                            label:
+                              messages.complianceCases.resolutions
+                                .FALSE_POSITIVE,
+                          },
+                          {
+                            value: 'CONFIRMED_MULE',
+                            label:
+                              messages.complianceCases.resolutions
+                                .CONFIRMED_MULE,
+                          },
+                        ]}
+                      />
+                      <AppButton
+                        label={messages.complianceCases.close}
+                        variant="destructive"
+                        onPress={() => setAction('close')}
+                      />
+                    </AppCard>
+                  </>
+                ) : (
+                  <AppButton
+                    label={messages.complianceCases.reopen}
+                    variant="secondary"
+                    onPress={() => setAction('reopen')}
+                  />
                 )}
-              </View>
-            </>
-          ) : null}
-        </StateView>
-      </ScrollView>
+
+                {addNote.error || assign.error ? (
+                  <AppText
+                    variant="body"
+                    className="text-center text-destructive"
+                  >
+                    {translateUnknownError(addNote.error ?? assign.error)}
+                  </AppText>
+                ) : null}
+
+                <View className="gap-2">
+                  <AppText variant="label">
+                    {messages.complianceCases.events}
+                  </AppText>
+                  {events.length === 0 ? (
+                    <AppText variant="caption">
+                      {messages.complianceCases.eventsEmpty}
+                    </AppText>
+                  ) : (
+                    events.map((event, index) => (
+                      <AppCard key={index} className="gap-1">
+                        <AppText variant="body" className="font-semibold">
+                          {event.eventType}
+                        </AppText>
+                        {event.details ? (
+                          <AppText variant="caption">{event.details}</AppText>
+                        ) : null}
+                        <AppText variant="tiny">
+                          {formatDate(event.timestamp)}
+                          {event.actor ? ` · ${event.actor}` : ''}
+                        </AppText>
+                      </AppCard>
+                    ))
+                  )}
+                </View>
+              </>
+            ) : null}
+          </StateView>
+        </ScrollView>
+      </KeyboardAvoider>
 
       <ConfirmSheet
         visible={action !== null}

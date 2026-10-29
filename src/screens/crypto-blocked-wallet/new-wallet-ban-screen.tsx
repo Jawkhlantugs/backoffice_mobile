@@ -7,6 +7,7 @@ import {
   AppHeader,
   AppInput,
   ConfirmSheet,
+  KeyboardAvoider,
   Screen,
   SelectField,
 } from '@/components'
@@ -62,74 +63,76 @@ export function NewWalletBanScreen() {
         }}
       />
 
-      <ScrollView
-        contentContainerClassName="gap-4 pb-8"
-        keyboardShouldPersistTaps="handled"
-      >
-        <SelectField
-          label={text.coin}
-          placeholder={text.coinPlaceholder}
-          options={coins.map((item) => ({
-            value: item.coin,
-            label: item.coin,
-            description: item.name,
-          }))}
-          value={coin}
-          onChange={(value) => {
-            setCoin(value)
-            // Сүлжээ нь coin-оос хамаарна — вэб ч мөн адил цэвэрлэдэг.
-            setNetwork(undefined)
-          }}
-          error={errors.coin}
-          loading={coinsQuery.isPending}
-          loadError={coinsQuery.error}
-          onRetry={() => coinsQuery.refetch()}
-        />
-
-        <SelectField
-          label={text.network}
-          placeholder={
-            selectedCoin ? messages.common.select : text.networkPlaceholder
-          }
-          options={networks.map((item) => ({
-            value: item.network,
-            label: item.network,
-            description: item.name,
-          }))}
-          value={network}
-          onChange={setNetwork}
-          error={errors.network}
-          disabled={networks.length === 0}
-        />
-
-        <AppInput
-          label={text.address}
-          placeholder={text.addressPlaceholder}
-          value={address}
-          onChangeText={setAddress}
-          autoCapitalize="none"
-          autoCorrect={false}
-          error={errors.address}
-        />
-
-        <AppInput
-          label={text.reason}
-          placeholder={text.reasonPlaceholder}
-          value={reason}
-          onChangeText={setReason}
-          multiline
-          error={errors.reason}
-        />
-
-        <View className="pt-2">
-          <AppButton
-            label={text.submit}
-            icon="block"
-            variant="destructive"
-            onPress={handleSubmit}
+      <KeyboardAvoider>
+        <ScrollView
+          contentContainerClassName="gap-4 pb-8"
+          keyboardShouldPersistTaps="handled"
+        >
+          <SelectField
+            label={text.coin}
+            placeholder={text.coinPlaceholder}
+            options={coins.map((item) => ({
+              value: item.coin,
+              label: item.coin,
+              description: item.name,
+            }))}
+            value={coin}
+            onChange={(value) => {
+              setCoin(value)
+              // Сүлжээ нь coin-оос хамаарна — вэб ч мөн адил цэвэрлэдэг.
+              setNetwork(undefined)
+            }}
+            error={errors.coin}
+            loading={coinsQuery.isPending}
+            loadError={coinsQuery.error}
+            onRetry={() => coinsQuery.refetch()}
           />
-        </View>
-      </ScrollView>
+
+          <SelectField
+            label={text.network}
+            placeholder={
+              selectedCoin ? messages.common.select : text.networkPlaceholder
+            }
+            options={networks.map((item) => ({
+              value: item.network,
+              label: item.network,
+              description: item.name,
+            }))}
+            value={network}
+            onChange={setNetwork}
+            error={errors.network}
+            disabled={networks.length === 0}
+          />
+
+          <AppInput
+            label={text.address}
+            placeholder={text.addressPlaceholder}
+            value={address}
+            onChangeText={setAddress}
+            autoCapitalize="none"
+            autoCorrect={false}
+            error={errors.address}
+          />
+
+          <AppInput
+            label={text.reason}
+            placeholder={text.reasonPlaceholder}
+            value={reason}
+            onChangeText={setReason}
+            multiline
+            error={errors.reason}
+          />
+
+          <View className="pt-2">
+            <AppButton
+              label={text.submit}
+              icon="block"
+              variant="destructive"
+              onPress={handleSubmit}
+            />
+          </View>
+        </ScrollView>
+      </KeyboardAvoider>
 
       <ConfirmSheet
         visible={confirming}

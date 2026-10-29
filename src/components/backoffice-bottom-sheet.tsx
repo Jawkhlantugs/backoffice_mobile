@@ -26,6 +26,7 @@ import { useAppColors } from '@/theme/use-theme'
 
 import { AppText } from './app-text'
 import { GlassSurface } from './glass-surface'
+import { KeyboardAvoider } from './keyboard-avoider'
 
 const TIMING = { duration: duration.slow, easing: Easing.out(Easing.cubic) }
 
@@ -36,7 +37,7 @@ const CLOSE_VELOCITY = 800
 
 // NativeWind-ийн className Reanimated компонентод найдваргүй (skeleton.tsx).
 const styles = StyleSheet.create({
-  root: { flex: 1, justifyContent: 'flex-end' },
+  root: { flex: 1 },
   sheet: { maxHeight: '80%' },
 })
 
@@ -127,24 +128,29 @@ export function BackofficeBottomSheet({
             accessibilityLabel={messages.common.close}
           />
         </Animated.View>
-        <Animated.View
-          style={[styles.sheet, sheetStyle]}
-          onLayout={(event) => sheetHeight.set(event.nativeEvent.layout.height)}
-        >
-          <GlassSurface
-            fallbackClassName="border-t border-border bg-elevated"
-            className={cn('shrink gap-4 rounded-t-3xl p-5 pb-8', className)}
+        {/* Modal нь тусдаа цонх — дэлгэцийн KeyboardAvoider хүрэхгүй. */}
+        <KeyboardAvoider className="justify-end" pointerEvents="box-none">
+          <Animated.View
+            style={[styles.sheet, sheetStyle]}
+            onLayout={(event) =>
+              sheetHeight.set(event.nativeEvent.layout.height)
+            }
           >
-            <GestureDetector gesture={pan}>
-              {/* Сөрөг зайгаар хавтангийн дээд ирмэг хүртэл барих талбайг томсгоно. */}
-              <View className="-mx-5 -mt-5 gap-4 px-5 pt-5">
-                <View className="h-1 w-10 self-center rounded-full bg-border" />
-                {title ? <AppText variant="title">{title}</AppText> : null}
-              </View>
-            </GestureDetector>
-            {children}
-          </GlassSurface>
-        </Animated.View>
+            <GlassSurface
+              fallbackClassName="border-t border-border bg-elevated"
+              className={cn('shrink gap-4 rounded-t-3xl p-5 pb-8', className)}
+            >
+              <GestureDetector gesture={pan}>
+                {/* Сөрөг зайгаар хавтангийн дээд ирмэг хүртэл барих талбайг томсгоно. */}
+                <View className="-mx-5 -mt-5 gap-4 px-5 pt-5">
+                  <View className="h-1 w-10 self-center rounded-full bg-border" />
+                  {title ? <AppText variant="title">{title}</AppText> : null}
+                </View>
+              </GestureDetector>
+              {children}
+            </GlassSurface>
+          </Animated.View>
+        </KeyboardAvoider>
       </GestureHandlerRootView>
     </Modal>
   )

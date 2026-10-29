@@ -12,7 +12,7 @@ import {
   type TicketMessage,
 } from '@/data/support-ticket/ticket-conversation-model'
 import { ticketConversationRepository } from '@/data/support-ticket/ticket-conversation-repository'
-import { wrapAsHtmlParagraph } from '@/lib/html'
+import { wrapAsHtmlParagraphs } from '@/lib/html'
 import { logger } from '@/lib/logger'
 import { messages } from '@/lib/messages'
 import {
@@ -184,7 +184,7 @@ export function useTicketConversation(ticketId: string) {
     if (!senderId) throw new Error(messages.supportTickets.reply.sessionMissing)
 
     if (demoMode.isActive()) {
-      appendDemoTicketMessage(ticketId, wrapAsHtmlParagraph(text))
+      appendDemoTicketMessage(ticketId, wrapAsHtmlParagraphs(text))
       await queryClient.invalidateQueries({
         queryKey: conversationKey(ticketId),
       })
@@ -201,7 +201,7 @@ export function useTicketConversation(ticketId: string) {
       throw new Error(messages.supportTickets.reply.notConnected)
     }
 
-    const html = wrapAsHtmlParagraph(text)
+    const html = wrapAsHtmlParagraphs(text)
     socketRef.current.send(
       conversationSendMessage({
         ticketId,

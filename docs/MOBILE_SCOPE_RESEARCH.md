@@ -116,9 +116,9 @@ Mobile-д анхаарах:
 
 | Үйлдэл   | Endpoint                                     |
 | -------- | -------------------------------------------- |
-| Жагсаалт | `POST {finance}/push-notification/list`      |
-| Үүсгэх   | `POST {finance}/push-notification`           |
-| Батлах   | `PUT  {finance}/push-notification/{pid}/status` (`PROCESSING` = зөвшөөрөх, `REJECTED` = татгалзах) |
+| Жагсаалт | `POST {marketing}/push-notification/list`      |
+| Үүсгэх   | `POST {marketing}/push-notification`           |
+| Батлах   | `PUT  {marketing}/push-notification/{pid}/status` (`PROCESSING` = зөвшөөрөх, `REJECTED` = татгалзах) |
 
 - Body: `{ title, message, isBroadcast, notifications: [{ email }] }`
 - Үүсгэсэн кампанит ажил `PENDING` статустай гарч, **өөр админ батлах** ёстой
@@ -154,7 +154,7 @@ mobile нь "татаж шинэчлэх" (polling) л байна. Push авах
 
 **Compliance case 🟢 унших, 🟡 үйлдэл:**
 
-`{compliance}/cases` — `list`, `{uid}/{caseId}` дэлгэрэнгүй, `close`,
+`{compliance}/compliance/cases` — `list`, `{uid}/{caseId}` дэлгэрэнгүй, `close`,
 `reopen`, `assign`, `note`, event `create/list`. Event төрөлд
 `FREEZE_EXECUTE`, `UNFREEZE_EXECUTE`, `WITHDRAWAL_BLOCKED`, `REVERSAL` байна.
 

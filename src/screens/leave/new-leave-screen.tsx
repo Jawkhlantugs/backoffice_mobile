@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useRouter } from 'expo-router'
-import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 
 import {
   AppButton,
@@ -8,6 +8,7 @@ import {
   AppHeader,
   AppInput,
   AppText,
+  KeyboardAvoider,
   Screen,
   SegmentedControl,
 } from '@/components'
@@ -88,10 +89,7 @@ export function NewLeaveScreen() {
         }}
       />
 
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      <KeyboardAvoider>
         <ScrollView
           contentContainerClassName="gap-4 pb-8"
           keyboardShouldPersistTaps="handled"
@@ -186,7 +184,7 @@ export function NewLeaveScreen() {
             />
           </View>
         </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAvoider>
     </Screen>
   )
 }

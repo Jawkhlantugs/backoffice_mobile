@@ -26,7 +26,11 @@ npm run typecheck   # tsc --noEmit
 npm run lint        # expo lint
 npm test            # jest
 npm run format      # prettier --write
+./deploy.sh         # EAS production build + store submit (--help)
 ```
+
+`.env` cloud build руу очдоггүй — `deploy.sh` нь EAS-ийн `production`
+environment-д шаардлагатай `EXPO_PUBLIC_*` байгааг эхлээд шалгана.
 
 ## Бүтэц
 

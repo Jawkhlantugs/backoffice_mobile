@@ -1485,6 +1485,16 @@ export const en: Messages = {
       pair: 'Pair',
       isCancel: 'Is cancel',
       createdAt: 'Created',
+      txinId: 'Txin ID',
+      hariultAmount: 'Hariult amount',
+    },
+    missingTxin: {
+      all: 'Txin: all',
+      either: 'Missing txin',
+      maker: 'Missing maker txin',
+      taker: 'Missing taker txin',
+      found: 'Found in loaded rows',
+      loadMore: 'Search further',
     },
   },
   /** Convert limit orders — negotiated conversions. */

@@ -17,6 +17,9 @@ describe('api registry', () => {
     expect(api.finance).toBe(
       'https://api.example.com/api/backoffice/finance/v3/admin',
     )
+    expect(api.marketing).toBe(
+      'https://api.example.com/api/backoffice/marketing/v3/admin',
+    )
     expect(api.support).toBe(
       'https://api.example.com/api/support/support-ticket/',
     )
@@ -25,5 +28,6 @@ describe('api registry', () => {
   it('bankV2 нь base биш ORIGIN дээр суурилна', () => {
     // base нь /api-аар төгсдөг ч bankV2 нь host-ийн үндсэн дээр сууна.
     expect(api.bankV2).toBe('https://api.example.com/v2/withdraw')
+    expect(api.wallet).toBe('https://api.example.com//wallet/v3/admin/wallets')
   })
 })

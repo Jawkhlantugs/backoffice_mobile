@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
 import dayjs from 'dayjs'
@@ -13,6 +13,7 @@ import {
   FormSection,
   IconButton,
   InfoRow,
+  KeyboardAvoider,
   ProgressBar,
   RecordActions,
   Screen,
@@ -138,10 +139,7 @@ export function TaskDetailScreen() {
         onRetry={() => query.refetch()}
       >
         {task ? (
-          <KeyboardAvoidingView
-            className="flex-1"
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          >
+          <KeyboardAvoider>
             <ScrollView
               contentContainerClassName="gap-6 pb-10"
               keyboardShouldPersistTaps="handled"
@@ -337,7 +335,7 @@ export function TaskDetailScreen() {
                 ]}
               />
             </ScrollView>
-          </KeyboardAvoidingView>
+          </KeyboardAvoider>
         ) : null}
       </StateView>
 

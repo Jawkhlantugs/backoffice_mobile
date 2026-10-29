@@ -17,7 +17,7 @@ export type ListFilterField = {
   placeholder?: string
   /** Asset (`USDT`) том үсгээр, ID жижиг үсгээр — вэбийн утгатай таарна. */
   autoCapitalize?: 'none' | 'characters'
-  keyboardType?: 'default' | 'number-pad'
+  keyboardType?: 'default' | 'number-pad' | 'decimal-pad'
   /** Вэбийн `type: 'number'` — тоо биш оролтыг авахгүй. */
   numeric?: boolean
   /**

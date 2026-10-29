@@ -2,14 +2,11 @@ import { useRef, useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import {
   FlatList,
-  KeyboardAvoidingView,
-  Platform,
   TextInput,
   View,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import {
   AppButton,
@@ -17,6 +14,7 @@ import {
   AppHeader,
   AppText,
   IconButton,
+  KeyboardAvoider,
   Screen,
   StateView,
   TextButton,
@@ -52,7 +50,6 @@ const connectionLabel = () => ({
 export function TicketDetailScreen() {
   const router = useRouter()
   const { colors } = useAppColors()
-  const insets = useSafeAreaInsets()
   const { id } = useLocalSearchParams<{ id: string }>()
   const ticketId = id ?? ''
 
@@ -61,6 +58,9 @@ export function TicketDetailScreen() {
   const conversation = useTicketConversation(ticketId)
 
   const [draft, setDraft] = useState('')
+  // iOS-д multiline TextInput-ийг цэвэрлэхэд өндөр нь багасдаггүй —
+  // илгээсний дараа key солиж дахин mount хийнэ.
+  const [composerKey, setComposerKey] = useState(0)
   const [macroVisible, setMacroVisible] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
   const [infoVisible, setInfoVisible] = useState(false)
@@ -100,6 +100,7 @@ export function TicketDetailScreen() {
     try {
       await conversation.sendMessage(text, ticket?.customerUid)
       setDraft('')
+      setComposerKey((key) => key + 1)
     } catch (error) {
       setSendError(translateUnknownError(error))
     }
@@ -141,13 +142,7 @@ export function TicketDetailScreen() {
         />
       </View>
 
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        // ⚠️ KAV байрлалаа эцэг View-ээс хэмждэг — `Screen`-ий дээд safe area-г
-        // нэмэхгүй бол reply мөр keyboard-ийн ард нуугдана.
-        keyboardVerticalOffset={insets.top}
-      >
+      <KeyboardAvoider>
         <StateView
           className="px-4"
           loading={query.isPending}
@@ -234,6 +229,8 @@ export function TicketDetailScreen() {
             />
 
             <TextInput
+              key={composerKey}
+              autoFocus={composerKey > 0}
               value={draft}
               onChangeText={setDraft}
               placeholder={messages.supportTickets.reply.placeholder}
@@ -241,7 +238,7 @@ export function TicketDetailScreen() {
               multiline
               autoCorrect={false}
               spellCheck={false}
-              className="min-h-11 flex-1 rounded-lg border border-input bg-card px-3 py-2.5 text-body text-foreground"
+              className="max-h-32 min-h-11 flex-1 rounded-lg border border-input bg-card px-3 py-2.5 text-body text-foreground"
             />
 
             <AppButton
@@ -252,7 +249,7 @@ export function TicketDetailScreen() {
             />
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardAvoider>
 
       {ticket ? (
         <TicketInfoSheet

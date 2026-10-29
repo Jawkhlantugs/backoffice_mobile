@@ -23,3 +23,16 @@ export type MatchResult = {
   taker: MatchSide
   createdAt?: number
 }
+
+/**
+ * Backend-д "txinID хоосон" гэсэн параметр байхгүй (вэбийн `MatchEngineListRequest`)
+ * — ачаалсан мөрөөс шүүнэ.
+ */
+export type MissingTxin = 'either' | 'maker' | 'taker'
+export const MISSING_TXIN: readonly MissingTxin[] = ['either', 'maker', 'taker']
+
+export function isMissingTxin(item: MatchResult, side: MissingTxin): boolean {
+  if (side === 'maker') return !item.maker.txinId
+  if (side === 'taker') return !item.taker.txinId
+  return !item.maker.txinId || !item.taker.txinId
+}

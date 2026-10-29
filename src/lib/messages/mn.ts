@@ -1485,6 +1485,16 @@ export const mn = {
       pair: 'Хос',
       isCancel: 'Цуцлагдсан',
       createdAt: 'Огноо',
+      txinId: 'Txin ID',
+      hariultAmount: 'Hariult дүн',
+    },
+    missingTxin: {
+      all: 'Txin: бүгд',
+      either: 'Txin дутуу',
+      maker: 'Maker txin дутуу',
+      taker: 'Taker txin дутуу',
+      found: 'Ачаалсан мөрөөс олдсон',
+      loadMore: 'Цааш хайх',
     },
   },
   /** Convert limit захиалга — үнэ тохиролцох хөрвүүлэлт. */

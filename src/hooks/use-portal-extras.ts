@@ -11,22 +11,55 @@ import { convertLimitRepository } from '@/data/convert-limit/convert-limit-repos
 import { crystalRepository } from '@/data/crystal/crystal-repository'
 import { withUserSearch } from '@/data/exchange-user/user-search'
 import { jumioBackupRepository } from '@/data/jumio-backup/jumio-backup-repository'
-import type { MatchMarket } from '@/data/match-engine/match-engine-model'
-import { matchEngineRepository } from '@/data/match-engine/match-engine-repository'
+import {
+  isMissingTxin,
+  type MatchMarket,
+  type MissingTxin,
+} from '@/data/match-engine/match-engine-model'
+import {
+  matchEngineRepository,
+  type MatchListFilters,
+} from '@/data/match-engine/match-engine-repository'
 import { operationAccountBalanceRepository } from '@/data/operation-account/operation-account-balance-repository'
 import { stakeRepository } from '@/data/stake/stake-repository'
+import { withDefaultRange, type ListFilters } from '@/lib/list-filters'
 
 import { useCursorList } from './use-cursor-list'
 import { useInvalidatingMutation } from './use-invalidating-mutation'
 import { usePagedList } from './use-paged-list'
 
-export const useMatchResults = (market: MatchMarket, isCancel?: string) =>
-  useCursorList(
+/**
+ * `missingTxin` нь backend-д байхгүй тул ачаалсан мөрөөс шүүнэ — `scanned` нь
+ * хэдэн мөрөөс хайсныг, нийт тоо (`total`) нь шүүгээгүй дүн тул нуугдана.
+ */
+export function useMatchResults(
+  market: MatchMarket,
+  options: {
+    isCancel?: string
+    filters?: ListFilters
+    missingTxin?: MissingTxin
+  } = {},
+) {
+  const list = useCursorList(
     `match-${market}`,
-    (params: CursorParams & { isCancel?: string }) =>
+    (params: CursorParams & MatchListFilters) =>
       matchEngineRepository.list({ ...params, market }),
-    { filters: { isCancel } },
+    {
+      filters: {
+        isCancel: options.isCancel,
+        ...withDefaultRange(options.filters ?? {}),
+      },
+    },
   )
+  const side = options.missingTxin
+  if (!side) return { ...list, scanned: undefined }
+  return {
+    ...list,
+    items: list.items.filter((item) => isMissingTxin(item, side)),
+    total: undefined,
+    scanned: list.items.length,
+  }
+}
 
 export const useConvertLimitOrders = (status: string) =>
   useCursorList('convert-limit', convertLimitRepository.list, {

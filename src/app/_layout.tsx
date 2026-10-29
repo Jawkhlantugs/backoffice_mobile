@@ -7,23 +7,21 @@ import { StatusBar } from 'expo-status-bar'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
-import { adminRepository } from '@/data/auth/admin-repository'
 import { useMenuRefresh } from '@/hooks/use-menu-refresh'
 import { configureAmplify } from '@/core/config/amplify'
 import { assertEnvReady } from '@/core/config/env'
 import { queryClient } from '@/core/query/query-client'
+import { restoreSession } from '@/core/session/restore-session'
 import { useAppLock } from '@/core/session/use-app-lock'
 import { useSessionStore } from '@/core/session/session-store'
 import { useThemeStore } from '@/theme/theme-preference'
 import { useListViewStore } from '@/core/ui/list-view-store'
 import { AppLoader, AppText, Screen, ToastHost } from '@/components'
-import { biometricService } from '@/services/biometric/biometric-service'
-import { cognitoAuth } from '@/services/auth/cognito-auth-service'
-import { logger } from '@/lib/logger'
 import { messages, useLanguageStore } from '@/lib/messages'
 import { useAppColors } from '@/theme/use-theme'
 
 import { LockScreen } from '@/screens/lock-screen'
+import { SessionRestoreErrorScreen } from '@/screens/session-restore-error-screen'
 import { RouteGuard } from '@/screens/shell/route-guard'
 import { SignInScreen } from '@/screens/sign-in-screen'
 
@@ -34,10 +32,8 @@ import { SignInScreen } from '@/screens/sign-in-screen'
  */
 export default function RootLayout() {
   const [fatal, setFatal] = useState<string | null>(null)
+  const [restoreError, setRestoreError] = useState<unknown>(null)
   const status = useSessionStore((state) => state.status)
-  const setStatus = useSessionStore((state) => state.setStatus)
-  const restore = useSessionStore((state) => state.restore)
-  const signOut = useSessionStore((state) => state.signOut)
   const { scheme } = useAppColors()
   const restoreTheme = useThemeStore((store) => store.restore)
   const language = useLanguageStore((store) => store.language)
@@ -61,34 +57,15 @@ export default function RootLayout() {
         return
       }
 
-      if (!(await cognitoAuth.isAuthenticated())) {
-        setStatus('signedOut')
-        return
-      }
-
-      // Профайлыг түгжээнээс **өмнө** татна: session сэргээхэд `user` хоосон
-      // үлдвэл түгжээ тайлах товч юу ч хийхгүй, апп гацна.
-      try {
-        const [profile, locked] = await Promise.all([
-          adminRepository.profile(),
-          biometricService.isEnabled(),
-        ])
-        restore(profile, locked)
-      } catch (error) {
-        logger.warn('Session сэргээх амжилтгүй', error)
-        await signOut()
-      }
+      setRestoreError(await restoreSession())
     }
 
     void boot()
-  }, [
-    restore,
-    restoreLanguage,
-    restoreListView,
-    restoreTheme,
-    setStatus,
-    signOut,
-  ])
+  }, [restoreLanguage, restoreListView, restoreTheme])
+
+  async function retryRestore() {
+    setRestoreError(await restoreSession())
+  }
 
   if (fatal) {
     return (
@@ -113,7 +90,12 @@ export default function RootLayout() {
           {/* Хэл солигдоход бүх дэлгэцийг шинээр mount хийнэ — React Compiler
               memo хийсэн текст хуучин хэлээр үлдэхгүй. */}
           <Fragment key={language}>
-            {status === 'loading' ? (
+            {status === 'loading' && restoreError ? (
+              <SessionRestoreErrorScreen
+                error={restoreError}
+                onRetry={retryRestore}
+              />
+            ) : status === 'loading' ? (
               <Screen className="justify-center">
                 <AppLoader />
               </Screen>

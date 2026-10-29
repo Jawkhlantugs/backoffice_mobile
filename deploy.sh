@@ -63,8 +63,13 @@ echo "Нэвтэрсэн: $account"
 
 step "EAS production environment"
 if ! remote_env=$(eas env:list production 2>&1); then
-  fail "EAS production env-ийг уншиж чадсангүй. \"$account\" бүртгэл x-meta
-  төсөлд эрхтэй эсэхийг шалгаад (eas login), дахин оролдоно уу."
+  owner=$(node -p "require('./app.json').expo.owner")
+  if grep -q "Entity Not Authorized" <<<"$remote_env"; then
+    fail "\"$account\" бүртгэл \"$owner\" эзэмшигчийн төсөлд эрхгүй — build ч мөн
+  ингэж унана. expo.dev дээр \"$owner\"-д гишүүнээр нэмүүлэх, эсвэл
+  эрхтэй бүртгэлээр нэвтэрнэ: eas logout && eas login"
+  fi
+  fail "EAS production env-ийг уншиж чадсангүй:\n$remote_env"
 fi
 missing=""
 for key in $REQUIRED_ENV; do

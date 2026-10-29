@@ -16,6 +16,8 @@ const REASONS: Record<string, AppException> = {
   TooManyRequestsException: AppErrors.auth('tooManyAttempts'),
   TooManyFailedAttemptsException: AppErrors.auth('tooManyAttempts'),
   InvalidPasswordException: AppErrors.auth('weakPassword'),
+  // Token refresh-ийн үед: админ session-ийг хүчингүй болгосон.
+  TokenRevokedException: AppErrors.auth('expired'),
 }
 
 export function toCognitoException(error: unknown): AppException | null {

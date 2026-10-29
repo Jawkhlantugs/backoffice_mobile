@@ -6,6 +6,10 @@ import {
   signOut,
 } from 'aws-amplify/auth'
 
+import { AppErrors } from '@/core/errors/app-exception'
+
+import { toCognitoException } from './cognito-error'
+
 /**
  * Cognito-той ярих цорын ганц газар. Вэб админы `src/lib/auth-amplify.ts`-ийн
  * алхмуудыг яг дагасан — нэвтрэлтийн урсгал хоёр талд ижил байх ёстой.
@@ -21,6 +25,21 @@ export type SignInStep =
   | { step: 'totpCode' }
   | { step: 'newPassword' }
   | { step: 'totpSetup'; sharedSecret: string; setupUri: string }
+
+/**
+ * `null` = session үнэхээр алга (refresh token хүчингүй). Сүлжээний түр
+ * алдааг шиднэ — `null` гэвэл header-гүй хүсэлт 401 авч, хүчинтэй token-оо
+ * өөрөө устгана. Amplify ч ийм үед token-оо үлдээдэг.
+ */
+async function sessionTokens(forceRefresh = false) {
+  try {
+    return (await fetchAuthSession({ forceRefresh })).tokens ?? null
+  } catch (error) {
+    const failure = toCognitoException(error) ?? AppErrors.unknown(error)
+    if (failure.kind === 'auth') return null
+    throw failure
+  }
+}
 
 async function signedInPayload(): Promise<
   Extract<SignInStep, { step: 'done' }>
@@ -115,32 +134,17 @@ export const cognitoAuth = {
 
   /** API хүсэлтийн Bearer token. Amplify хугацаа дуусахад нь өөрөө шинэчилнэ. */
   async idToken(): Promise<string | null> {
-    try {
-      const session = await fetchAuthSession()
-      return session.tokens?.idToken?.toString() ?? null
-    } catch {
-      return null
-    }
+    return (await sessionTokens())?.idToken?.toString() ?? null
   },
 
   /** ⚠️ Зөвхөн step-up MFA verify-ийн body-д. Bearer-т **биш** (§1.2). */
   async accessToken(): Promise<string | null> {
-    try {
-      const session = await fetchAuthSession()
-      return session.tokens?.accessToken?.toString() ?? null
-    } catch {
-      return null
-    }
+    return (await sessionTokens())?.accessToken?.toString() ?? null
   },
 
-  /** Апп foreground-д ирэхэд token-оо шинэчилнэ. */
+  /** Foreground-д ирэх, 401 авах үед token-оо албадан шинэчилнэ. */
   async refresh(): Promise<string | null> {
-    try {
-      const session = await fetchAuthSession({ forceRefresh: true })
-      return session.tokens?.idToken?.toString() ?? null
-    } catch {
-      return null
-    }
+    return (await sessionTokens(true))?.idToken?.toString() ?? null
   },
 
   async isAuthenticated(): Promise<boolean> {

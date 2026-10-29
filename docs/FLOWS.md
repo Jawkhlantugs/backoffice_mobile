@@ -63,9 +63,10 @@ repository-г мэдэхгүй.
 | --- | ------------------------------------ | ------------------------------------------------------- |
 | 1   | `src/app/_layout.tsx` — `RootLayout` | `assertEnvReady()` — дутуу тохиргоотой бол улаан дэлгэц |
 | 2   | ↑                                    | `configureAmplify()` — Cognito pool тохируулна          |
-| 3   | ↑                                    | `cognitoAuth.isAuthenticated()` → нэвтрээгүй бол `signedOut` |
+| 3   | `core/session/restore-session.ts`    | `cognitoAuth.isAuthenticated()` → нэвтрээгүй бол `signedOut` |
 | 3a  | ↑                                    | `adminRepository.profile()` — **түгжээнээс өмнө** татна |
 | 3b  | ↑                                    | `restore(profile, locked)` — профайл ба түгжээг нэг дор |
+| 3c  | ↑ алдаа                              | `auth` алдаа → `signOut()`; бусад (сүлжээ, 5xx) → `screens/session-restore-error-screen.tsx` (Дахин оролдох / Гарах) |
 | 4   | `core/session/use-app-lock.ts`       | AppState сонсож эхэлнэ (60 сек дүрэм)                   |
 | 5   | статус `locked`                      | `screens/lock-screen.tsx` — биометрик асууна            |
 | 6   | статус `signedIn`                    | `<Stack />` — route-ууд ажиллана                        |
@@ -86,12 +87,18 @@ repository-г мэдэхгүй.
 | 1     | `core/network/clients.ts` | `clients.finance` — base URL бүхий axios               |
 | 2     | request interceptor       | `Authorization: Bearer <idToken>` тавина               |
 | 3     | сервер                    |                                                        |
-| 4     | response interceptor      | 401 → `sessionActions.signOut()` (skip list-ээс бусад) |
+| 4     | response interceptor      | 401 → `cognitoAuth.refresh()` → нэг удаа дахин илгээнэ; дахиад 401 эсвэл refresh `null` бол `signOut()` (skip list-ээс бусад) |
 | 5     | ↑                         | алдааг `toAppException()`-оор `AppException` болгоно   |
 | 6     | repository                | `unwrap()` / `unwrapList()` — дугтуй задлана           |
 | 7     | hook                      | `useQuery` — cache, retry, loading/error төлөв         |
 | 8     | дэлгэц                    | `<StateView>` — loading / empty / error                |
 | 9     | татаж шинэчлэх            | `usePullRefresh()` — `isRefetching`-ийг шууд холбохгүй |
+
+🔴 **Сүлжээний алдаа ≠ session дууссан.** `cognitoAuth.idToken()` /
+`refresh()` нь refresh token үнэхээр хүчингүй үед л `null`, сүлжээ унасан үед
+`network` алдаа шиднэ. `null` болговол header-гүй хүсэлт 401 авч, хүчинтэй
+token-оо өөрөө устгана — апп удаан унтаад сэрэхэд login гарч ирдэг байсан
+шалтгаан энэ. Amplify ч ийм үед token-оо үлдээдэг.
 
 🔴 Нэг query key-г хэд хэдэн дэлгэц хуваалцдаг (Нүүр ба Ажил таб хоёулаа
 `PENDING` жагсаалтыг уншина). `refreshing={query.isRefetching}` гэвэл нөгөө

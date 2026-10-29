@@ -1,4 +1,9 @@
-import { create, isAxiosError, type AxiosInstance } from 'axios'
+import {
+  create,
+  isAxiosError,
+  type AxiosInstance,
+  type InternalAxiosRequestConfig,
+} from 'axios'
 
 import { api } from '@/core/config/api'
 import { AppErrors } from '@/core/errors/app-exception'
@@ -16,7 +21,7 @@ import { toAppException } from './failure'
  *
  * Бүгд ижил interceptor хуваалцана:
  * 1. `Authorization: Bearer <idToken>` (§1.2 — accessToken **биш**)
- * 2. 401 → session цэвэрлэх, login руу
+ * 2. 401 → token refresh хийж нэг удаа дахин илгээнэ, дахиад 401 бол login руу
  * 3. Алдааг `AppException` болгох
  */
 
@@ -32,6 +37,19 @@ const AUTH_URL_SKIP_LOGOUT = [
   '/auth/mfa-challenge',
   '/auth/action-mfa/verify',
 ]
+
+/** Нэг хүсэлтийг refresh-ийн дараа ганц л удаа дахин илгээнэ. */
+type RetriableConfig = InternalAxiosRequestConfig & { authRetried?: boolean }
+
+/**
+ * `true` = шинэ token-оор дахин илгээж болно. Refresh сүлжээгээр унавал
+ * алдааг шиднэ — logout хийхгүй, session хүчинтэй хэвээр байж магадгүй.
+ */
+async function refreshForRetry(config: RetriableConfig): Promise<boolean> {
+  if (config.authRetried) return false
+  config.authRetried = true
+  return (await cognitoAuth.refresh()) !== null
+}
 
 /**
  * Логт зөвхөн хаяг, статус — header, body, token **хэзээ ч биш** (§1.4).
@@ -82,10 +100,16 @@ function attachInterceptors(instance: AxiosInstance): AxiosInstance {
         failure.debugMessage,
       )
 
-      if (isAxiosError(error) && error.response?.status === 401) {
-        const url = error.config?.url ?? ''
+      if (
+        isAxiosError(error) &&
+        error.response?.status === 401 &&
+        error.config
+      ) {
+        const config: RetriableConfig = error.config
+        const url = config.url ?? ''
         const skip = AUTH_URL_SKIP_LOGOUT.some((path) => url.includes(path))
         if (!skip) {
+          if (await refreshForRetry(config)) return instance(config)
           logger.warn('401 ирлээ — session цэвэрлэж байна', url)
           await sessionActions.signOut()
         }
